@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "HeartChain",
+    "nameEn": "HeartChain",
+    "slogan": "Linking the world with love"
+  },
+  "nav": {
+    "home": "Home",
+    "tasks": "Tasks",
+    "teams": "Teams",
+    "wallet": "Wallet",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "loading": "Loading..."
+  }
+}

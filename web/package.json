@@ -1,0 +1,30 @@
+{
+  "name": "heartchain-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HeartChain (哈特链) - Blockchain-based Volunteer Service Platform",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.11.3",
+    "@vueuse/nuxt": "^13.0.0",
+    "axios": "^1.9.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "nuxt": "3.15.4",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^2.4.0",
+    "@nuxtjs/i18n": "^10.0.0",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "typescript": "^5.8.0"
+  }
+}
