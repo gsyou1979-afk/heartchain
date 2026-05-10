@@ -460,7 +460,7 @@
 <script setup lang="ts">
 const auth = useAuthStore()
 const router = useRouter()
-const API_BASE = 'http://localhost:3005/api/v1/ad'
+const API_BASE = useRuntimeConfig().public.apiBase || 'https://heartchain-backend.onrender.com/api/v1/ad'
 
 const activeTab = ref('placements')
 const projectFilter = ref('pending')
