@@ -43,8 +43,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // 生产环境使用 ngrok 公网地址（更新于 2026-05-10）
-      apiBase: 'https://crux-countable-deprive.ngrok-free.dev/api/v1',
+      // 生产环境使用 Render 后端地址（更新于 2026-05-10）
+      apiBase: 'https://heartchain-backend.onrender.com/api/v1',
       appName: 'HeartChain',
     },
   },
