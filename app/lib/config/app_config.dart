@@ -5,7 +5,8 @@ class AppConfig {
   /// Flutter Web → Backend API (CORS 허용: localhost:3002)
   /// localtunnel 외부 접근: https://famous-rabbits-sell.loca.lt/api/v1
   /// 로컬 네트워크 테스트: http://192.168.0.3:3000/api/v1
-  static const String apiBaseUrl = 'https://famous-rabbits-sell.loca.lt/api/v1';
+  // 生产环境：Render 后端地址（更新于 2026-05-10）
+  static const String apiBaseUrl = 'https://heartchain-backend.onrender.com/api/v1';
 
   /// JWT Access Token 저장 키 (SharedPreferences)
   static const String keyAccessToken = 'hc_access_token';
