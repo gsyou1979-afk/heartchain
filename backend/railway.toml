@@ -1,0 +1,24 @@
+[build]
+ builder = "nixpacks"
+ buildCommand = "npm install && npm run build"
+
+[deploy]
+ startCommand = "npm run start:prod"
+ restartPolicyType = "on_failure"
+
+[env]
+ NODE_ENV = "production"
+ PORT = "3002"
+
+[[services]]
+  name = "backend"
+  [[services.envs]]
+    key = "DATABASE_URL"
+    value = "${{PostgreSQL.DATABASE_URL}}"
+  [[services.envs]]
+    key = "JWT_SECRET"
+    value = "heartchain-secret-key-2024"
+
+[[databases]]
+  name = "PostgreSQL"
+  type = "postgresql"

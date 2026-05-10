@@ -3,11 +3,24 @@ import { config } from 'dotenv';
 
 config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+const databaseUrl = process.env.DATABASE_URL;
+
 export const AppDataSource = new DataSource({
-  type: 'sqlite',
-  database: process.env.DB_DATABASE || 'heartchain.sqlite',
-  entities: ['src/**/*.entity.ts'],
-  migrations: ['src/migrations/*.ts'],
-  synchronize: true, // SQLite에서는 자동 동기화 활성화 (개발용)
-  logging: false,
+  type: databaseUrl && isProduction ? 'postgres' : 'sqlite',
+  ...(databaseUrl && isProduction
+    ? {
+        url: databaseUrl,
+        entities: ['dist/**/*.entity.js'],
+        migrations: ['dist/migrations/*.js'],
+        synchronize: true,
+        logging: false,
+      }
+    : {
+        database: process.env.DB_DATABASE || 'heartchain.sqlite',
+        entities: ['src/**/*.entity.ts'],
+        migrations: ['src/migrations/*.ts'],
+        synchronize: true,
+        logging: false,
+      }),
 });
