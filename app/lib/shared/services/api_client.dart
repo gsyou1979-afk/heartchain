@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../config/app_config.dart';
 
+/// 请求超时时间（秒）
+const _kTimeoutSeconds = 15;
+
 /// HTTP 응답 (내부용 - generic 버전은 auth_service.dart의 ApiResult 사용)
 class _HttpResult {
   final dynamic data;
@@ -39,12 +42,16 @@ class ApiClient {
     String path, {
     Map<String, String>? query,
   }) async {
-    final uri = Uri.parse('$baseUrl$path').replace(queryParameters: query);
-    final resp = await http.get(
-      uri,
-      headers: _headers(),
-    );
-    return _handle(resp);
+    try {
+      final uri = Uri.parse('$baseUrl$path').replace(queryParameters: query);
+      final resp = await http.get(
+        uri,
+        headers: _headers(),
+      ).timeout(const Duration(seconds: _kTimeoutSeconds));
+      return _handle(resp);
+    } catch (e) {
+      return _HttpResult.failure(_timeoutOrErrorMsg(e), 0);
+    }
   }
 
   /// POST 요청 (JSON Body)
@@ -52,13 +59,17 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? body,
   }) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final resp = await http.post(
-      uri,
-      headers: _headers(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    return _handle(resp);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final resp = await http.post(
+        uri,
+        headers: _headers(),
+        body: body != null ? jsonEncode(body) : null,
+      ).timeout(const Duration(seconds: _kTimeoutSeconds));
+      return _handle(resp);
+    } catch (e) {
+      return _HttpResult.failure(_timeoutOrErrorMsg(e), 0);
+    }
   }
 
   /// PUT 요청
@@ -66,13 +77,17 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? body,
   }) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final resp = await http.put(
-      uri,
-      headers: _headers(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    return _handle(resp);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final resp = await http.put(
+        uri,
+        headers: _headers(),
+        body: body != null ? jsonEncode(body) : null,
+      ).timeout(const Duration(seconds: _kTimeoutSeconds));
+      return _handle(resp);
+    } catch (e) {
+      return _HttpResult.failure(_timeoutOrErrorMsg(e), 0);
+    }
   }
 
   /// PATCH 요청
@@ -80,13 +95,17 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? body,
   }) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final resp = await http.patch(
-      uri,
-      headers: _headers(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    return _handle(resp);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final resp = await http.patch(
+        uri,
+        headers: _headers(),
+        body: body != null ? jsonEncode(body) : null,
+      ).timeout(const Duration(seconds: _kTimeoutSeconds));
+      return _handle(resp);
+    } catch (e) {
+      return _HttpResult.failure(_timeoutOrErrorMsg(e), 0);
+    }
   }
 
   Map<String, String> _headers() {
@@ -117,7 +136,19 @@ class ApiClient {
       return _HttpResult.failure('Parse error: $e', resp.statusCode);
     }
   }
+
+  /// 判断超时或其他错误，返回友好错误信息
+  String _timeoutOrErrorMsg(Object e) {
+    final msg = e.toString();
+    if (msg.contains('TimeoutException') || msg.contains('timed out')) {
+      return '请求超时，请检查网络连接后重试';
+    }
+    if (msg.contains('SocketException') || msg.contains('Network is unreachable')) {
+      return '网络连接失败，请检查网络设置';
+    }
+    return '网络错误: $msg';
+  }
 }
 
-// ─── 전역 API 클라이언트 ─────────────────────────────────────
+/// ─── 전역 API 클라이언트 ─────────────────────────────────────
 final apiClient = ApiClient();
