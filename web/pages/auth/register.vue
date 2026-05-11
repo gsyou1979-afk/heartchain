@@ -145,12 +145,15 @@ const countdown = ref(0);
 const error = ref('');
 let timer: ReturnType<typeof setInterval>;
 
-const API_BASE = 'http://localhost:3002/api/v1';
+const getApiBase = () => {
+  const config = useRuntimeConfig();
+  return (config.public?.apiBase as string) || 'http://localhost:3002/api/v1';
+};
 
 async function sendCode() {
   if (!form.phone) return;
   try {
-    const res = await fetch(`${API_BASE}/auth/sms/send`, {
+    const res = await fetch(`${getApiBase()}/auth/sms/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone: form.phone }),
@@ -186,7 +189,7 @@ async function handleRegister() {
   loading.value = true;
   error.value = '';
   try {
-    const res = await fetch(`${API_BASE}/auth/register`, {
+    const res = await fetch(`${getApiBase()}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
