@@ -1,7 +1,4 @@
 {
   "version": 2,
-  "name": "heartchain-web",
-  "buildCommand": "npm run generate",
-  "outputDirectory": ".output/public",
   "framework": "nuxtjs"
 }
