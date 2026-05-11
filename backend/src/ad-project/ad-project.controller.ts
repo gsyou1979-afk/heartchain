@@ -61,6 +61,16 @@ export class AdProjectController {
     return this.service.resume(id);
   }
 
+  @Put(':id/approve')
+  async approve(@Param('id') id: string) {
+    return this.service.updateStatus(id, 'active' as any);
+  }
+
+  @Put(':id/reject')
+  async reject(@Param('id') id: string) {
+    return this.service.updateStatus(id, 'rejected' as any);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.service.remove(id);

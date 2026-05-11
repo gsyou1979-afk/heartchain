@@ -131,7 +131,7 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <button @click="openEditPlacement(placement)" class="text-blue-600 hover:text-blue-800 mr-3">编辑</button>
-                    <button @click="deletePlacement(placement.code)" class="text-red-600 hover:text-red-800">删除</button>
+                    <button @click="deletePlacement(placement.id)" class="text-red-600 hover:text-red-800">删除</button>
                   </td>
                 </tr>
               </tbody>
@@ -233,7 +233,7 @@
                 </div>
                 <span :class="{
                   'bg-yellow-100 text-yellow-800': project.status === 'pending',
-                  'bg-green-100 text-green-800': project.status === 'approved',
+                  'bg-green-100 text-green-800': project.status === 'active',
                   'bg-red-100 text-red-800': project.status === 'rejected'
                 }" class="px-2 py-1 rounded-full text-xs">
                   {{ getProjectStatusText(project.status) }}
@@ -270,7 +270,7 @@
                 </button>
               </div>
 
-              <div v-else-if="project.status === 'approved'" class="flex gap-2">
+              <div v-else-if="project.status === 'active'" class="flex gap-2">
                 <button
                   @click="boostProject(project.id)"
                   class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -524,13 +524,43 @@ function openCreatePlacement() {
 }
 
 function openEditPlacement(p: any) {
-  editingCode.value = p.code
-  newPlacement.value = { ...p }
+  editingCode.value = p.id
+  newPlacement.value = { ...p, location: 'homepage-top' }
   showPlacementModal.value = true
 }
 
 async function savePlacement() {
   try {
+    const loc = newPlacement.value.location || 'homepage-top'
+    const size = sizeMap[loc] || { width: 728, height: 90 }
+
+    // 前端 location 值 → 后端 platform/page/position 映射
+    const locationMapping: Record<string, { platform: string; page: string; position: string }> = {
+      'homepage-top': { platform: 'web', page: 'home', position: 'hero' },
+      'homepage-middle': { platform: 'web', page: 'home', position: 'feed' },
+      'homepage-bottom': { platform: 'web', page: 'home', position: 'footer' },
+      'sidebar-top': { platform: 'web', page: 'home', position: 'sidebar' },
+      'sidebar-bottom': { platform: 'web', page: 'home', position: 'sidebar' },
+      'feed': { platform: 'web', page: 'home', position: 'feed' },
+      'splash': { platform: 'android', page: 'splash', position: 'splash' },
+    }
+    const mapping = locationMapping[loc] || { platform: 'web', page: 'home', position: 'hero' }
+
+    // 构造后端 DTO 格式
+    const payload = {
+      code: newPlacement.value.code,
+      name: newPlacement.value.name,
+      description: `${newPlacement.value.name} - ${loc}`,
+      platform: mapping.platform,
+      page: mapping.page,
+      position: mapping.position,
+      width: size.width,
+      height: size.height,
+      supportedTypes: ['commercial', 'public_service', 'project'],
+      floorCpm: 0,
+      isActive: true,
+    }
+
     const url = editingCode.value
       ? `${API_BASE}/placements/${editingCode.value}`
       : `${API_BASE}/placements`
@@ -541,7 +571,7 @@ async function savePlacement() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${auth.token}`,
       },
-      body: JSON.stringify(newPlacement.value),
+      body: JSON.stringify(payload),
     })
     if (res.ok) {
       showPlacementModal.value = false
@@ -557,10 +587,10 @@ async function savePlacement() {
   }
 }
 
-async function deletePlacement(code: string) {
-  if (!confirm(`确定删除广告位 ${code}？此操作不可撤销！`)) return
+async function deletePlacement(id: string) {
+  if (!confirm('确定删除该广告位？此操作不可撤销！')) return
   try {
-    const res = await fetch(`${API_BASE}/placements/${code}`, {
+    const res = await fetch(`${API_BASE}/placements/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${auth.token}` },
     })
@@ -588,19 +618,42 @@ async function loadCampaigns() {
 
 async function createCampaign() {
   try {
+    // 构造后端 CreateAdCampaignDto 格式
+    const payload = {
+      advertiserId: auth.user?.id || '',
+      name: newCampaign.value.name,
+      adType: newCampaign.value.type === 'charity' ? 'public_service' : 'commercial',
+      pricingModel: 'cpm',
+      budgetDaily: newCampaign.value.dailyBudget,
+      budgetTotal: newCampaign.value.dailyBudget * 30,
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      targeting: {
+        interests: [],
+        frequency: { daily: 10 },
+      },
+      placements: ['A1', 'B1', 'C1'],
+    }
     const res = await fetch(`${API_BASE}/campaigns`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${auth.token}`,
       },
-      body: JSON.stringify(newCampaign.value),
+      body: JSON.stringify(payload),
     })
     if (res.ok) {
       showCampaignModal.value = false
+      alert('广告计划创建成功')
       await loadCampaigns()
+    } else {
+      const err = await res.json().catch(() => ({ message: '创建失败' }))
+      alert(err.message || `错误 (${res.status})`)
     }
-  } catch (e) { console.error(e) }
+  } catch (e: any) {
+    console.error('创建广告计划失败', e)
+    alert('网络错误: ' + (e?.message || '请检查后端服务'))
+  }
 }
 
 // ========== 项目广告审核 ==========
@@ -712,15 +765,50 @@ const getStatusText = (status: string) => {
 }
 
 const getProjectStatusText = (status: string) => {
-  const map: Record<string, string> = { pending: '待审核', approved: '已通过', rejected: '已拒绝' }
+  const map: Record<string, string> = { pending: '待审核', active: '已通过', rejected: '已拒绝', paused: '已暂停', completed: '已完成' }
   return map[status] || status
 }
 
-const boostProject = (id: number) => {
-  console.log('Boost project:', id)
+async function boostProject(id: string) {
+  try {
+    // 通过提高 priorityScore 来实现置顶推广
+    const res = await fetch(`${API_BASE}/project-ads/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.token}`,
+      },
+      body: JSON.stringify({ priorityScore: 100 }),
+    })
+    if (res.ok) {
+      alert('已置顶推广')
+      await loadProjects()
+    } else {
+      const err = await res.json()
+      alert(err.message || '操作失败')
+    }
+  } catch (e) {
+    console.error('置顶推广失败', e)
+    alert('网络错误')
+  }
 }
 
-const pauseProject = (id: number) => {
-  console.log('Pause project:', id)
+async function pauseProject(id: string) {
+  try {
+    const res = await fetch(`${API_BASE}/project-ads/${id}/pause`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    if (res.ok) {
+      alert('已暂停')
+      await loadProjects()
+    } else {
+      const err = await res.json()
+      alert(err.message || '操作失败')
+    }
+  } catch (e) {
+    console.error('暂停失败', e)
+    alert('网络错误')
+  }
 }
 </script>

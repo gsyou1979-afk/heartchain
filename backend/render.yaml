@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: heartchain-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      - key: DATABASE_URL
+        fromDatabase:
+          name: heartchain-db
+          property: connectionString
+      - key: JWT_SECRET
+        value: heartchain-secret-key-2024
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_SECRET
+        value: heartchain-refresh-secret-2024
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: API_PREFIX
+        value: api/v1
+
+databases:
+  - name: heartchain-db
+    databaseName: heartchain
+    user: heartchain
+    plan: free
