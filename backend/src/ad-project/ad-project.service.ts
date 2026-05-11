@@ -263,31 +263,96 @@ export class AdProjectService {
     const endDate = new Date(now);
     endDate.setMonth(endDate.getMonth() + 6);
 
+    const results = { created: 0, errors: 0 };
     for (const ad of ads) {
-      const projectAd = this.projectAdRepo.create({
-        title: ad.title,
-        description: ad.description,
-        imageUrl: ad.imageUrl,
-        landingUrl: ad.landingUrl,
-        applicantName: '系统管理员',
-        targetAmount: 1000000,
-        raisedAmount: 0,
-        urgency: ad.urgency,
-        urgencyLevel: ad.urgencyLevel,
-        priorityScore: ad.priorityScore,
-        startDate: now,
-        endDate: endDate,
-        quotaTotal: 100000,
-        quotaUsed: 0,
-        impressions: 0,
-        clicks: 0,
-        conversions: 0,
-        status: ProjectAdStatus.ACTIVE,
-      });
-      await this.projectAdRepo.save(projectAd);
+      try {
+        const projectAd = this.projectAdRepo.create({
+          title: ad.title,
+          description: ad.description,
+          imageUrl: ad.imageUrl,
+          landingUrl: ad.landingUrl,
+          applicantName: '系统管理员',
+          targetAmount: 1000000,
+          raisedAmount: 0,
+          urgency: ad.urgency,
+          urgencyLevel: ad.urgencyLevel,
+          priorityScore: ad.priorityScore,
+          startDate: now,
+          endDate: endDate,
+          quotaTotal: 100000,
+          quotaUsed: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          status: ProjectAdStatus.ACTIVE,
+        });
+        await this.projectAdRepo.save(projectAd);
+        results.created++;
+      } catch (e) {
+        console.error('广告创建失败:', ad.title, e);
+        results.errors++;
+      }
     }
 
-    return { created: ads.length, message: `成功创建 ${ads.length} 个公益广告` };
+    return { created: results.created, message: `成功创建 ${results.created} 个广告${results.errors > 0 ? '，失败 ' + results.errors + ' 个' : ''}` };
+  }
+
+  async quickSeedAds(): Promise<{ created: number; message: string }> {
+    const existing = await this.projectAdRepo.count();
+    if (existing > 0) {
+      return { created: 0, message: `已存在 ${existing} 个广告，跳过` };
+    }
+
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setMonth(endDate.getMonth() + 6);
+
+    const ads = [
+      { title: '传递爱心，温暖世界', description: '伸出援助之手，让爱心传递到每一个角落。', priorityScore: 20 },
+      { title: '志愿同行，让爱传递', description: '与志愿者同行，用爱心点亮希望。', priorityScore: 15 },
+      { title: '小行动，大爱心', description: '每一个小行动，都是大爱心的体现。', priorityScore: 25 },
+      { title: '用爱温暖每一位需要的人', description: '韩国老年人关怀志愿服务，为独居老人送去温暖。', priorityScore: 30 },
+      { title: '爱心让世界更美丽', description: '灾害救援志愿服务，关键时刻伸出援手。', priorityScore: 30 },
+      { title: '伸出援手，让爱发光', description: '社区志愿服务，从身边做起。', priorityScore: 10 },
+      { title: '一人帮人人，人人互帮', description: '志愿服务是一种生活方式。', priorityScore: 25 },
+    ];
+
+    const bgColors = ['from-red-500 to-pink-500', 'from-blue-500 to-cyan-500', 'from-green-500 to-emerald-500',
+      'from-purple-500 to-violet-500', 'from-orange-500 to-amber-500', 'from-teal-500 to-cyan-500', 'from-rose-500 to-pink-500'];
+    const emojis = ['❤️', '🤝', '💪', '🌍', '💖', '🙏', '✨'];
+
+    let created = 0;
+    for (let i = 0; i < ads.length; i++) {
+      const ad = ads[i];
+      try {
+        const projectAd = this.projectAdRepo.create({
+          title: ad.title,
+          description: ad.description,
+          imageUrl: '',
+          landingUrl: '/tasks',
+          applicantName: '系统管理员',
+          targetAmount: 1000000,
+          raisedAmount: 0,
+          urgency: ProjectAdUrgency.NORMAL,
+          urgencyLevel: 1,
+          priorityScore: ad.priorityScore,
+          startDate: now,
+          endDate: endDate,
+          quotaTotal: 100000,
+          quotaUsed: 0,
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          status: ProjectAdStatus.ACTIVE,
+        });
+        await this.projectAdRepo.save(projectAd);
+        created++;
+      } catch (e) {
+        console.error('quickSeed失败:', ad.title, e);
+      }
+    }
+
+    return { created, message: `快速创建 ${created} 个广告（无图片）` };
   }
 
   // Match score calculation for targeting

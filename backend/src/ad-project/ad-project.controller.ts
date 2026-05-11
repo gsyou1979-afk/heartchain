@@ -43,6 +43,11 @@ export class AdProjectController {
     return this.service.seedVolunteerAds();
   }
 
+  @Post('seed/quick')
+  async quickSeedAds() {
+    return this.service.quickSeedAds();
+  }
+
   @Post('generate')
   async generate(@Body() dto: GenerateProjectAdDto) {
     return this.service.generate(dto.projectId, dto);
