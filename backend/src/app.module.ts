@@ -62,36 +62,88 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
             logging: ['error', 'warn', 'log'], // log 추가로 초기화 확인
           } as any;
         } else {
-          // 프로덕션 모드: 반드시 DATABASE_URL 사용 (Supabase Pooler SNI 필요)
+          // 프로덕션 모드: PostgreSQL 사용
           const databaseUrl = configService.get('DATABASE_URL');
-          if (!databaseUrl) {
-            throw new Error(
-              'DATABASE_URL 환경변수가 설정되지 않았습니다. ' +
-              'Render Environment Variables에서 DATABASE_URL을 설정해주세요.\n' +
-              '예: postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?sslmode=require'
-            );
-          }
-          console.log('[DB] DATABASE_URL 사용 (Supabase Pooler)');
-          // DATABASE_URL에서 SSL 파라미터 제거 후 ssl 옵션으로 직접 설정
-          // (pg 드라이버가 URL 내 sslmode를 제대로 처리하지 못하는 이슈 해결)
-          const dbUrl = databaseUrl.replace(/[?&]sslmode=[^&]*/g, '');
-          return {
-            type: 'postgres',
-            url: dbUrl,
-            ssl: {
-              rejectUnauthorized: false,
-            },
-            extra: {
+          const dbHost = configService.get('DB_HOST');
+          
+          if (databaseUrl) {
+            // DATABASE_URL이 설정된 경우: URL 파싱하여 분리 파라미터로 연결
+            // (Supabase Pooler SNI 문제 해결: pg 드라이버가 URL 방식에서 SNI를
+            //  올바르게 전송하지 못하므로, 직접 host/port/user/pass 설정 + servername)
+            console.log('[DB] DATABASE_URL 파싱하여 연결');
+            try {
+              const url = new URL(databaseUrl);
+              const host = url.hostname;
+              const port = parseInt(url.port, 10) || 5432;
+              const username = decodeURIComponent(url.username);
+              const password = decodeURIComponent(url.password);
+              const database = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+              
+              console.log('[DB] host:', host, 'port:', port, 'user:', username, 'db:', database);
+              
+              return {
+                type: 'postgres',
+                host,
+                port,
+                username,
+                password,
+                database,
+                ssl: {
+                  rejectUnauthorized: false,
+                  // Supabase Pooler는 servername(SNI)으로 tenant 식별
+                  servername: host,
+                },
+                extra: {
+                  ssl: {
+                    rejectUnauthorized: false,
+                    servername: host,
+                  },
+                },
+                entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
+                synchronize: false,
+                migrations: ['dist/migrations/*.js'],
+                migrationsRun: true,
+                logging: ['error'],
+              } as any;
+            } catch (e) {
+              throw new Error(
+                'DATABASE_URL 파싱 실패: ' + (e as Error).message + '\n' +
+                '올바른 형식: postgresql://user:password@host:port/database'
+              );
+            }
+          } else if (dbHost) {
+            // DB_* 분리 변수 사용
+            console.log('[DB] DB_* 환경변수 사용');
+            return {
+              type: 'postgres',
+              host: configService.get('DB_HOST'),
+              port: parseInt(configService.get('DB_PORT', '5432'), 10),
+              username: configService.get('DB_USERNAME'),
+              password: configService.get('DB_PASSWORD'),
+              database: configService.get('DB_DATABASE'),
               ssl: {
                 rejectUnauthorized: false,
+                servername: configService.get('DB_HOST'),
               },
-            },
-            entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
-            synchronize: false,
-            migrations: ['dist/migrations/*.js'],
-            migrationsRun: true,
-            logging: ['error'],
-          } as any;
+              extra: {
+                ssl: {
+                  rejectUnauthorized: false,
+                  servername: configService.get('DB_HOST'),
+                },
+              },
+              entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
+              synchronize: false,
+              migrations: ['dist/migrations/*.js'],
+              migrationsRun: true,
+              logging: ['error'],
+            } as any;
+          } else {
+            throw new Error(
+              '데이터베이스 연결 정보가 없습니다.\n' +
+              'Render Environment Variables에서 DATABASE_URL을 설정해주세요.\n' +
+              '예: postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres'
+            );
+          }
         }
       },
     }),
