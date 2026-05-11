@@ -61,12 +61,9 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
 
-  // Debug: 打印数据库配置
+  // Debug: 打印配置信息（不输出敏感值）
   console.log('[DEBUG] NODE_ENV:', configService.get('NODE_ENV'));
-  console.log('[DEBUG] DB_HOST:', configService.get('DB_HOST'));
-  console.log('[DEBUG] DB_PORT:', configService.get('DB_PORT'));
-  console.log('[DEBUG] DB_USERNAME:', configService.get('DB_USERNAME'));
-  console.log('[DEBUG] DB_DATABASE:', configService.get('DB_DATABASE'));
+  console.log('[DEBUG] DATABASE_URL:', configService.get('DATABASE_URL') ? 'SET (length: ' + configService.get('DATABASE_URL').length + ')' : 'NOT SET');
   console.log('[DEBUG] PORT:', port);
 
   console.log(`
@@ -82,4 +79,7 @@ async function bootstrap() {
   `);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('❌ HeartChain 启动失败:', err.message || err);
+  process.exit(1);
+});

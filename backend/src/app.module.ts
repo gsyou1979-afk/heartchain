@@ -62,29 +62,20 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
             logging: ['error', 'warn', 'log'], // log 추가로 초기화 확인
           } as any;
         } else {
-          // 프로덕션 모드: PostgreSQL 사용
-          // 优先使用 DATABASE_URL（Supabase Pooler 需要 URL 格式来传递 SNI）
+          // 프로덕션 모드: 반드시 DATABASE_URL 사용 (Supabase Pooler SNI 필요)
           const databaseUrl = configService.get('DATABASE_URL');
-          if (databaseUrl) {
-            return {
-              type: 'postgres',
-              url: databaseUrl,
-              ssl: { rejectUnauthorized: false },
-              entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
-              synchronize: false,
-              migrations: ['dist/migrations/*.js'],
-              migrationsRun: true,
-              logging: ['error'],
-            } as any;
+          if (!databaseUrl) {
+            throw new Error(
+              'DATABASE_URL 환경변수가 설정되지 않았습니다. ' +
+              'Render Environment Variables에서 DATABASE_URL을 설정해주세요.\n' +
+              '예: postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?sslmode=require'
+            );
           }
+          console.log('[DB] DATABASE_URL 사용 (Supabase Pooler)');
           return {
             type: 'postgres',
-            host: configService.get('DB_HOST', 'localhost'),
-            port: configService.get<number>('DB_PORT', 5432),
-            username: configService.get('DB_USERNAME', 'heartchain'),
-            password: configService.get('DB_PASSWORD', 'heartchain_dev_2026'),
-            database: configService.get('DB_DATABASE', 'heartchain'),
-            ssl: configService.get('DB_SSL') === 'false' ? false : { rejectUnauthorized: false },
+            url: databaseUrl,
+            ssl: { rejectUnauthorized: false },
             entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
             synchronize: false,
             migrations: ['dist/migrations/*.js'],
