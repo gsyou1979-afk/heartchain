@@ -18,7 +18,7 @@ export enum ConversionType {
 }
 
 @Entity('project_ad_conversions')
-@Index(['projectAdId', 'createdAt'])
+@Index(['projectAd', 'createdAt'])
 @Index(['userId', 'createdAt'])
 export class ProjectAdConversion {
   @PrimaryGeneratedColumn('increment')
