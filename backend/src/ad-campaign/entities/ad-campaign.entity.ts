@@ -51,7 +51,7 @@ export class AdCampaign {
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   budgetTotal: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: '0' })
   spent: number;
 
   @Column({ type: 'date', nullable: false })
@@ -69,7 +69,7 @@ export class AdCampaign {
     schedule?: { hours?: number[]; daysOfWeek?: number[] };
   };
 
-  @Column({ type: 'simple-array', nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   placements: string[];
 
   @CreateDateColumn({ type: 'timestamp' })

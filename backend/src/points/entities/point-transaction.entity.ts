@@ -9,20 +9,20 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 export enum PointTransactionType {
-  TASK_REWARD = 'task_reward',           // 任务完成奖励
-  TASK_STAKE = 'task_stake',             // 发布任务质押
-  TRANSFER = 'transfer',                 // 用户间转账
-  DONATION = 'donation',                 // 捐赠
-  DONATION_RECEIVE = 'donation_receive', // 收到捐赠
-  TEAM_REWARD = 'team_reward',           // 团队奖励
-  REFUND = 'refund',                     // 退款
-  ADMIN_ADJUST = 'admin_adjust',         // 管理员调整
+  TASK_REWARD = 'task_reward',
+  TASK_STAKE = 'task_stake',
+  TRANSFER = 'transfer',
+  DONATION = 'donation',
+  DONATION_RECEIVE = 'donation_receive',
+  TEAM_REWARD = 'team_reward',
+  REFUND = 'refund',
+  ADMIN_ADJUST = 'admin_adjust',
 }
 
 export enum PointTransactionStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
-  ON_CHAIN = 'on_chain',                 // 已上链
+  ON_CHAIN = 'on_chain',
   REVERSED = 'reversed',
 }
 
@@ -43,12 +43,6 @@ export class PointTransaction {
   @Column({ type: 'text', nullable: true, comment: 'Transaction description' })
   description: string;
 
-  @Column({ type: 'uuid', nullable: false, name: 'from_user_id', comment: 'Sender user ID, null for system' })
-  fromUserId: string;
-
-  @Column({ type: 'uuid', nullable: false, name: 'to_user_id', comment: 'Receiver user ID' })
-  toUserId: string;
-
   @Column({ type: 'uuid', nullable: true, name: 'task_id', comment: 'Related task ID' })
   taskId: string;
 
@@ -58,14 +52,12 @@ export class PointTransaction {
   @Column({ type: 'uuid', nullable: true, name: 'team_id', comment: 'Related team ID' })
   teamId: string;
 
-  // Blockchain info
   @Column({ type: 'varchar', length: 66, nullable: true, name: 'tx_hash', comment: 'On-chain transaction hash' })
   txHash: string;
 
-  @Column({ type: 'int', nullable: true, name: 'block_number', comment: 'On-chain block number' })
+  @Column({ type: 'integer', nullable: true, name: 'block_number', comment: 'On-chain block number' })
   blockNumber: number;
 
-  // Triple endorsement for task reward
   @Column({ type: 'simple-json', nullable: true, comment: 'Endorsement chain' })
   endorsements: {
     workerId: string;
@@ -102,4 +94,12 @@ export class PointTransaction {
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  get fromUserId(): string | undefined {
+    return this.fromUser?.id;
+  }
+
+  get toUserId(): string | undefined {
+    return this.toUser?.id;
+  }
 }

@@ -38,7 +38,7 @@ export class UserTag {
   @Column({ type: 'varchar', length: 200, nullable: false })
   tagValue: string;
 
-  @Column({ type: 'decimal', precision: 3, scale: 2, default: 1.0 })
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: '1.0' })
   confidence: number;
 
   @Column({ type: 'varchar', length: 30, default: TagSource.INFERRED })

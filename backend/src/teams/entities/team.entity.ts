@@ -41,13 +41,13 @@ export class Team {
   @Column({ type: 'varchar', length: 20, default: TeamStatus.ACTIVE })
   status: TeamStatus;
 
-  @Column({ type: 'int', default: 0, comment: 'Total team HeartCoin balance' })
+  @Column({ type: 'integer', default: 0, comment: 'Total team HeartCoin balance' })
   totalPoints: number;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   memberCount: number;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   taskCount: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true, comment: 'Region: cn / kr / global' })
@@ -65,18 +65,19 @@ export class Team {
   @Column({ type: 'boolean', default: false, comment: 'Is verified organization' })
   isVerified: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'leader_id' })
   leader: User;
-
-  @Column({ type: 'uuid', nullable: false, name: 'leader_id' })
-  leaderId: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  get leaderId(): string {
+    return this.leader.id;
+  }
 }
 
 @Entity('team_members')
@@ -84,29 +85,31 @@ export class TeamMember {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: false })
-  teamId: string;
+  @ManyToOne(() => Team, { nullable: false })
+  @JoinColumn({ name: 'team_id' })
+  team: Team;
 
-  @Column({ type: 'uuid', nullable: false })
-  userId: string;
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @Column({ type: 'varchar', length: 20, default: TeamRole.MEMBER })
   role: TeamRole;
 
-  @Column({ type: 'int', default: 0, comment: 'Points contributed to this team' })
+  @Column({ type: 'integer', default: 0, comment: 'Points contributed to this team' })
   contributedPoints: number;
 
-  @Column({ type: 'int', default: 0, comment: 'Tasks completed in this team' })
+  @Column({ type: 'integer', default: 0, comment: 'Tasks completed in this team' })
   completedTasks: number;
 
   @CreateDateColumn({ type: 'timestamp' })
   joinedAt: Date;
 
-  @ManyToOne(() => Team)
-  @JoinColumn({ name: 'team_id' })
-  team: Team;
+  get teamId(): string {
+    return this.team.id;
+  }
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  get userId(): string {
+    return this.user.id;
+  }
 }

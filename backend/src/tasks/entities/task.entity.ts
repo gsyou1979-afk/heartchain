@@ -10,10 +10,10 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 export enum TaskType {
-  SINGLE_ONCE = 'single_once',      // 单人单次任务
-  SINGLE_MULTI = 'single_multi',   // 单人多次任务
-  TEAM_ONCE = 'team_once',          // 团队单次任务
-  TEAM_MULTI = 'team_multi',        // 团队多次任务
+  SINGLE_ONCE = 'single_once',
+  SINGLE_MULTI = 'single_multi',
+  TEAM_ONCE = 'team_once',
+  TEAM_MULTI = 'team_multi',
 }
 
 export enum TaskStatus {
@@ -72,43 +72,37 @@ export class Task {
   @Column({ type: 'text', nullable: true })
   schedule: any;
 
-  @Column({ type: 'int', default: 0, comment: 'HeartCoin reward' })
+  @Column({ type: 'integer', default: 0, comment: 'HeartCoin reward' })
   pointsReward: number;
 
-  @Column({ type: 'int', default: 1, comment: 'Number of volunteers needed' })
+  @Column({ type: 'integer', default: 1, comment: 'Number of volunteers needed' })
   volunteerCount: number;
 
-  @Column({ type: 'int', default: 1, name: 'teamsize', comment: 'Team task size' })
+  @Column({ type: 'integer', default: 1, name: 'teamsize', comment: 'Team task size' })
   teamSize: number;
 
-  @Column({ type: 'int', default: 0, name: 'currentparticipants', comment: 'Current participants count' })
+  @Column({ type: 'integer', default: 0, name: 'currentparticipants', comment: 'Current participants count' })
   currentParticipants: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true, comment: 'Region: cn / kr / global' })
   region: string;
 
   // Relations
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'publisher_id' })
   publisher: User;
-
-  @Column({ type: 'uuid', nullable: false, name: 'publisher_id' })
-  publisherId: string;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'assignee_id' })
   assignee: User;
 
-  @Column({ type: 'uuid', nullable: true, name: 'assignee_id' })
-  assigneeId: string;
-
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   viewCount: number;
 
   @Column({ type: 'json', nullable: true, comment: 'Proof evidence items' })
   proofEvidence: { type: 'image' | 'location' | 'description'; url?: string; text?: string; timestamp?: string }[];
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   proofsSubmitted: number;
 
   @CreateDateColumn({ type: 'timestamp' })
@@ -116,4 +110,12 @@ export class Task {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  get publisherId(): string {
+    return this.publisher.id;
+  }
+
+  get assigneeId(): string | undefined {
+    return this.assignee?.id;
+  }
 }

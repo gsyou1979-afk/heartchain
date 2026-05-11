@@ -48,7 +48,7 @@ export class User {
   @Column({ type: 'varchar', length: 20, default: UserStatus.ACTIVE })
   status: UserStatus;
 
-  @Column({ type: 'int', default: 0, comment: 'Credit score 0-1000' })
+  @Column({ type: 'integer', default: 0, comment: 'Credit score 0-1000' })
   creditScore: number;
 
   @Column({ type: 'float', default: 0, comment: 'HeartCoin balance' })

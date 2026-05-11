@@ -21,24 +21,24 @@ export class AdPlacement {
   description: string;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
-  platform: string; // web / ios / android
+  platform: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   page: string;
 
   @Column({ type: 'varchar', length: 50, nullable: false })
-  position: string; // hero / sidebar / feed / footer / splash
+  position: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'integer', nullable: false })
   width: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'integer', nullable: false })
   height: number;
 
-  @Column({ type: 'simple-array', nullable: true })
-  supportedTypes: string[]; // commercial / public_service / project
+  @Column({ type: 'simple-json', nullable: true })
+  supportedTypes: string[];
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: '0' })
   floorCpm: number;
 
   @Column({ type: 'boolean', default: true })

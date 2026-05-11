@@ -30,9 +30,9 @@ export class AdFrequency {
   @Column({ type: 'date', nullable: false })
   date: Date;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   impressions: number;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   clicks: number;
 }

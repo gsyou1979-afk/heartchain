@@ -24,7 +24,7 @@ export class ProjectAdConversion {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   projectAdId: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })

@@ -32,8 +32,9 @@ export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: false })
-  userId: string;
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column({ type: 'varchar', length: 50, nullable: false })
   type: NotificationType;
@@ -56,10 +57,10 @@ export class Notification {
   @Column({ type: 'varchar', length: 50, nullable: true, comment: 'Related entity type' })
   relatedType: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  get userId(): string {
+    return this.user.id;
+  }
 }

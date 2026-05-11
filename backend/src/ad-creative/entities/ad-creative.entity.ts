@@ -26,10 +26,7 @@ export class AdCreative {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: true })
-  campaignId: string;
-
-  @ManyToOne(() => AdCampaign)
+  @ManyToOne(() => AdCampaign, { nullable: true })
   @JoinColumn({ name: 'campaignId' })
   campaign: AdCampaign;
 
@@ -51,10 +48,10 @@ export class AdCreative {
   @Column({ type: 'varchar', length: 30, nullable: false })
   creativeType: CreativeType;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'integer', nullable: true })
   width: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'integer', nullable: true })
   height: number;
 
   @Column({ type: 'varchar', length: 20, default: CreativeStatus.PENDING })
@@ -62,4 +59,8 @@ export class AdCreative {
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  get campaignId(): string | undefined {
+    return this.campaign?.id;
+  }
 }

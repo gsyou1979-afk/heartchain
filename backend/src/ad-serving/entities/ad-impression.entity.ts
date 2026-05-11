@@ -46,7 +46,7 @@ export class AdImpression {
   @Column({ type: 'boolean', default: false })
   isViewable: boolean;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'integer', default: 0 })
   viewDuration: number;
 
   @Column({ type: 'varchar', length: 30, nullable: true })

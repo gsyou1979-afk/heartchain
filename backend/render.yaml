@@ -3,6 +3,7 @@ services:
     name: heartchain-backend
     env: node
     plan: free
+    rootDir: .
     buildCommand: npm ci --production=false && npm run build
     startCommand: npm run start:prod
     envVars:
