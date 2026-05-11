@@ -113,7 +113,10 @@ import AdBanner from '~/components/ad/AdBanner.vue'
 
 useHead({ title: '哈特链 HeartChain - ' + '以爱心链接世界' });
 
-const API_BASE = 'http://localhost:3002/api/v1';
+const getApiBase = () => {
+  const config = useRuntimeConfig();
+  return (config.public?.apiBase as string) || 'http://localhost:3002/api/v1';
+};
 const recentTasks = ref<any[]>([]);
 
 const stats = [
@@ -143,7 +146,7 @@ function getTaskTypeLabel(type: string) {
 
 async function fetchRecentTasks() {
   try {
-    const res = await fetch(`${API_BASE}/tasks?status=open&limit=3`);
+    const res = await fetch(`${getApiBase()}/tasks?status=open&limit=3`);
     if (res.ok) {
       const data = await res.json();
       recentTasks.value = data.items || [];
