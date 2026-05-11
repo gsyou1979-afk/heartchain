@@ -556,6 +556,7 @@ onMounted(async () => {
   await loadPlacements()
   await loadProjects()
   await loadStats()
+  await loadAvailableImages()
 })
 
 // ========== 广告位 CRUD ==========
