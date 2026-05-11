@@ -63,6 +63,20 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
           } as any;
         } else {
           // 프로덕션 모드: PostgreSQL 사용
+          // 优先使用 DATABASE_URL（Supabase Pooler 需要 URL 格式来传递 SNI）
+          const databaseUrl = configService.get('DATABASE_URL');
+          if (databaseUrl) {
+            return {
+              type: 'postgres',
+              url: databaseUrl,
+              ssl: { rejectUnauthorized: false },
+              entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
+              synchronize: false,
+              migrations: ['dist/migrations/*.js'],
+              migrationsRun: true,
+              logging: ['error'],
+            } as any;
+          }
           return {
             type: 'postgres',
             host: configService.get('DB_HOST', 'localhost'),
