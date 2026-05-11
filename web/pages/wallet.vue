@@ -171,8 +171,9 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore();
-const apiBase = useApiBase();
+const apiBase = getApiUrl();
 
 // 数据
 const loading = ref(true);

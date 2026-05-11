@@ -119,8 +119,9 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore();
-const API_BASE = useApiBase();
+const API_BASE = getApiUrl();
 
 const loading = ref(false);
 const submitting = ref(false);

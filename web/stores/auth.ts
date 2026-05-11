@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { getApiUrl } from '~/utils/api';
 
 interface User {
   id: string;
@@ -11,9 +12,6 @@ interface User {
   pointBalance?: number;
 }
 
-// API 地址：通过 useApiBase composable 获取（有域名判断 fallback）
-const getApiBase = useApiBase as any;
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isLoggedIn: false,
@@ -23,7 +21,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async loginWithPhone(phone: string, password: string) {
-      const response = await fetch(`${getApiBase()}/auth/password-login`, {
+      const response = await fetch(`${getApiUrl()}/auth/password-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, password }),
@@ -48,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
       if (!this.token) return;
       
       try {
-        const response = await fetch(`${getApiBase()}/users/me`, {
+        const response = await fetch(`${getApiUrl()}/users/me`, {
           headers: { 'Authorization': `Bearer ${this.token}` }
         });
         
@@ -109,7 +107,7 @@ export const useAuthStore = defineStore('auth', {
             // 验证用户是否仍然存在于后端
             if (parsed.user?.id && parsed.token) {
               try {
-                const response = await fetch(`${getApiBase()}/users/${parsed.user.id}`, {
+                const response = await fetch(`${getApiUrl()}/users/${parsed.user.id}`, {
                   headers: { 'Authorization': `Bearer ${parsed.token}` }
                 });
                 

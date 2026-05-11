@@ -510,9 +510,10 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore()
 const router = useRouter()
-const API_BASE = useApiBase() + '/ad';
+const API_BASE = getApiUrl() + '/ad';
 
 const activeTab = ref('placements')
 const projectFilter = ref('pending')

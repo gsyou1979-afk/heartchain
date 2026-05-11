@@ -411,9 +411,10 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore()
 const router = useRouter()
-const API_BASE = useApiBase()
+const API_BASE = getApiUrl()
 
 // 状态
 const activeTab = ref('dashboard')

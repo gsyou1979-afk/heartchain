@@ -123,6 +123,7 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore();
 const router = useRouter();
 
@@ -145,12 +146,10 @@ const countdown = ref(0);
 const error = ref('');
 let timer: ReturnType<typeof setInterval>;
 
-const getApiBase = useApiBase;
-
 async function sendCode() {
   if (!form.phone) return;
   try {
-    const res = await fetch(`${getApiBase()}/auth/sms/send`, {
+    const res = await fetch(`${getApiUrl()}/auth/sms/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone: form.phone }),
@@ -186,7 +185,7 @@ async function handleRegister() {
   loading.value = true;
   error.value = '';
   try {
-    const res = await fetch(`${getApiBase()}/auth/register`, {
+    const res = await fetch(`${getApiUrl()}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

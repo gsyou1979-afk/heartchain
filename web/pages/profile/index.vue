@@ -154,9 +154,10 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore();
 const router = useRouter();
-const API_BASE = useApiBase();
+const API_BASE = getApiUrl();
 
 const profileData = ref<any>(null);
 const saving = ref(false);

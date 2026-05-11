@@ -163,7 +163,8 @@
 </template>
 
 <script setup lang="ts">
-const API_BASE = useApiBase();
+import { getApiUrl } from '~/utils/api';
+const API_BASE = getApiUrl();
 const saving = ref(false);
 const showToast = ref(false);
 const toastMessage = ref('');

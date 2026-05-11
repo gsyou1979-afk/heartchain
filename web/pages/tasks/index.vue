@@ -458,9 +458,10 @@
 </template>
 
 <script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
 const auth = useAuthStore();
 const router = useRouter();
-const API_BASE = useApiBase();
+const API_BASE = getApiUrl();
 
 const showModal = ref(false);
 const showSuccess = ref(false);
