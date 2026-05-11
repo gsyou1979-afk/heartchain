@@ -126,6 +126,9 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
       },
     }),
 
+    // For AppController seed endpoint
+    TypeOrmModule.forFeature([User, Task]),
+
     Web3Module,
     CommonModule,
     AuthModule,
