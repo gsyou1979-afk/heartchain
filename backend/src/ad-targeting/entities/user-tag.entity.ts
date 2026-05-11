@@ -44,9 +44,9 @@ export class UserTag {
   @Column({ type: 'varchar', length: 30, default: TagSource.INFERRED })
   source: TagSource;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   expiresAt: Date;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }

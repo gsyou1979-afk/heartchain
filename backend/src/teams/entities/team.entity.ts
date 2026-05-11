@@ -72,10 +72,10 @@ export class Team {
   @Column({ type: 'uuid', nullable: false, name: 'leader_id' })
   leaderId: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 }
 
@@ -99,7 +99,7 @@ export class TeamMember {
   @Column({ type: 'int', default: 0, comment: 'Tasks completed in this team' })
   completedTasks: number;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   joinedAt: Date;
 
   @ManyToOne(() => Team)

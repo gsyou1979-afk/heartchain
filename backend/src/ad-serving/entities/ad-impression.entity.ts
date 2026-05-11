@@ -61,6 +61,6 @@ export class AdImpression {
   @Column({ type: 'decimal', precision: 10, scale: 4, nullable: true })
   winPrice: number;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }

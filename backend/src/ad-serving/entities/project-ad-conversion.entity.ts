@@ -46,7 +46,7 @@ export class ProjectAdConversion {
   @Column({ type: 'varchar', length: 200, nullable: true })
   conversionValue: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @ManyToOne(() => ProjectAd, { nullable: true })

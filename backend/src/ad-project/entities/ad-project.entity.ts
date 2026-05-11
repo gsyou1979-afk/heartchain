@@ -90,10 +90,10 @@ export class ProjectAd {
   priorityScore: number;
 
   // ── 投放计划 ────────────────────────────────────────────
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   startDate: Date;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   endDate: Date;
 
   /** 日预算（0 = 项目广告免费）*/
@@ -121,10 +121,10 @@ export class ProjectAd {
   @Column({ type: 'varchar', length: 20, default: ProjectAdStatus.PENDING })
   status: ProjectAdStatus;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   // ── 计算属性 ─────────────────────────────────────────────

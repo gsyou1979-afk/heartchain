@@ -100,6 +100,6 @@ export class PointTransaction {
   @JoinColumn({ name: 'to_user_id' })
   toUser: User;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }

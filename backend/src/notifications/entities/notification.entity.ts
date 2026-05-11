@@ -60,6 +60,6 @@ export class Notification {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }

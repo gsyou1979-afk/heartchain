@@ -60,6 +60,6 @@ export class AdCreative {
   @Column({ type: 'varchar', length: 20, default: CreativeStatus.PENDING })
   status: CreativeStatus;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }

@@ -37,6 +37,6 @@ export class AdClick {
   @Column({ type: 'boolean', default: false })
   isBot: boolean;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 }
