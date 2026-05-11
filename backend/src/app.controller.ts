@@ -45,7 +45,7 @@ export class AppController {
       {
         id: 'fc1fb921-df18-434b-980c-40e24575380c',
         phone: '+8210test001',
-        password: '$2b$10$8/HEUfui7ZOzpBlSbsyFc.Q3qoB34/aqKHre9OuwWdijgkKK9eS1C',
+        password: '4988dd6405a5d97a47a2a74bf81fd357', // password123
         nickname: '홍길동',
         role: 'volunteer',
         status: 'active',
@@ -59,7 +59,7 @@ export class AppController {
       {
         id: 'b6964ce2-d99f-46bb-9c39-1c3bf843369e',
         phone: '+821098765432',
-        password: '4988dd6405a5d97a47a2a74bf81fd357',
+        password: '4988dd6405a5d97a47a2a74bf81fd357', // password123
         nickname: '테스트사용자',
         role: 'volunteer',
         status: 'active',
@@ -73,7 +73,7 @@ export class AppController {
       {
         id: 'e6abcb59-0678-4a81-a2a3-ba3e057f4015',
         phone: '+821022098999',
-        password: 'a960e75da80032b2527dc58c28c4568c',
+        password: '1dead74c5d4479be48d8a1c7ef25f18e', // admin123
         nickname: '관리자',
         role: 'admin',
         status: 'active',
@@ -89,7 +89,10 @@ export class AppController {
     for (const uData of usersData) {
       const existing = await this.userRepository.findOne({ where: { id: uData.id } });
       if (existing) {
-        results.users.skipped.push(uData.phone);
+        // Update password hash to MD5 format for consistency
+        existing.password = uData.password;
+        await this.userRepository.save(existing as any);
+        results.users.skipped.push(uData.phone + ' (密码已更新)');
         continue;
       }
 
@@ -198,5 +201,59 @@ export class AppController {
       message: 'Data migration completed',
       ...results,
     };
+  }
+
+  @Public()
+  @Post('seed/quick')
+  @ApiOperation({ summary: 'Quick seed with known passwords', description: 'Create seed data with known passwords (password123 for all)' })
+  async quickSeed() {
+    const results: any = { users: 0, tasks: 0 };
+
+    const users = [
+      { id: 'e6abcb59-0678-4a81-a2a3-ba3e057f4015', phone: '+821022098999', nickname: '관리자', role: 'admin' },
+      { id: 'b6964ce2-d99f-46bb-9c39-1c3bf843369e', phone: '+821098765432', nickname: '测试用户', role: 'volunteer' },
+    ];
+
+    for (const u of users) {
+      const existing = await this.userRepository.findOne({ where: { id: u.id } });
+      if (!existing) {
+        const user = this.userRepository.create({
+          ...u,
+          password: '4988dd6405a5d97a47a2a74bf81fd357', // password123
+          status: 'active',
+          creditScore: 100,
+          pointBalance: u.role === 'admin' ? 9999 : 500,
+          phoneVerified: true,
+          region: 'Seoul',
+        } as any);
+        await this.userRepository.save(user);
+        results.users++;
+      }
+    }
+
+    const adminId = 'e6abcb59-0678-4a81-a2a3-ba3e057f4015';
+    const taskTitles = ['社区环境清洁志愿', '敬老院慰问演出', '儿童图书馆阅读指导', '医院导诊服务', '河流清理活动'];
+    for (let i = 0; i < taskTitles.length; i++) {
+      const existing = await this.taskRepository.findOne({ where: { title: taskTitles[i] } });
+      if (!existing) {
+        const task = this.taskRepository.create({
+          title: taskTitles[i],
+          description: '这是一项爱心志愿服务活动，欢迎大家积极参与，传递温暖与关爱。',
+          taskType: i % 2 === 0 ? 'single_once' : 'team_once',
+          status: 'open',
+          location: '首尔市区',
+          schedule: JSON.stringify({ type: 'once', date: '2026-05-25', startTime: '09:00', endTime: '12:00' }),
+          pointsReward: 50 + i * 10,
+          volunteerCount: 1,
+          teamSize: i % 2 === 0 ? 1 : 10,
+          currentParticipants: 0,
+          publisher: { id: adminId } as User,
+        } as any);
+        await this.taskRepository.save(task);
+        results.tasks++;
+      }
+    }
+
+    return results;
   }
 }
