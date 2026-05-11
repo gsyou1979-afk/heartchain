@@ -70,6 +70,7 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
             username: configService.get('DB_USERNAME', 'heartchain'),
             password: configService.get('DB_PASSWORD', 'heartchain_dev_2026'),
             database: configService.get('DB_DATABASE', 'heartchain'),
+            ssl: configService.get('DB_SSL') === 'false' ? false : { rejectUnauthorized: false },
             entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
             synchronize: false,
             migrations: ['dist/migrations/*.js'],
