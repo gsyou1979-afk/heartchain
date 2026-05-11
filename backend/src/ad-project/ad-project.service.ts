@@ -125,6 +125,11 @@ export class AdProjectService {
     return this.findOne(id);
   }
 
+  async updateStatus(id: string, status: ProjectAdStatus): Promise<ProjectAd> {
+    await this.projectAdRepo.update(id, { status });
+    return this.findOne(id);
+  }
+
   async remove(id: string): Promise<void> {
     await this.projectAdRepo.delete(id);
   }
