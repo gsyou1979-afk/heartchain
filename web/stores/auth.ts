@@ -11,7 +11,7 @@ interface User {
   pointBalance?: number;
 }
 
-// 使用 Nuxt runtimeConfig 获取后端 API 地址（开发环境 localhost:3002，生产环境 Render）
+// API 地址：通过 useApiBase composable 获取（有域名判断 fallback）
 const getApiBase = useApiBase as any;
 
 export const useAuthStore = defineStore('auth', {
