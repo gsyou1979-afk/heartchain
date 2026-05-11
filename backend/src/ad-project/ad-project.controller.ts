@@ -40,6 +40,11 @@ export class AdProjectController {
     return this.service.generate(dto.projectId, dto);
   }
 
+  @Post('seed')
+  async seedVolunteerAds() {
+    return this.service.seedVolunteerAds();
+  }
+
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateProjectAdDto) {
     return this.service.update(id, dto);

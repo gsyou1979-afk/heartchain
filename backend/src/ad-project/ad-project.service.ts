@@ -134,6 +134,112 @@ export class AdProjectService {
     await this.projectAdRepo.delete(id);
   }
 
+  async seedVolunteerAds(): Promise<{ created: number; message: string }> {
+    // 检查是否已有数据
+    const existing = await this.projectAdRepo.count();
+    if (existing > 0) {
+      return { created: 0, message: `已存在 ${existing} 个广告，跳过` };
+    }
+
+    const baseUrl = 'https://heartchain-anqam8gak-gsyou1979-afks-projects.vercel.app/ads';
+
+    const ads = [
+      {
+        title: '传递爱心，温暖世界',
+        description: '伸出援助之手，让爱心传递到每一个角落。韩国志愿者服务，用行动温暖需要帮助的人。',
+        imageUrl: `${baseUrl}/Korean_volunteers_donating_foo_2026-05-10T15-41-29.png`,
+        landingUrl: '/volunteer',
+        urgency: ProjectAdUrgency.NORMAL,
+        urgencyLevel: 2,
+        priorityScore: 20,
+      },
+      {
+        title: '志愿同行，让爱传递',
+        description: '与志愿者同行，用爱心点亮希望。韩国青年志愿服务队，欢迎您的加入！',
+        imageUrl: `${baseUrl}/Korean_youth_volunteers_planti_2026-05-10T15-40-48.png`,
+        landingUrl: '/mytasks',
+        urgency: ProjectAdUrgency.NORMAL,
+        urgencyLevel: 1,
+        priorityScore: 10,
+      },
+      {
+        title: '小行动，大爱心',
+        description: '每一个小行动，都是大爱心的体现。韩国志愿者，用平凡成就非凡。',
+        imageUrl: `${baseUrl}/Korean_volunteers_tutoring_chi_2026-05-10T15-42-33.png`,
+        landingUrl: '/tasks',
+        urgency: ProjectAdUrgency.URGENT,
+        urgencyLevel: 2,
+        priorityScore: 25,
+      },
+      {
+        title: '用爱温暖每一位需要的人',
+        description: '韩国老年人关怀志愿服务，为独居老人送去温暖与陪伴。',
+        imageUrl: `${baseUrl}/Korean_elderly_volunteers_c_2026-05-10T15-40-25.png`,
+        landingUrl: '/tasks',
+        urgency: ProjectAdUrgency.CRITICAL,
+        urgencyLevel: 3,
+        priorityScore: 30,
+      },
+      {
+        title: '爱心让世界更美丽',
+        description: '灾害救援志愿服务，关键时刻伸出援手。韩国救灾志愿者队伍随时待命。',
+        imageUrl: `${baseUrl}/Korean_disaster_volunteers_r_2026-05-10T15-40-37.png`,
+        landingUrl: '/tasks',
+        urgency: ProjectAdUrgency.CRITICAL,
+        urgencyLevel: 3,
+        priorityScore: 30,
+      },
+      {
+        title: '伸出援手，让爱发光',
+        description: '社区志愿服务，从身边做起。韩国各地志愿者团队，欢迎您的参与。',
+        imageUrl: `${baseUrl}/Korean_environmental_cleanup_2026-05-10T15-42-16.png`,
+        landingUrl: '/tasks',
+        urgency: ProjectAdUrgency.NORMAL,
+        urgencyLevel: 1,
+        priorityScore: 10,
+      },
+      {
+        title: '一人帮人人，人人互帮',
+        description: '志愿服务是一种生活方式。韩国志愿者，在付出中获得成长与快乐。',
+        imageUrl: `${baseUrl}/Korean_blood_donation_volu_2026-05-10T15-41-50.png`,
+        landingUrl: '/volunteer',
+        urgency: ProjectAdUrgency.URGENT,
+        urgencyLevel: 2,
+        priorityScore: 25,
+      },
+    ];
+
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setMonth(endDate.getMonth() + 6);
+
+    for (const ad of ads) {
+      const projectAd = this.projectAdRepo.create({
+        title: ad.title,
+        description: ad.description,
+        imageUrl: ad.imageUrl,
+        landingUrl: ad.landingUrl,
+        applicantName: '系统管理员',
+        targetAmount: 1000000,
+        raisedAmount: 0,
+        urgency: ad.urgency,
+        urgencyLevel: ad.urgencyLevel,
+        priorityScore: ad.priorityScore,
+        startDate: now,
+        endDate: endDate,
+        quotaTotal: 100000,
+        quotaUsed: 0,
+        impressions: 0,
+        clicks: 0,
+        conversions: 0,
+        status: ProjectAdStatus.ACTIVE,
+      });
+      await this.projectAdRepo.save(projectAd);
+    }
+
+    return { created: ads.length, message: `成功创建 ${ads.length} 个公益广告` };
+  }
+
   // Match score calculation for targeting
   calculateMatchScore(
     projectAd: ProjectAd,
