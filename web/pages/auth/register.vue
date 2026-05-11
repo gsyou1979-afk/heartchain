@@ -195,8 +195,6 @@ async function handleRegister() {
         password: form.password,
         nickname: form.nickname || undefined,
         region: form.region,
-        adEnabled: form.adEnabled,
-        adPreferences: form.adPreferences,
       }),
     });
     const data = await res.json();
