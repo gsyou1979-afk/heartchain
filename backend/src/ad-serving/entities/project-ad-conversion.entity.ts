@@ -24,9 +24,6 @@ export class ProjectAdConversion {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column({ type: 'uuid', nullable: true })
-  projectAdId: string;
-
   @Column({ type: 'varchar', length: 50, nullable: true })
   impressionId: string;
 
@@ -52,4 +49,8 @@ export class ProjectAdConversion {
   @ManyToOne(() => ProjectAd, { nullable: true })
   @JoinColumn({ name: 'projectAdId' })
   projectAd: ProjectAd;
+
+  get projectAdId(): string | undefined {
+    return this.projectAd?.id;
+  }
 }
