@@ -25,11 +25,6 @@ export class AdProjectController {
     return this.service.findForTargeting(city, interestList);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
-  }
-
   @Get('project/:projectId')
   async findByProjectId(@Param('projectId') projectId: string) {
     return this.service.findByProjectId(projectId);
@@ -43,6 +38,12 @@ export class AdProjectController {
   @Post('seed')
   async seedVolunteerAds() {
     return this.service.seedVolunteerAds();
+  }
+
+  // ⚠️ :id 路由必须放在所有具体路由之后，否则会优先匹配
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
   }
 
   @Put(':id')
