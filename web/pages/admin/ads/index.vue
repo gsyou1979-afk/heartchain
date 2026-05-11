@@ -397,12 +397,28 @@
                 @change="handleImageUpload" 
                 class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-500 hover:file:bg-red-100"
               />
-              <input 
-                v-model="newPlacement.imageUrl" 
-                type="text" 
-                class="mt-2 block w-full border rounded-lg px-3 py-2" 
-                placeholder="或直接输入图片URL" 
+              <input
+                v-model="newPlacement.imageUrl"
+                type="text"
+                class="mt-2 block w-full border rounded-lg px-3 py-2"
+                placeholder="或直接输入图片URL"
               />
+            </div>
+            <!-- 已上传图片选择 -->
+            <div v-if="availableImages.length > 0" class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">📁 选择已上传的图片</label>
+              <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2">
+                <div
+                  v-for="(img, idx) in availableImages"
+                  :key="idx"
+                  @click="selectImage(img.url)"
+                  class="cursor-pointer border-2 rounded overflow-hidden hover:border-red-500 transition"
+                  :class="newPlacement.imageUrl === img.url ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-200'"
+                >
+                  <img :src="img.url" class="w-full h-20 object-cover" :alt="img.description" />
+                  <div class="text-xs text-gray-500 truncate px-1">{{ img.description }}</div>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">目标链接</label>
@@ -487,6 +503,7 @@ const newPlacement = ref({
   code: '', name: '', location: 'homepage-top',
   imageUrl: '', targetUrl: '',
 })
+const availableImages = ref<any[]>([])
 
 const newCampaign = ref({
   name: '', targetUrl: '', type: 'commercial',
@@ -521,12 +538,14 @@ function openCreatePlacement() {
   editingCode.value = null
   newPlacement.value = { code: '', name: '', location: 'homepage-top', imageUrl: '', targetUrl: '' }
   showPlacementModal.value = true
+  loadAvailableImages()
 }
 
 function openEditPlacement(p: any) {
   editingCode.value = p.id
   newPlacement.value = { ...p, location: 'homepage-top' }
   showPlacementModal.value = true
+  loadAvailableImages()
 }
 
 async function savePlacement() {
@@ -728,6 +747,23 @@ function handleImageUpload(event: Event) {
     }
   }
   reader.readAsDataURL(file)
+}
+
+// 加载已上传图片列表
+async function loadAvailableImages() {
+  try {
+    const res = await fetch('/ads/images.json')
+    if (res.ok) {
+      availableImages.value = await res.json()
+    }
+  } catch (e) {
+    console.error('加载图片列表失败', e)
+  }
+}
+
+// 选择图片
+function selectImage(url: string) {
+  newPlacement.value.imageUrl = url
 }
 
 // 尺寸映射
