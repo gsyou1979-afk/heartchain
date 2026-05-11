@@ -97,7 +97,7 @@ export class AppController {
         ...uData,
         createdAt: new Date(uData.createdAt),
         updatedAt: new Date(uData.updatedAt),
-      });
+      } as any);
       await this.userRepository.save(user);
       results.users.created++;
     }

@@ -134,6 +134,56 @@ export class AdProjectService {
     await this.projectAdRepo.delete(id);
   }
 
+  async initAdSlots(): Promise<{ created: number; message: string }> {
+    const existing = await this.projectAdRepo.count();
+    if (existing > 0) {
+      return { created: 0, message: `已有 ${existing} 个广告位，跳过初始化` };
+    }
+
+    // 定义8个广告位
+    const slots = [
+      { position: 'A1', title: '首页顶部横幅', landingUrl: '/', priorityScore: 100 },
+      { position: 'A2', title: '首页中部横栏', landingUrl: '/', priorityScore: 90 },
+      { position: 'A3', title: '首页底部横幅', landingUrl: '/', priorityScore: 80 },
+      { position: 'B1', title: '任务列表页左侧', landingUrl: '/tasks', priorityScore: 70 },
+      { position: 'B2', title: '任务详情页顶部', landingUrl: '/mytasks', priorityScore: 60 },
+      { position: 'B3', title: '志愿者页侧栏', landingUrl: '/volunteer', priorityScore: 50 },
+      { position: 'C1', title: '个人中心页中栏', landingUrl: '/profile', priorityScore: 40 },
+      { position: 'C2', title: '捐赠页横幅', landingUrl: '/donate', priorityScore: 30 },
+    ];
+
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setFullYear(endDate.getFullYear() + 1);
+
+    for (const slot of slots) {
+      const ad = this.projectAdRepo.create({
+        slotPosition: slot.position,
+        title: slot.title,
+        description: '等待填充内容',
+        imageUrl: '/assets/default-ad-placeholder.png',
+        landingUrl: slot.landingUrl,
+        applicantName: '系统管理员',
+        targetAmount: 0,
+        raisedAmount: 0,
+        urgency: ProjectAdUrgency.NORMAL,
+        urgencyLevel: 1,
+        priorityScore: slot.priorityScore,
+        startDate: now,
+        endDate: endDate,
+        quotaTotal: 0,
+        quotaUsed: 0,
+        impressions: 0,
+        clicks: 0,
+        conversions: 0,
+        status: ProjectAdStatus.PAUSED, // 默认暂停，等待填充内容
+      });
+      await this.projectAdRepo.save(ad);
+    }
+
+    return { created: slots.length, message: `成功初始化 ${slots.length} 个广告位` };
+  }
+
   async seedVolunteerAds(): Promise<{ created: number; message: string }> {
     // 检查是否已有数据
     const existing = await this.projectAdRepo.count();

@@ -31,6 +31,10 @@ export class ProjectAd {
   @Column({ type: 'varchar', nullable: true })
   projectId: string;
 
+  // 广告位标识，如 A1、A2、B1 等
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  slotPosition: string;
+
   @Column({ type: 'varchar', length: 200 })
   title: string;
 

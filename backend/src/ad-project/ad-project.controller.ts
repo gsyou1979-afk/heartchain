@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { AdProjectService } from './ad-project.service';
-import { GenerateProjectAdDto, UpdateProjectAdDto } from './dto/generate-project-ad.dto';
+import { GenerateProjectAdDto } from './dto/generate-project-ad.dto';
 
 @Controller('ad/project-ads')
 export class AdProjectController {
   constructor(private readonly service: AdProjectService) {}
 
+  // 列表 & 统计类路由（静态路径，不含 :id）
   @Get()
   async findAll(@Query('status') status?: string) {
     return this.service.findAll(status as any);
@@ -30,54 +31,66 @@ export class AdProjectController {
     return this.service.findByProjectId(projectId);
   }
 
-  @Post('generate')
-  async generate(@Body() dto: GenerateProjectAdDto) {
-    return this.service.generate(dto.projectId, dto);
+  // 初始化广告位（静态路由，放任何 :id 路由前面）
+  @Post('init')
+  async initAdSlots() {
+    return this.service.initAdSlots();
   }
 
+  // 填充公益广告
   @Post('seed')
   async seedVolunteerAds() {
     return this.service.seedVolunteerAds();
   }
 
-  // ⚠️ :id 路由必须放在所有具体路由之后，否则会优先匹配
-  @Get(':id')
+  @Post('generate')
+  async generate(@Body() dto: GenerateProjectAdDto) {
+    return this.service.generate(dto.projectId, dto);
+  }
+}
+
+// 所有含 :id 的操作路由拆分到独立控制器，避免路由匹配冲突
+@Controller('ad/project-ads/:id')
+export class AdProjectItemController {
+  constructor(private readonly service: AdProjectService) {}
+
+  @Get()
   async findOne(@Param('id') id: string) {
     return this.service.findOne(id);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateProjectAdDto) {
-    return this.service.update(id, dto);
+  @Put()
+  async update(@Param('id') id: string, @Body() body: any) {
+    return this.service.update(id, body);
   }
 
-  @Put(':id/increment')
+  @Put('increment')
   async incrementQuota(@Param('id') id: string, @Body('count') count: number) {
     await this.service.incrementQuotaUsed(id, count);
     return { message: 'Quota updated' };
   }
 
-  @Put(':id/pause')
+  @Put('pause')
   async pause(@Param('id') id: string) {
     return this.service.pause(id);
   }
 
-  @Put(':id/resume')
+  @Put('resume')
   async resume(@Param('id') id: string) {
     return this.service.resume(id);
   }
 
-  @Put(':id/approve')
+  @Put('approve')
   async approve(@Param('id') id: string) {
     return this.service.updateStatus(id, 'active' as any);
   }
 
-  @Put(':id/reject')
+  @Put('reject')
   async reject(@Param('id') id: string) {
     return this.service.updateStatus(id, 'rejected' as any);
   }
 
-  @Delete(':id')
+  @Delete()
   async remove(@Param('id') id: string) {
     await this.service.remove(id);
     return { message: 'ProjectAd deleted' };
