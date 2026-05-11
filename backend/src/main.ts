@@ -18,10 +18,12 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix(apiPrefix);
 
-  // CORS - allow mobile app and all local IPs
+  // CORS - allow all origins (app uses Bearer token, not cookies)
+  // Note: origin: '*' + credentials: true is invalid in browsers
+  // Since we use Bearer token auth, credentials are not needed.
   app.enableCors({
     origin: '*',
-    credentials: true,
+    credentials: false,
   });
 
   // Global validation pipe
