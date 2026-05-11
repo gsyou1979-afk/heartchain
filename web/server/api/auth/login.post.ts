@@ -4,7 +4,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   
   try {
-    const response = await axios.post('http://localhost:3002/api/v1/auth/password-login', {
+    const config = useRuntimeConfig()
+    const apiBase = (config.public?.apiBase as string) || 'http://localhost:3002/api/v1'
+    
+    const response = await axios.post(`${apiBase}/auth/password-login`, {
       phone: body.phone,
       password: body.password,
     }, {

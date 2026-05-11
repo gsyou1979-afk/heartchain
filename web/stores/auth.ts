@@ -11,8 +11,12 @@ interface User {
   pointBalance?: number;
 }
 
-// 直接连接后端API
-const API_BASE = 'http://localhost:3002/api/v1';
+// 使用 Nuxt runtimeConfig 获取后端 API 地址（开发环境 localhost:3002，生产环境 Render）
+const getApiBase = () => {
+  // @ts-ignore - Nuxt auto-imports useRuntimeConfig in Pinia stores
+  const config = useRuntimeConfig();
+  return (config.public?.apiBase as string) || 'http://localhost:3002/api/v1';
+};
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -23,7 +27,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async loginWithPhone(phone: string, password: string) {
-      const response = await fetch(`${API_BASE}/auth/password-login`, {
+      const response = await fetch(`${getApiBase()}/auth/password-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, password }),
@@ -48,7 +52,7 @@ export const useAuthStore = defineStore('auth', {
       if (!this.token) return;
       
       try {
-        const response = await fetch(`${API_BASE}/users/me`, {
+        const response = await fetch(`${getApiBase()}/users/me`, {
           headers: { 'Authorization': `Bearer ${this.token}` }
         });
         
@@ -109,7 +113,7 @@ export const useAuthStore = defineStore('auth', {
             // 验证用户是否仍然存在于后端
             if (parsed.user?.id && parsed.token) {
               try {
-                const response = await fetch(`${API_BASE}/users/${parsed.user.id}`, {
+                const response = await fetch(`${getApiBase()}/users/${parsed.user.id}`, {
                   headers: { 'Authorization': `Bearer ${parsed.token}` }
                 });
                 
