@@ -72,10 +72,20 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
             );
           }
           console.log('[DB] DATABASE_URL 사용 (Supabase Pooler)');
+          // DATABASE_URL에서 SSL 파라미터 제거 후 ssl 옵션으로 직접 설정
+          // (pg 드라이버가 URL 내 sslmode를 제대로 처리하지 못하는 이슈 해결)
+          const dbUrl = databaseUrl.replace(/[?&]sslmode=[^&]*/g, '');
           return {
             type: 'postgres',
-            url: databaseUrl,
-            ssl: { rejectUnauthorized: false },
+            url: dbUrl,
+            ssl: {
+              rejectUnauthorized: false,
+            },
+            extra: {
+              ssl: {
+                rejectUnauthorized: false,
+              },
+            },
             entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
             synchronize: false,
             migrations: ['dist/migrations/*.js'],
