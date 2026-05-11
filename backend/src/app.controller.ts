@@ -184,6 +184,8 @@ export class AppController {
 
       const task = this.taskRepository.create({
         ...tData,
+        publisher: { id: tData.publisherId } as User,
+        assignee: tData.assigneeId ? { id: tData.assigneeId } as User : null,
         createdAt: new Date(tData.createdAt),
         updatedAt: new Date(tData.updatedAt),
       } as any);
