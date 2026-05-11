@@ -163,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-const API_BASE = 'http://localhost:3002/api/v1';
+const API_BASE = useApiBase();
 const saving = ref(false);
 const showToast = ref(false);
 const toastMessage = ref('');

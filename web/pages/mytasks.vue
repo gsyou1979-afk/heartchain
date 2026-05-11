@@ -135,7 +135,7 @@
 <script setup lang="ts">
 const auth = useAuthStore();
 const router = useRouter();
-const API_BASE = 'http://localhost:3002/api/v1';
+const API_BASE = useApiBase();
 
 const activeTab = ref('published');
 const loading = ref(false);

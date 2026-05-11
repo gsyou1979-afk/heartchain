@@ -413,7 +413,7 @@
 <script setup lang="ts">
 const auth = useAuthStore()
 const router = useRouter()
-const API_BASE = 'http://localhost:3002/api/v1'
+const API_BASE = useApiBase()
 
 // 状态
 const activeTab = ref('dashboard')

@@ -145,10 +145,7 @@ const countdown = ref(0);
 const error = ref('');
 let timer: ReturnType<typeof setInterval>;
 
-const getApiBase = () => {
-  const config = useRuntimeConfig();
-  return (config.public?.apiBase as string) || 'http://localhost:3002/api/v1';
-};
+const getApiBase = useApiBase;
 
 async function sendCode() {
   if (!form.phone) return;

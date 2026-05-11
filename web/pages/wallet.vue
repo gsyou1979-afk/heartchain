@@ -172,7 +172,7 @@
 
 <script setup lang="ts">
 const auth = useAuthStore();
-const apiBase = '/api/v1';
+const apiBase = useApiBase();
 
 // 数据
 const loading = ref(true);

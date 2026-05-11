@@ -113,10 +113,7 @@ import AdBanner from '~/components/ad/AdBanner.vue'
 
 useHead({ title: '哈特链 HeartChain - ' + '以爱心链接世界' });
 
-const getApiBase = () => {
-  const config = useRuntimeConfig();
-  return (config.public?.apiBase as string) || 'http://localhost:3002/api/v1';
-};
+const getApiBase = useApiBase;
 const recentTasks = ref<any[]>([]);
 
 const stats = [
