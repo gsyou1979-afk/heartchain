@@ -61,6 +61,14 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
 
+  // Debug: 打印数据库配置
+  console.log('[DEBUG] NODE_ENV:', configService.get('NODE_ENV'));
+  console.log('[DEBUG] DB_HOST:', configService.get('DB_HOST'));
+  console.log('[DEBUG] DB_PORT:', configService.get('DB_PORT'));
+  console.log('[DEBUG] DB_USERNAME:', configService.get('DB_USERNAME'));
+  console.log('[DEBUG] DB_DATABASE:', configService.get('DB_DATABASE'));
+  console.log('[DEBUG] PORT:', port);
+
   console.log(`
   ╔══════════════════════════════════════════════════╗
   ║           HeartChain API Server                   ║
