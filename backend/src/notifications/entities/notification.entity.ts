@@ -60,7 +60,12 @@ export class Notification {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
+  set userId(val: string) {
+    if (!this.user) this.user = new User();
+    this.user.id = val;
+  }
+
   get userId(): string {
-    return this.user.id;
+    return this.user?.id;
   }
 }

@@ -75,8 +75,13 @@ export class Team {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
+  set leaderId(val: string) {
+    if (!this.leader) this.leader = new User();
+    this.leader.id = val;
+  }
+
   get leaderId(): string {
-    return this.leader.id;
+    return this.leader?.id;
   }
 }
 
@@ -105,11 +110,21 @@ export class TeamMember {
   @CreateDateColumn({ type: 'timestamp' })
   joinedAt: Date;
 
+  set teamId(val: string) {
+    if (!this.team) this.team = new Team();
+    this.team.id = val;
+  }
+
   get teamId(): string {
-    return this.team.id;
+    return this.team?.id;
+  }
+
+  set userId(val: string) {
+    if (!this.user) this.user = new User();
+    this.user.id = val;
   }
 
   get userId(): string {
-    return this.user.id;
+    return this.user?.id;
   }
 }

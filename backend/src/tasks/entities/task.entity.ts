@@ -111,8 +111,22 @@ export class Task {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
+  set publisherId(val: string) {
+    if (!this.publisher) this.publisher = new User();
+    this.publisher.id = val;
+  }
+
   get publisherId(): string {
-    return this.publisher.id;
+    return this.publisher?.id;
+  }
+
+  set assigneeId(val: string | undefined) {
+    if (val === undefined || val === null) {
+      this.assignee = null;
+    } else {
+      if (!this.assignee) this.assignee = new User();
+      this.assignee.id = val;
+    }
   }
 
   get assigneeId(): string | undefined {
