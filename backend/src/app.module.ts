@@ -56,7 +56,7 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
 
         const allEntities = [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag];
 
-        // 1. DATABASE_URL이 있으면 PostgreSQL 사용 (Supabase Pooler 지원)
+        // 1. DATABASE_URL이 있으면 PostgreSQL 사용 (Neon / Supabase 호환)
         if (databaseUrl) {
           console.log('[DB] DATABASE_URL 사용 (PostgreSQL)');
           try {
@@ -78,24 +78,19 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
               database,
               ssl: {
                 rejectUnauthorized: false,
-                servername: host,
               },
               extra: {
                 ssl: {
                   rejectUnauthorized: false,
-                  servername: host,
                 },
               },
               entities: allEntities,
-              synchronize: isDev,
-              migrations: ['dist/migrations/*.js'],
-              migrationsRun: !isDev,
+              synchronize: true,
               logging: ['error', 'warn'],
             } as any;
           } catch (e) {
             throw new Error(
-              'DATABASE_URL 파싱 실패: ' + (e as Error).message + '\n' +
-              '올바른 형식: postgresql://user:password@host:port/database'
+              'DATABASE_URL 파싱 실패: ' + (e as Error).message
             );
           }
         }
@@ -112,18 +107,9 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
             database: configService.get('DB_DATABASE'),
             ssl: {
               rejectUnauthorized: false,
-              servername: configService.get('DB_HOST'),
-            },
-            extra: {
-              ssl: {
-                rejectUnauthorized: false,
-                servername: configService.get('DB_HOST'),
-              },
             },
             entities: allEntities,
-            synchronize: isDev,
-            migrations: ['dist/migrations/*.js'],
-            migrationsRun: !isDev,
+            synchronize: true,
             logging: ['error', 'warn'],
           } as any;
         }
