@@ -146,7 +146,7 @@
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-semibold">商业广告计划</h2>
             <button
-              @click="showCampaignModal = true"
+              @click="openCampaignModal"
               class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
             >
               创建广告计划
@@ -435,13 +435,49 @@
 
     <!-- Create Campaign Modal -->
     <div v-if="showCampaignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <div class="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <h3 class="text-xl font-semibold mb-4">创建广告计划</h3>
         <form @submit.prevent="createCampaign">
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">计划名称</label>
               <input v-model="newCampaign.name" type="text" class="mt-1 block w-full border rounded-lg px-3 py-2" required />
+            </div>
+            <!-- 广告图片 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">广告图片</label>
+              <div v-if="newCampaign.imageUrl" class="mt-1 mb-2 relative inline-block">
+                <img :src="newCampaign.imageUrl" class="max-w-full max-h-40 rounded-lg border" />
+                <button type="button" @click="newCampaign.imageUrl = ''" class="absolute top-1 right-1 bg-black/60 text-white rounded-full w-6 h-6 text-xs hover:bg-black/80">×</button>
+              </div>
+              <input 
+                type="file" 
+                accept="image/*" 
+                @change="handleCampaignImageUpload" 
+                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-500 hover:file:bg-red-100"
+              />
+              <input
+                v-model="newCampaign.imageUrl"
+                type="text"
+                class="mt-2 block w-full border rounded-lg px-3 py-2"
+                placeholder="或直接输入图片URL"
+              />
+            </div>
+            <!-- 已上传图片选择 -->
+            <div v-if="availableImages.length > 0" class="mt-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">📁 从素材库选择图片</label>
+              <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2">
+                <div
+                  v-for="(img, idx) in availableImages"
+                  :key="idx"
+                  @click="newCampaign.imageUrl = img.url"
+                  class="cursor-pointer border-2 rounded overflow-hidden hover:border-red-500 transition"
+                  :class="newCampaign.imageUrl === img.url ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-200'"
+                >
+                  <img :src="img.url" class="w-full h-20 object-cover" :alt="img.description" />
+                  <div class="text-xs text-gray-500 truncate px-1">{{ img.description }}</div>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">目标URL</label>
@@ -507,7 +543,7 @@ const availableImages = ref<any[]>([])
 
 const newCampaign = ref({
   name: '', targetUrl: '', type: 'commercial',
-  dailyBudget: 100, bidAmount: 0.1,
+  dailyBudget: 100, bidAmount: 0.1, imageUrl: '',
 })
 
 // 生命周期
@@ -642,6 +678,7 @@ async function createCampaign() {
       advertiserId: auth.user?.id || '',
       name: newCampaign.value.name,
       adType: newCampaign.value.type === 'charity' ? 'public_service' : 'commercial',
+      imageUrl: newCampaign.value.imageUrl,
       pricingModel: 'cpm',
       budgetDaily: newCampaign.value.dailyBudget,
       budgetTotal: newCampaign.value.dailyBudget * 30,
@@ -673,6 +710,13 @@ async function createCampaign() {
     console.error('创建广告计划失败', e)
     alert('网络错误: ' + (e?.message || '请检查后端服务'))
   }
+}
+
+// 打开 Campaign 模态框时加载素材库
+function openCampaignModal() {
+  newCampaign.value = { name: '', targetUrl: '', type: 'commercial', dailyBudget: 100, bidAmount: 0.1, imageUrl: '' }
+  showCampaignModal.value = true
+  loadAvailableImages()
 }
 
 // ========== 项目广告审核 ==========
@@ -764,6 +808,21 @@ async function loadAvailableImages() {
 // 选择图片
 function selectImage(url: string) {
   newPlacement.value.imageUrl = url
+}
+
+// Campaign 图片上传
+function handleCampaignImageUpload(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    const result = e.target?.result
+    if (typeof result === 'string') {
+      newCampaign.value.imageUrl = result
+    }
+  }
+  reader.readAsDataURL(file)
 }
 
 // 尺寸映射
