@@ -50,101 +50,93 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get('DATABASE_URL');
+        const dbHost = configService.get('DB_HOST');
         const isDev = configService.get('NODE_ENV') === 'development';
-        
-        if (isDev) {
-          // 개발 모드: SQLite 사용 (타입 체크 임시 비활성화)
-          return {
-            type: 'sqlite',
-            database: 'E:/WorkBuddy/heartchain/backend/heartchain.sqlite', // Windows에서도 작동하는 경로
-            entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
-            synchronize: true,
-            logging: ['error', 'warn', 'log'], // log 추가로 초기화 확인
-          } as any;
-        } else {
-          // 프로덕션 모드: PostgreSQL 사용
-          const databaseUrl = configService.get('DATABASE_URL');
-          const dbHost = configService.get('DB_HOST');
-          
-          if (databaseUrl) {
-            // DATABASE_URL이 설정된 경우: URL 파싱하여 분리 파라미터로 연결
-            // (Supabase Pooler SNI 문제 해결: pg 드라이버가 URL 방식에서 SNI를
-            //  올바르게 전송하지 못하므로, 직접 host/port/user/pass 설정 + servername)
-            console.log('[DB] DATABASE_URL 파싱하여 연결');
-            try {
-              const url = new URL(databaseUrl);
-              const host = url.hostname;
-              const port = parseInt(url.port, 10) || 5432;
-              const username = decodeURIComponent(url.username);
-              const password = decodeURIComponent(url.password);
-              const database = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
-              
-              console.log('[DB] host:', host, 'port:', port, 'user:', username, 'db:', database);
-              
-              return {
-                type: 'postgres',
-                host,
-                port,
-                username,
-                password,
-                database,
-                ssl: {
-                  rejectUnauthorized: false,
-                  // Supabase Pooler는 servername(SNI)으로 tenant 식별
-                  servername: host,
-                },
-                extra: {
-                  ssl: {
-                    rejectUnauthorized: false,
-                    servername: host,
-                  },
-                },
-                entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
-                synchronize: false,
-                migrations: ['dist/migrations/*.js'],
-                migrationsRun: true,
-                logging: ['error'],
-              } as any;
-            } catch (e) {
-              throw new Error(
-                'DATABASE_URL 파싱 실패: ' + (e as Error).message + '\n' +
-                '올바른 형식: postgresql://user:password@host:port/database'
-              );
-            }
-          } else if (dbHost) {
-            // DB_* 분리 변수 사용
-            console.log('[DB] DB_* 환경변수 사용');
+
+        const allEntities = [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag];
+
+        // 1. DATABASE_URL이 있으면 PostgreSQL 사용 (Supabase Pooler 지원)
+        if (databaseUrl) {
+          console.log('[DB] DATABASE_URL 사용 (PostgreSQL)');
+          try {
+            const url = new URL(databaseUrl);
+            const host = url.hostname;
+            const port = parseInt(url.port, 10) || 5432;
+            const username = decodeURIComponent(url.username);
+            const password = decodeURIComponent(url.password);
+            const database = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+
+            console.log('[DB] host:', host, 'port:', port, 'user:', username, 'db:', database);
+
             return {
               type: 'postgres',
-              host: configService.get('DB_HOST'),
-              port: parseInt(configService.get('DB_PORT', '5432'), 10),
-              username: configService.get('DB_USERNAME'),
-              password: configService.get('DB_PASSWORD'),
-              database: configService.get('DB_DATABASE'),
+              host,
+              port,
+              username,
+              password,
+              database,
               ssl: {
                 rejectUnauthorized: false,
-                servername: configService.get('DB_HOST'),
+                servername: host,
               },
               extra: {
                 ssl: {
                   rejectUnauthorized: false,
-                  servername: configService.get('DB_HOST'),
+                  servername: host,
                 },
               },
-              entities: [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag],
-              synchronize: false,
+              entities: allEntities,
+              synchronize: isDev,
               migrations: ['dist/migrations/*.js'],
-              migrationsRun: true,
-              logging: ['error'],
+              migrationsRun: !isDev,
+              logging: ['error', 'warn'],
             } as any;
-          } else {
+          } catch (e) {
             throw new Error(
-              '데이터베이스 연결 정보가 없습니다.\n' +
-              'Render Environment Variables에서 DATABASE_URL을 설정해주세요.\n' +
-              '예: postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres'
+              'DATABASE_URL 파싱 실패: ' + (e as Error).message + '\n' +
+              '올바른 형식: postgresql://user:password@host:port/database'
             );
           }
         }
+
+        // 2. DB_* 분리 변수가 있으면 PostgreSQL 사용
+        if (dbHost) {
+          console.log('[DB] DB_* 환경변수 사용 (PostgreSQL)');
+          return {
+            type: 'postgres',
+            host: configService.get('DB_HOST'),
+            port: parseInt(configService.get('DB_PORT', '5432'), 10),
+            username: configService.get('DB_USERNAME'),
+            password: configService.get('DB_PASSWORD'),
+            database: configService.get('DB_DATABASE'),
+            ssl: {
+              rejectUnauthorized: false,
+              servername: configService.get('DB_HOST'),
+            },
+            extra: {
+              ssl: {
+                rejectUnauthorized: false,
+                servername: configService.get('DB_HOST'),
+              },
+            },
+            entities: allEntities,
+            synchronize: isDev,
+            migrations: ['dist/migrations/*.js'],
+            migrationsRun: !isDev,
+            logging: ['error', 'warn'],
+          } as any;
+        }
+
+        // 3. 둘 다 없으면 SQLite fallback (로컬 개발용)
+        console.log('[DB] SQLite fallback (로컬 개발)');
+        return {
+          type: 'sqlite',
+          database: 'E:/WorkBuddy/heartchain/backend/heartchain.sqlite',
+          entities: allEntities,
+          synchronize: true,
+          logging: ['error', 'warn', 'log'],
+        } as any;
       },
     }),
 
