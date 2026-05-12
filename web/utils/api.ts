@@ -9,6 +9,8 @@ export function getApiUrl(): string {
     if (h !== 'localhost' && h !== '127.0.0.1') {
       return 'https://heartchain-backend.onrender.com/api/v1';
     }
+    // 本地开发时连线上后端（无需启动本地后端）
+    return 'https://heartchain-backend.onrender.com/api/v1';
   }
-  return 'http://localhost:3002/api/v1';
+  return 'https://heartchain-backend.onrender.com/api/v1';
 }
