@@ -280,26 +280,26 @@
                   <input v-model="form.date" type="date" class="input-field" :min="minDate" />
                   <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-sm text-gray-500">从</span>
-                    <select v-model="form.startHour" class="input-field w-16">
+                    <select v-model="form.startHour" class="input-field w-20 text-center">
                       <option v-for="h in 12" :key="h" :value="h">{{ h }}</option>
                     </select>
                     <span>:</span>
-                    <select v-model="form.startMinute" class="input-field w-16">
+                    <select v-model="form.startMinute" class="input-field w-20 text-center">
                       <option v-for="m in [0,5,10,15,20,25,30,35,40,45,50,55]" :key="m" :value="m">{{ m.toString().padStart(2,'0') }}</option>
                     </select>
-                    <select v-model="form.startAmPm" class="input-field w-16">
+                    <select v-model="form.startAmPm" class="input-field w-20 text-center">
                       <option value="AM">AM</option>
                       <option value="PM">PM</option>
                     </select>
                     <span class="text-sm text-gray-500 mx-2">到</span>
-                    <select v-model="form.endHour" class="input-field w-16">
+                    <select v-model="form.endHour" class="input-field w-20 text-center">
                       <option v-for="h in 12" :key="h" :value="h">{{ h }}</option>
                     </select>
                     <span>:</span>
-                    <select v-model="form.endMinute" class="input-field w-16">
+                    <select v-model="form.endMinute" class="input-field w-20 text-center">
                       <option v-for="m in [0,5,10,15,20,25,30,35,40,45,50,55]" :key="m" :value="m">{{ m.toString().padStart(2,'0') }}</option>
                     </select>
-                    <select v-model="form.endAmPm" class="input-field w-16">
+                    <select v-model="form.endAmPm" class="input-field w-20 text-center">
                       <option value="AM">AM</option>
                       <option value="PM">PM</option>
                     </select>
@@ -310,10 +310,37 @@
                   <input type="radio" v-model="form.scheduleType" value="range" class="text-red-500" />
                   <span>时间区间</span>
                 </label>
-                <div v-if="form.scheduleType === 'range'" class="ml-6 flex gap-3">
-                  <input v-model="form.startDate" type="date" class="input-field flex-1" :min="minDate" />
-                  <span class="self-center text-gray-400">至</span>
-                  <input v-model="form.endDate" type="date" class="input-field flex-1" :min="form.startDate || minDate" />
+                <div v-if="form.scheduleType === 'range'" class="ml-6 space-y-3">
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-500 w-12">开始</span>
+                    <input v-model="form.startDate" type="date" class="input-field flex-1" :min="minDate" />
+                    <select v-model="form.startHourR" class="input-field w-20 text-center">\
+                      <option v-for="h in 12" :key="'s'+h" :value="h">{{ h }}</option>\
+                    </select>\
+                    <span>:</span>\
+                    <select v-model="form.startMinuteR" class="input-field w-20 text-center">\
+                      <option v-for="m in [0,5,10,15,20,25,30,35,40,45,50,55]" :key="'sm'+m" :value="m">{{ m.toString().padStart(2,'0') }}</option>\
+                    </select>\
+                    <select v-model="form.startAmPmR" class="input-field w-20 text-center">\
+                      <option value="AM">AM</option>\
+                      <option value="PM">PM</option>\
+                    </select>\
+                  </div>\
+                  <div class="flex items-center gap-3">\
+                    <span class="text-sm text-gray-500 w-12">结束</span>\
+                    <input v-model="form.endDate" type="date" class="input-field flex-1" :min="form.startDate || minDate" />\
+                    <select v-model="form.endHourR" class="input-field w-20 text-center">\
+                      <option v-for="h in 12" :key="'e'+h" :value="h">{{ h }}</option>\
+                    </select>\
+                    <span>:</span>\
+                    <select v-model="form.endMinuteR" class="input-field w-20 text-center">\
+                      <option v-for="m in [0,5,10,15,20,25,30,35,40,45,50,55]" :key="'em'+m" :value="m">{{ m.toString().padStart(2,'0') }}</option>\
+                    </select>\
+                    <select v-model="form.endAmPmR" class="input-field w-20 text-center">\
+                      <option value="AM">AM</option>\
+                      <option value="PM">PM</option>\
+                    </select>\
+                  </div>\
                 </div>
               </div>
             </div>
@@ -568,6 +595,12 @@ const form = reactive({
   endAmPm: 'PM',
   startDate: '',
   endDate: '',
+  startHourR: 9,
+  startMinuteR: 0,
+  startAmPmR: 'AM',
+  endHourR: 5,
+  endMinuteR: 0,
+  endAmPmR: 'PM',
   location: '',
   teamSize: 2,
 });
@@ -632,7 +665,11 @@ function formatTaskSchedule(schedule: any) {
   if (scheduleObj.type === 'range' && scheduleObj.startDate && scheduleObj.endDate) {
     const start = new Date(scheduleObj.startDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
     const end = new Date(scheduleObj.endDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
-    return `${start} 至 ${end}`;
+    let result = `${start} 至 ${end}`;
+    if (scheduleObj.startTime && scheduleObj.endTime) {
+      result += ` ${scheduleObj.startTime}-${scheduleObj.endTime}`;
+    }
+    return result;
   }
   return '时间待定';
 }
@@ -753,10 +790,16 @@ async function publishTask() {
         endTime: endTimeStr,
       };
     } else if (form.scheduleType === 'range' && form.startDate && form.endDate) {
+      const startH = to24Hour(form.startHourR, form.startAmPmR);
+      const endH = to24Hour(form.endHourR, form.endAmPmR);
+      const startTimeStr = `${startH.toString().padStart(2,'0')}:${form.startMinuteR.toString().padStart(2,'0')}`;
+      const endTimeStr = `${endH.toString().padStart(2,'0')}:${form.endMinuteR.toString().padStart(2,'0')}`;
       schedule = {
         type: 'range',
         startDate: form.startDate,
         endDate: form.endDate,
+        startTime: startTimeStr,
+        endTime: endTimeStr,
       };
     }
 
@@ -866,6 +909,12 @@ function resetForm() {
   form.endAmPm = 'PM';
   form.startDate = '';
   form.endDate = '';
+  form.startHourR = 9;
+  form.startMinuteR = 0;
+  form.startAmPmR = 'AM';
+  form.endHourR = 5;
+  form.endMinuteR = 0;
+  form.endAmPmR = 'PM';
   form.location = '';
   form.teamSize = 2;
 }
