@@ -3,7 +3,7 @@ export const useApi = () => {
 
   // 客户端和服务端都使用 runtimeConfig 配置的后端地址
   // 开发环境可通过 NUXT_PUBLIC_API_BASE 环境变量覆盖
-  const baseURL = (config.public?.apiBase as string) || 'http://localhost:3002/api/v1';
+  const baseURL = 'https://heartchain-backend.onrender.com/api/v1';
 
   const api = $fetch.create({
     baseURL,

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   
   try {
     const config = useRuntimeConfig()
-    const apiBase = (config.public?.apiBase as string) || 'http://localhost:3002/api/v1'
+    const apiBase = 'https://heartchain-backend.onrender.com/api/v1'
     
     const response = await axios.post(`${apiBase}/auth/password-login`, {
       phone: body.phone,

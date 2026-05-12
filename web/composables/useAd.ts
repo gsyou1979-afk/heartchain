@@ -75,7 +75,7 @@ interface ConversionReport {
 }
 
 export const useAd = () => {
-  const apiBase = '/api/v1/ad'
+  const apiBase = 'https://heartchain-backend.onrender.com/api/v1/ad'
 
   // Get device ID (persistent)
   const getDeviceId = () => {
