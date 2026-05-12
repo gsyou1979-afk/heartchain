@@ -36,7 +36,7 @@ export class TasksService {
       location: dto.location,
       schedule: scheduleStr,
       volunteerCount: dto.volunteerCount || 1,
-      teamSize: dto.teamSize || null,
+      teamSize: dto.teamSize ?? 1,
       currentParticipants: 0,
       region: dto.region,
       publisherId,

@@ -78,7 +78,7 @@ export class Task {
   @Column({ type: 'integer', default: 1, comment: 'Number of volunteers needed' })
   volunteerCount: number;
 
-  @Column({ type: 'integer', default: 1, name: 'teamsize', comment: 'Team task size' })
+  @Column({ type: 'integer', default: 1, nullable: true, name: 'teamsize', comment: 'Team task size' })
   teamSize: number;
 
   @Column({ type: 'integer', default: 0, name: 'currentparticipants', comment: 'Current participants count' })
