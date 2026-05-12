@@ -349,8 +349,8 @@
     </div>
 
     <!-- Create Placement Modal -->
-    <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+    <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg p-4 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <h3 class="text-xl font-semibold mb-4">{{ editingCode ? '编辑广告位' : '添加广告位' }}</h3>
         <form @submit.prevent="savePlacement">
           <div class="space-y-4">
