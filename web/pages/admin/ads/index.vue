@@ -577,7 +577,7 @@ onMounted(async () => {
 // ========== 广告位 CRUD ==========
 async function loadPlacements() {
   try {
-    const res = await fetch(`${API_BASE}/placements`, {
+    const res = await fetch(`${API_BASE}/placements/admin/all`, {
       headers: { Authorization: `Bearer ${auth.token}` },
     })
     if (res.ok) {
