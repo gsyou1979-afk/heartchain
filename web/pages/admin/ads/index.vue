@@ -349,108 +349,101 @@
     </div>
 
     <!-- Create Placement Modal -->
-    <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg w-full max-w-lg max-h-[80vh] flex flex-col">
-        <!-- 标题：固定不滚动 -->
-        <div class="flex-shrink-0 px-4 pt-4 pb-2 border-b">
-          <h3 class="text-xl font-semibold">{{ editingCode ? '编辑广告位' : '添加广告位' }}</h3>
-        </div>
-        <!-- 表单内容：可滚动 -->
-        <div class="flex-1 overflow-y-auto px-4 py-4">
-          <form @submit.prevent="savePlacement" id="placementForm">
-            <div class="space-y-4">
+    <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl font-semibold mb-4">{{ editingCode ? '编辑广告位' : '添加广告位' }}</h3>
+        <form @submit.prevent="savePlacement">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">广告位代码</label>
+              <input v-model="newPlacement.code" type="text" class="mt-1 block w-full border rounded-lg px-3 py-2" placeholder="如: A1, S1" required :disabled="!!editingCode" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">名称</label>
+              <input v-model="newPlacement.name" type="text" class="mt-1 block w-full border rounded-lg px-3 py-2" required />
+            </div>
+            <!-- 启用状态 -->
+            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
               <div>
-                <label class="block text-sm font-medium text-gray-700">广告位代码</label>
-                <input v-model="newPlacement.code" type="text" class="mt-1 block w-full border rounded-lg px-3 py-2" placeholder="如: A1, S1" required :disabled="!!editingCode" />
+                <div class="text-sm font-medium text-gray-700">广告位状态</div>
+                <div class="text-xs text-gray-400 mt-0.5">关闭后该广告位不会展示</div>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">名称</label>
-                <input v-model="newPlacement.name" type="text" class="mt-1 block w-full border rounded-lg px-3 py-2" required />
-              </div>
-              <!-- 启用状态（放顶部，显眼位置） -->
-              <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-                <div>
-                  <div class="text-sm font-medium text-gray-700">广告位状态</div>
-                  <div class="text-xs text-gray-400 mt-0.5">关闭后该广告位不会展示</div>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input v-model="newPlacement.isActive" type="checkbox" class="sr-only peer" />
-                  <div class="w-12 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                  <span class="ml-2 text-sm font-semibold" :class="newPlacement.isActive ? 'text-green-600' : 'text-gray-400'">
-                    {{ newPlacement.isActive ? '启用' : '禁用' }}
-                  </span>
-                </label>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">位置（尺寸自动匹配）</label>
-                <select v-model="newPlacement.location" class="mt-1 block w-full border rounded-lg px-3 py-2">
-                  <option value="homepage-top">首页顶部横幅 (728×90)</option>
-                  <option value="homepage-middle">首页中部推荐 (600×400)</option>
-                  <option value="homepage-bottom">首页底部 (728×90)</option>
-                  <option value="sidebar-top">右侧边栏上 (300×250)</option>
-                  <option value="sidebar-bottom">右侧边栏下 (300×250)</option>
-                  <option value="feed">信息流插入 (600×400)</option>
-                  <option value="splash">App开屏全屏 (1080×1920)</option>
-                </select>
-              </div>
-              <!-- 尺寸预览 -->
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-sm text-gray-500 mb-2">预览框</div>
-                <div
-                  class="bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden"
-                  :style="previewStyle"
-                >
-                  <template v-if="newPlacement.imageUrl">
-                    <img :src="newPlacement.imageUrl" class="w-full h-full object-cover" />
-                  </template>
-                  <template v-else>
-                    <span class="text-gray-400 text-sm">点击下方上传图片</span>
-                  </template>
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">广告图片</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  @change="handleImageUpload"
-                  class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-500 hover:file:bg-red-100"
-                />
-                <input
-                  v-model="newPlacement.imageUrl"
-                  type="text"
-                  class="mt-2 block w-full border rounded-lg px-3 py-2"
-                  placeholder="或直接输入图片URL"
-                />
-              </div>
-              <!-- 已上传图片选择 -->
-              <div v-if="availableImages.length > 0" class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">📁 选择已上传的图片</label>
-                <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2">
-                  <div
-                    v-for="(img, idx) in availableImages"
-                    :key="idx"
-                    @click="selectImage(img.url)"
-                    class="cursor-pointer border-2 rounded overflow-hidden hover:border-red-500 transition"
-                    :class="newPlacement.imageUrl === img.url ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-200'"
-                  >
-                    <img :src="img.url" class="w-full h-20 object-cover" :alt="img.description" />
-                    <div class="text-xs text-gray-500 truncate px-1">{{ img.description }}</div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">目标链接</label>
-                <input v-model="newPlacement.targetUrl" type="url" class="mt-1 block w-full border rounded-lg px-3 py-2" placeholder="https://" />
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input v-model="newPlacement.isActive" type="checkbox" class="sr-only peer" />
+                <div class="w-12 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                <span class="ml-2 text-sm font-semibold" :class="newPlacement.isActive ? 'text-green-600' : 'text-gray-400'">
+                  {{ newPlacement.isActive ? '启用' : '禁用' }}
+                </span>
+              </label>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">位置（尺寸自动匹配）</label>
+              <select v-model="newPlacement.location" class="mt-1 block w-full border rounded-lg px-3 py-2">
+                <option value="homepage-top">首页顶部横幅 (728×90)</option>
+                <option value="homepage-middle">首页中部推荐 (600×400)</option>
+                <option value="homepage-bottom">首页底部 (728×90)</option>
+                <option value="sidebar-top">右侧边栏上 (300×250)</option>
+                <option value="sidebar-bottom">右侧边栏下 (300×250)</option>
+                <option value="feed">信息流插入 (600×400)</option>
+                <option value="splash">App开屏全屏 (1080×1920)</option>
+              </select>
+            </div>
+            <!-- 尺寸预览 -->
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm text-gray-500 mb-2">预览框</div>
+              <div
+                class="bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden"
+                :style="previewStyle"
+              >
+                <template v-if="newPlacement.imageUrl">
+                  <img :src="newPlacement.imageUrl" class="w-full h-full object-cover" />
+                </template>
+                <template v-else>
+                  <span class="text-gray-400 text-sm">点击下方上传图片</span>
+                </template>
               </div>
             </div>
-          </form>
-        </div>
-        <!-- 按钮：固定底部不滚动 -->
-        <div class="flex-shrink-0 flex gap-3 px-4 py-3 border-t bg-white rounded-b-lg">
-          <button type="submit" form="placementForm" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">保存</button>
-          <button type="button" @click="showPlacementModal = false" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">取消</button>
-        </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">广告图片</label>
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleImageUpload"
+                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-500 hover:file:bg-red-100"
+              />
+              <input
+                v-model="newPlacement.imageUrl"
+                type="text"
+                class="mt-2 block w-full border rounded-lg px-3 py-2"
+                placeholder="或直接输入图片URL"
+              />
+            </div>
+            <!-- 已上传图片选择 -->
+            <div v-if="availableImages.length > 0" class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">📁 选择已上传的图片</label>
+              <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2">
+                <div
+                  v-for="(img, idx) in availableImages"
+                  :key="idx"
+                  @click="selectImage(img.url)"
+                  class="cursor-pointer border-2 rounded overflow-hidden hover:border-red-500 transition"
+                  :class="newPlacement.imageUrl === img.url ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-200'"
+                >
+                  <img :src="img.url" class="w-full h-20 object-cover" :alt="img.description" />
+                  <div class="text-xs text-gray-500 truncate px-1">{{ img.description }}</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">目标链接</label>
+              <input v-model="newPlacement.targetUrl" type="url" class="mt-1 block w-full border rounded-lg px-3 py-2" placeholder="https://" />
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button type="submit" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">保存</button>
+            <button type="button" @click="showPlacementModal = false" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">取消</button>
+          </div>
+        </form>
       </div>
     </div>
 
