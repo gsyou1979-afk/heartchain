@@ -429,6 +429,15 @@
                 <label class="block text-sm font-medium text-gray-700">目标链接</label>
                 <input v-model="newPlacement.targetUrl" type="url" class="mt-1 block w-full border rounded-lg px-3 py-2" placeholder="https://" />
               </div>
+              <!-- 启用状态 -->
+              <div class="flex items-center gap-3">
+                <label class="block text-sm font-medium text-gray-700">启用状态</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input v-model="newPlacement.isActive" type="checkbox" class="sr-only peer" />
+                  <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                  <span class="ml-3 text-sm font-medium text-gray-700">{{ newPlacement.isActive ? '启用' : '禁用' }}</span>
+                </label>
+              </div>
             </div>
           </form>
         </div>
@@ -545,7 +554,7 @@ const stats = ref({
 
 const newPlacement = ref({
   code: '', name: '', location: 'homepage-top',
-  imageUrl: '', targetUrl: '',
+  imageUrl: '', targetUrl: '', isActive: true,
 })
 const availableImages = ref<any[]>([])
 
@@ -581,14 +590,14 @@ async function loadPlacements() {
 
 function openCreatePlacement() {
   editingCode.value = null
-  newPlacement.value = { code: '', name: '', location: 'homepage-top', imageUrl: '', targetUrl: '' }
+  newPlacement.value = { code: '', name: '', location: 'homepage-top', imageUrl: '', targetUrl: '', isActive: true }
   showPlacementModal.value = true
   loadAvailableImages()
 }
 
 function openEditPlacement(p: any) {
   editingCode.value = p.id
-  newPlacement.value = { ...p, location: 'homepage-top' }
+  newPlacement.value = { ...p }
   showPlacementModal.value = true
   loadAvailableImages()
 }
@@ -622,7 +631,7 @@ async function savePlacement() {
       height: size.height,
       supportedTypes: ['commercial', 'public_service', 'project'],
       floorCpm: 0,
-      isActive: true,
+      isActive: !!newPlacement.value.isActive,
     }
 
     const url = editingCode.value
