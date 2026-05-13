@@ -46,9 +46,11 @@ interface Ad {
   landingUrl: string
 }
 
-const props = defineProps<{
-  placement: 'B1' | 'B2'
-}>()
+const props = withDefaults(defineProps<{
+  placement?: 'B1' | 'B2'
+}>(), {
+  placement: 'B1'
+})
 
 const loading = ref(true)
 const currentAd = ref<Ad | null>(null)

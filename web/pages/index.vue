@@ -28,7 +28,7 @@
       </div>
     </section>
 
-    <!-- Ad Banner A1: Hero下方横幅广告 -->
+    <!-- Ad Banner: 首页横幅 (A1=hero) -->
     <section class="py-8 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AdBanner placement="A1" />
@@ -47,10 +47,10 @@
       </div>
     </section>
 
-    <!-- Ad Banner A2: 首页中部推荐 -->
+    <!-- Ad Banner: 首页信息流广告 (C1=feed) -->
     <section class="py-4">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdBanner placement="A2" />
+        <AdBanner placement="C1" />
       </div>
     </section>
 
@@ -70,10 +70,10 @@
       </div>
     </section>
 
-    <!-- Ad Banner A3: 首页底部 -->
+    <!-- Ad Banner: 首页底部横幅 (D1=footer) -->
     <section class="py-8 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdBanner placement="A3" />
+        <AdBanner placement="D1" />
       </div>
     </section>
 
