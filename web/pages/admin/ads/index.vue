@@ -349,8 +349,8 @@
     </div>
 
     <!-- Create Placement Modal -->
-    <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center px-4 overflow-hidden">
+      <div class="bg-white rounded-lg p-6 w-full max-w-lg mx-auto" style="max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
         <h3 class="text-xl font-semibold mb-4">{{ editingCode ? '编辑广告位' : '添加广告位' }}</h3>
         <form @submit.prevent="savePlacement">
           <div class="space-y-4">
@@ -390,9 +390,9 @@
             </div>
             <!-- 尺寸预览 -->
             <div class="bg-gray-50 rounded-lg p-4">
-              <div class="text-sm text-gray-500 mb-2">预览框</div>
+              <div class="text-sm text-gray-500 mb-2">预览框（等比缩放）</div>
               <div
-                class="bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden"
+                class="bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden max-h-32"
                 :style="previewStyle"
               >
                 <template v-if="newPlacement.imageUrl">
