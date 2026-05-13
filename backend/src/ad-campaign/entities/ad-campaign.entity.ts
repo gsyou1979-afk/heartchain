@@ -72,6 +72,14 @@ export class AdCampaign {
   @Column({ type: 'simple-json', nullable: true })
   placements: string[];
 
+  /** 主图URL（base64或外部URL），方便在管理列表展示 */
+  @Column({ type: 'text', nullable: true })
+  imageUrl: string;
+
+  /** 默认跳转链接 */
+  @Column({ type: 'varchar', length: 1000, nullable: true })
+  landingUrl: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

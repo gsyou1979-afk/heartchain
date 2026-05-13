@@ -39,4 +39,10 @@ export class AdReportController {
   async getTopProjectAds(@Query('limit') limit?: number) {
     return this.service.getTopProjectAds(limit || 10);
   }
+
+  /** 简化统计（给前端广告管理页面用） */
+  @Get('summary')
+  async getSummary() {
+    return this.service.getSummary();
+  }
 }

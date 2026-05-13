@@ -23,6 +23,7 @@ import { AdProjectModule } from './ad-project/ad-project.module';
 import { AdServingModule } from './ad-serving/ad-serving.module';
 import { AdTargetingModule } from './ad-targeting/ad-targeting.module';
 import { AdReportModule } from './ad-report/ad-report.module';
+import { AdItemModule } from './ad-item/ad-item.module';
 
 import { User } from './users/entities/user.entity';
 import { Task } from './tasks/entities/task.entity';
@@ -38,6 +39,7 @@ import { AdClick } from './ad-serving/entities/ad-click.entity';
 import { AdFrequency } from './ad-serving/entities/ad-frequency.entity';
 import { ProjectAdConversion } from './ad-serving/entities/project-ad-conversion.entity';
 import { UserTag } from './ad-targeting/entities/user-tag.entity';
+import { AdItem } from './ad-item/entities/ad-item.entity';
 
 @Module({
   imports: [
@@ -54,7 +56,7 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
         const dbHost = configService.get('DB_HOST');
         const isDev = configService.get('NODE_ENV') === 'development';
 
-        const allEntities = [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag];
+        const allEntities = [User, Task, PointTransaction, Team, TeamMember, Notification, AdPlacement, AdCampaign, AdCreative, ProjectAd, AdImpression, AdClick, AdFrequency, ProjectAdConversion, UserTag, AdItem];
 
         // 1. DATABASE_URL이 있으면 PostgreSQL 사용 (Neon / Supabase 호환)
         if (databaseUrl) {
@@ -146,6 +148,7 @@ import { UserTag } from './ad-targeting/entities/user-tag.entity';
     AdServingModule,
     AdTargetingModule,
     AdReportModule,
+    AdItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -45,6 +45,14 @@ export class CreateAdCampaignDto {
   @IsArray()
   @IsOptional()
   placements?: string[];
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  landingUrl?: string;
 }
 
 export class UpdateAdCampaignDto {
@@ -80,4 +88,12 @@ export class UpdateAdCampaignDto {
   @IsArray()
   @IsOptional()
   placements?: string[];
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  landingUrl?: string;
 }

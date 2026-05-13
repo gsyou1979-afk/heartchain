@@ -219,4 +219,16 @@ export class AdReportService {
 
     return result;
   }
+
+  /** 简化统计：总广告数、曝光、点击 */
+  async getSummary(): Promise<{ totalAds: number; totalImpressions: number; totalClicks: number; ctr: string }> {
+    const totalImpressions = await this.impressionRepo.count();
+    const totalClicks = await this.clickRepo.count();
+    return {
+      totalAds: 0, // 广告计划数量后续接入
+      totalImpressions,
+      totalClicks,
+      ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0',
+    };
+  }
 }
