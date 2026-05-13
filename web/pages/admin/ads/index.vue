@@ -350,7 +350,7 @@
 
     <!-- Create Placement Modal -->
     <div v-if="showPlacementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div class="bg-white rounded-lg w-full max-w-lg max-h-[80vh] flex flex-col">
         <!-- 标题：固定不滚动 -->
         <div class="flex-shrink-0 px-4 pt-4 pb-2 border-b">
           <h3 class="text-xl font-semibold">{{ editingCode ? '编辑广告位' : '添加广告位' }}</h3>
@@ -366,6 +366,20 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700">名称</label>
                 <input v-model="newPlacement.name" type="text" class="mt-1 block w-full border rounded-lg px-3 py-2" required />
+              </div>
+              <!-- 启用状态（放顶部，显眼位置） -->
+              <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                <div>
+                  <div class="text-sm font-medium text-gray-700">广告位状态</div>
+                  <div class="text-xs text-gray-400 mt-0.5">关闭后该广告位不会展示</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input v-model="newPlacement.isActive" type="checkbox" class="sr-only peer" />
+                  <div class="w-12 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  <span class="ml-2 text-sm font-semibold" :class="newPlacement.isActive ? 'text-green-600' : 'text-gray-400'">
+                    {{ newPlacement.isActive ? '启用' : '禁用' }}
+                  </span>
+                </label>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">位置（尺寸自动匹配）</label>
@@ -428,15 +442,6 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700">目标链接</label>
                 <input v-model="newPlacement.targetUrl" type="url" class="mt-1 block w-full border rounded-lg px-3 py-2" placeholder="https://" />
-              </div>
-              <!-- 启用状态 -->
-              <div class="flex items-center gap-3">
-                <label class="block text-sm font-medium text-gray-700">启用状态</label>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input v-model="newPlacement.isActive" type="checkbox" class="sr-only peer" />
-                  <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
-                  <span class="ml-3 text-sm font-medium text-gray-700">{{ newPlacement.isActive ? '启用' : '禁用' }}</span>
-                </label>
               </div>
             </div>
           </form>
@@ -597,7 +602,7 @@ function openCreatePlacement() {
 
 function openEditPlacement(p: any) {
   editingCode.value = p.id
-  newPlacement.value = { ...p }
+  newPlacement.value = { ...p, isActive: p.isActive ?? false, location: p.location || 'homepage-top' }
   showPlacementModal.value = true
   loadAvailableImages()
 }
