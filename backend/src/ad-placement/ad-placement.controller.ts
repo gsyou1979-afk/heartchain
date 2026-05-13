@@ -13,6 +13,11 @@ export class AdPlacementController {
     return this.service.findAll();
   }
 
+  @Get('admin/all')
+  async findAllAdmin() {
+    return this.service.findAllAdmin();
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.service.findOne(id);

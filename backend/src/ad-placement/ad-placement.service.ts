@@ -12,8 +12,15 @@ export class AdPlacementService {
     private readonly placementRepo: Repository<AdPlacement>,
   ) {}
 
-  async findAll(): Promise<AdPlacement[]> {
-    return this.placementRepo.find({ where: { isActive: true } });
+  async findAll(activeOnly = true): Promise<AdPlacement[]> {
+    if (activeOnly) {
+      return this.placementRepo.find({ where: { isActive: true } });
+    }
+    return this.placementRepo.find();
+  }
+
+  async findAllAdmin(): Promise<AdPlacement[]> {
+    return this.placementRepo.find();
   }
 
   async findOne(id: string): Promise<AdPlacement> {
