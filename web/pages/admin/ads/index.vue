@@ -121,12 +121,12 @@
                 <tr v-for="placement in placements" :key="placement.code">
                   <td class="px-6 py-4 whitespace-nowrap font-mono text-sm">{{ placement.code }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ placement.name }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">{{ placement.location }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">{{ placement.position }} / {{ placement.page }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ placement.width }}x{{ placement.height }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap">{{ placement.floorPrice }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">{{ placement.floorCpm }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span :class="placement.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="px-2 py-1 rounded-full text-xs">
-                      {{ placement.status === 'active' ? '启用' : '禁用' }}
+                    <span :class="placement.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="px-2 py-1 rounded-full text-xs">
+                      {{ placement.isActive ? '启用' : '禁用' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -595,7 +595,19 @@ function openCreatePlacement() {
 
 function openEditPlacement(p: any) {
   editingCode.value = p.id
-  newPlacement.value = { ...p, isActive: p.isActive ?? false, location: p.location || 'homepage-top' }
+  // 后端用 position/platform/page，前端表单用 location，做双向映射
+  const pos2loc: Record<string, string> = {
+    hero: 'homepage-top',
+    feed: 'homepage-middle',
+    footer: 'homepage-bottom',
+    sidebar: 'sidebar-top',
+    splash: 'splash',
+  }
+  newPlacement.value = {
+    ...p,
+    isActive: p.isActive ?? false,
+    location: pos2loc[p.position] || 'homepage-top',
+  }
   showPlacementModal.value = true
   loadAvailableImages()
 }
