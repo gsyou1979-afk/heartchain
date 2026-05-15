@@ -1,8 +1,17 @@
 /**
  * API 基础地址
- * 纯函数，不依赖任何框架（Nuxt/Pinia），不使用 composable
- * 可在 <script setup>、Pinia store、任意 JS 上下文中安全调用
+ * 优先使用 runtimeConfig 中的 apiBase（支持环境变量覆盖）
+ * 回退到生产环境地址
  */
 export function getApiUrl(): string {
+  // 在 Nuxt 上下文中使用 runtimeConfig
+  try {
+    const config = useRuntimeConfig();
+    if (config?.public?.apiBase) {
+      return config.public.apiBase;
+    }
+  } catch {
+    // 非 Nuxt 上下文（如 Pinia store）时使用默认值
+  }
   return 'https://heartchain-backend.onrender.com/api/v1';
 }

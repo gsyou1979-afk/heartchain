@@ -116,12 +116,12 @@ useHead({ title: '哈特链 HeartChain - ' + '以爱心链接世界' });
 
 const recentTasks = ref<any[]>([]);
 
-const stats = [
-  { value: '1,000+', label: 'home.stats.volunteers' },
-  { value: '5,000+', label: 'home.stats.tasks' },
-  { value: '100K+', label: 'home.stats.points' },
-  { value: '50+', label: 'home.stats.teams' },
-];
+const stats = ref([
+  { value: '0', label: 'home.stats.volunteers' },
+  { value: '0', label: 'home.stats.tasks' },
+  { value: '0', label: 'home.stats.points' },
+  { value: '0', label: 'home.stats.teams' },
+]);
 
 const steps = [
   { title: 'home.step1', desc: 'home.step1Desc' },
@@ -153,7 +153,25 @@ async function fetchRecentTasks() {
   }
 }
 
+async function fetchStats() {
+  try {
+    const res = await fetch(`${getApiUrl()}/stats`);
+    if (res.ok) {
+      const data = await res.json();
+      stats.value = [
+        { value: data.volunteers?.toLocaleString() || '0', label: 'home.stats.volunteers' },
+        { value: data.tasks?.toLocaleString() || '0', label: 'home.stats.tasks' },
+        { value: data.totalPoints?.toLocaleString() || '0', label: 'home.stats.points' },
+        { value: data.completedTasks?.toLocaleString() || '0', label: 'home.stats.teams' },
+      ];
+    }
+  } catch (e) {
+    console.error('获取统计数据失败', e);
+  }
+}
+
 onMounted(() => {
   fetchRecentTasks();
+  fetchStats();
 });
 </script>

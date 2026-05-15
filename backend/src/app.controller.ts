@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { User } from './users/entities/user.entity';
+import { User, UserStatus } from './users/entities/user.entity';
 import { Task } from './tasks/entities/task.entity';
 import { Public } from './common/decorators/public.decorator';
 
@@ -28,6 +28,30 @@ export class AppController {
   @ApiOperation({ summary: 'API info', description: 'Get HeartChain API information' })
   getInfo() {
     return this.appService.getInfo();
+  }
+
+  @Public()
+  @Get('stats')
+  @ApiOperation({ summary: 'Platform statistics', description: 'Get platform-wide statistics for homepage display' })
+  async getStats() {
+    const [totalUsers, totalTasks, completedTasks, totalPoints] = await Promise.all([
+      this.userRepository.count({ where: { status: UserStatus.ACTIVE } }),
+      this.taskRepository.count(),
+      this.taskRepository.count({ where: { status: 'completed' } }),
+      this.taskRepository
+        .createQueryBuilder('task')
+        .select('COALESCE(SUM(task.pointsReward), 0)', 'total')
+        .where('task.status = :status', { status: 'completed' })
+        .getRawOne()
+        .then((r: any) => parseFloat(r?.total || 0)),
+    ]);
+
+    return {
+      volunteers: totalUsers,
+      tasks: totalTasks,
+      completedTasks,
+      totalPoints,
+    };
   }
 
   /**

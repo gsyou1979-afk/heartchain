@@ -43,8 +43,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // 生产环境使用 Render 后端地址（更新于 2026-05-10）
-      apiBase: 'https://heartchain-backend.onrender.com/api/v1',
+      // API 地址：生产环境用 Render，开发环境用本地
+      apiBase: process.env.NUXT_API_BASE || 'https://heartchain-backend.onrender.com/api/v1',
       appName: 'HeartChain',
     },
   },

@@ -14,16 +14,21 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3005);
   const apiPrefix = configService.get<string>('API_PREFIX', 'api/v1');
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
 
   // Global prefix
   app.setGlobalPrefix(apiPrefix);
 
-  // CORS - allow all origins (app uses Bearer token, not cookies)
-  // Note: origin: '*' + credentials: true is invalid in browsers
-  // Since we use Bearer token auth, credentials are not needed.
+  // CORS - 生产环境限制来源，开发环境允许所有
+  const allowedOrigins = nodeEnv === 'production'
+    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app').split(',')
+    : '*';
+
   app.enableCors({
-    origin: '*',
+    origin: allowedOrigins,
     credentials: false,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Global validation pipe
@@ -64,7 +69,8 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   // Debug: 打印配置信息（不输出敏感值）
-  console.log('[DEBUG] NODE_ENV:', configService.get('NODE_ENV'));
+  console.log('[DEBUG] NODE_ENV:', nodeEnv);
+  console.log('[DEBUG] CORS_ORIGINS:', allowedOrigins);
   console.log('[DEBUG] DATABASE_URL:', configService.get('DATABASE_URL') ? 'SET (length: ' + configService.get('DATABASE_URL').length + ')' : 'NOT SET');
   console.log('[DEBUG] PORT:', port);
 
@@ -76,7 +82,7 @@ async function bootstrap() {
   ║  Server:  http://localhost:${port}                   ║
   ║  API:     http://localhost:${port}/${apiPrefix}        ║
   ║  Swagger: http://localhost:${port}/${apiPrefix}/docs   ║
-  ║  Env:     ${configService.get('NODE_ENV') || 'development'}                                ║
+  ║  Env:     ${nodeEnv}                                ║
   ╚══════════════════════════════════════════════════╝
   `);
 }

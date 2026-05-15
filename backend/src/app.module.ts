@@ -87,7 +87,7 @@ import { AdItem } from './ad-item/entities/ad-item.entity';
                 },
               },
               entities: allEntities,
-              synchronize: true,
+              synchronize: isDev,
               logging: ['error', 'warn'],
             } as any;
           } catch (e) {
@@ -111,7 +111,7 @@ import { AdItem } from './ad-item/entities/ad-item.entity';
               rejectUnauthorized: false,
             },
             entities: allEntities,
-            synchronize: true,
+            synchronize: isDev,
             logging: ['error', 'warn'],
           } as any;
         }

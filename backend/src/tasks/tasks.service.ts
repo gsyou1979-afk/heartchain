@@ -168,34 +168,55 @@ export class TasksService {
   }
 
   async assignTask(taskId: string, userId: string): Promise<Task> {
-    const task = await this.taskRepository.findOne({ where: { id: taskId } });
+    // 使用事务 + SELECT FOR UPDATE 防止并发超员
+    const queryRunner = this.taskRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!task) {
-      throw new NotFoundException('Task not found');
-    }
+    try {
+      // 加行锁，防止并发接单导致超员
+      const task = await queryRunner.manager.findOne(Task, {
+        where: { id: taskId },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    if (task.status !== 'open') {
-      throw new ForbiddenException('Task is not open for assignment');
-    }
-
-    // 判断是否是单人任务还是团队任务
-    const isSingleTask = task.taskType === 'single_once' || task.taskType === 'single_multi';
-
-    if (isSingleTask) {
-      // 单人任务：接单后直接变为 in_progress
-      task.assigneeId = userId;
-      task.status = 'in_progress';
-    } else {
-      // 团队任务：增加参与者数量
-      task.currentParticipants += 1;
-      
-      // 如果达到团队人数，任务变为 in_progress
-      if (task.currentParticipants >= task.teamSize) {
-        task.status = 'in_progress';
+      if (!task) {
+        throw new NotFoundException('Task not found');
       }
-    }
 
-    return this.taskRepository.save(task);
+      if (task.status !== 'open') {
+        throw new ForbiddenException('Task is not open for assignment');
+      }
+
+      // 判断是否是单人任务还是团队任务
+      const isSingleTask = task.taskType === 'single_once' || task.taskType === 'single_multi';
+
+      if (isSingleTask) {
+        // 单人任务：接单后直接变为 in_progress
+        task.assigneeId = userId;
+        task.status = 'in_progress';
+      } else {
+        // 团队任务：增加参与者数量（加锁后检查，防止超员）
+        if (task.currentParticipants >= task.teamSize) {
+          throw new ForbiddenException('Team is already full');
+        }
+        task.currentParticipants += 1;
+
+        // 如果达到团队人数，任务变为 in_progress
+        if (task.currentParticipants >= task.teamSize) {
+          task.status = 'in_progress';
+        }
+      }
+
+      const savedTask = await queryRunner.manager.save(task);
+      await queryRunner.commitTransaction();
+      return savedTask;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async submitProof(taskId: string, userId: string, dto: SubmitProofDto): Promise<Task> {
