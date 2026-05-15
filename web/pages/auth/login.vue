@@ -43,6 +43,10 @@
           </button>
         </form>
 
+        <div class="mt-4 text-center text-sm">
+          <NuxtLink to="/auth/forgot-password" class="text-red-500 hover:text-red-600 font-medium">忘记密码？</NuxtLink>
+        </div>
+
         <div class="mt-4 text-center text-sm text-gray-500">
           以爱心链接世界
         </div>

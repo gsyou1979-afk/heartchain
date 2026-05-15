@@ -66,6 +66,23 @@ export class RefreshTokenDto {
   refreshToken: string;
 }
 
+export class ResetPasswordDto {
+  @ApiProperty({ example: '+861****8000', description: 'Phone number (E.164)' })
+  @IsString()
+  @Matches(/^\+[1-9]\d{1,14}$/, { message: '手机号格式错误' })
+  phone: string;
+
+  @ApiProperty({ example: '123456', description: 'SMS verification code' })
+  @IsString()
+  @Length(4, 6)
+  code: string;
+
+  @ApiProperty({ example: 'newPassword123', description: 'New password (min 6 characters)' })
+  @IsString()
+  @Length(6, 50)
+  newPassword: string;
+}
+
 export class AuthResponseDto {
   accessToken: string;
   refreshToken: string;

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SendSmsDto, PhoneLoginDto, RegisterDto, RefreshTokenDto, PasswordLoginDto, AuthResponseDto } from './dto/auth.dto';
+import { SendSmsDto, PhoneLoginDto, RegisterDto, RefreshTokenDto, PasswordLoginDto, AuthResponseDto, ResetPasswordDto } from './dto/auth.dto';
 import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Auth')
@@ -38,6 +38,15 @@ export class AuthController {
   @ApiOperation({ summary: 'Login with phone + password' })
   async passwordLogin(@Body() dto: PasswordLoginDto): Promise<AuthResponseDto> {
     return this.authService.passwordLogin(dto);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Reset password via SMS verification code' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.phone, dto.code, dto.newPassword);
+    return { message: '密码重置成功，请使用新密码登录' };
   }
 
   @Public()
