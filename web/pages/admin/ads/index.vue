@@ -121,6 +121,48 @@
         </div>
       </div>
 
+      <!-- ==================== 审核管理 ==================== -->
+      <div v-if="activeTab === 'review'" class="space-y-6">
+        <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
+          <h2 class="text-lg font-semibold">待审核广告</h2>
+          <span class="text-sm text-gray-500">共 {{ pendingCampaigns.length }} 条待审核</span>
+        </div>
+
+        <div v-if="pendingCampaigns.length > 0" class="space-y-3">
+          <div v-for="c in pendingCampaigns" :key="c.id" class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-start justify-between">
+              <div class="flex gap-4">
+                <div class="w-24 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <img v-if="getCampaignThumb(c)" :src="getCampaignThumb(c)" class="w-full h-full object-cover" />
+                  <span v-else class="text-gray-300 text-2xl">📷</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-semibold text-gray-900">{{ c.name }}</h3>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">待审核</span>
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    {{ getAdTypeLabel(c.adType) }} · {{ c.placements?.join(', ') || '未设置位置' }}
+                  </div>
+                  <div class="text-xs text-gray-400 mt-1">
+                    提交时间: {{ formatDate(c.createdAt) }}
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button @click="reviewCampaign(c.id, 'approve')" class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">通过</button>
+                <button @click="reviewCampaign(c.id, 'reject')" class="px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">拒绝</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="bg-white rounded-lg shadow p-8 text-center text-gray-400">
+          <div class="text-4xl mb-2">✅</div>
+          <p>暂无待审核广告</p>
+        </div>
+      </div>
+
       <!-- ==================== 广告计划 ==================== -->
       <div v-if="activeTab === 'campaigns'" class="space-y-6">
         <!-- 创建按钮 -->
@@ -352,6 +394,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue';
 import { getApiUrl } from '~/utils/api'
 
 const auth = useAuthStore()
@@ -363,6 +406,7 @@ const activeTab = ref('my-ads')
 const tabs = [
   { key: 'my-ads', label: '我的广告' },
   { key: 'publish', label: '发布广告', isLink: true },
+  { key: 'review', label: '审核管理' },
   { key: 'placements', label: '广告位管理' },
   { key: 'statistics', label: '数据统计' },
 ]
@@ -473,6 +517,31 @@ async function loadMyCampaigns() {
       if (r.ok) campaignItems.value[c.id] = await r.json()
     }
   } catch (e) { console.error('加载我的广告失败', e) }
+}
+
+// 待审核广告列表
+const pendingCampaigns = computed(() => {
+  return campaigns.value.filter((c: any) => c.status === 'pending')
+})
+
+async function reviewCampaign(id: string, action: 'approve' | 'reject') {
+  if (!confirm(action === 'approve' ? '确定通过该广告？' : '确定拒绝该广告？')) return
+  try {
+    const res = await fetch(`${API}/campaigns/${id}/review`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+      body: JSON.stringify({ action }),
+    })
+    if (res.ok) {
+      await loadCampaigns()
+      alert(action === 'approve' ? '已通过' : '已拒绝')
+    } else {
+      const err = await res.json().catch(() => ({ message: '操作失败' }))
+      alert(err.message || '操作失败')
+    }
+  } catch (e) {
+    alert('网络错误，请重试')
+  }
 }
 
 async function loadStats() {
