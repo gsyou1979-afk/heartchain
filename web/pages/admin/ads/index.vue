@@ -122,7 +122,7 @@
       </div>
 
       <!-- ==================== 广告计划 ==================== -->
-      <div v-if="activeTab === 'campaigns'\" class="space-y-6">
+      <div v-if="activeTab === 'campaigns'" class="space-y-6">
         <!-- 创建按钮 -->
         <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
           <h2 class="text-lg font-semibold">广告计划列表</h2>
