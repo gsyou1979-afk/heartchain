@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Inject, Query } from '@nestjs/common';
 import { AdPlacementService } from './ad-placement.service';
 import { CreateAdPlacementDto } from './dto/create-placement.dto';
 import { UpdateAdPlacementDto } from './dto/update-placement.dto';
@@ -9,8 +9,8 @@ export class AdPlacementController {
   private readonly service: AdPlacementService;
 
   @Get()
-  async findAll() {
-    return this.service.findAll();
+  async findAll(@Query('activeOnly') activeOnly?: string) {
+    return this.service.findAll(activeOnly !== 'false');
   }
 
   @Get('admin/all')
@@ -47,5 +47,11 @@ export class AdPlacementController {
   async initDefaults() {
     await this.service.initDefaults();
     return { message: 'Default ad placements initialized' };
+  }
+
+  @Post('activate-all')
+  async activateAll() {
+    await this.service.activateAll();
+    return { message: 'All ad placements activated' };
   }
 }

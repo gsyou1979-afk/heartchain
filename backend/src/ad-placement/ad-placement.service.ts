@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdPlacement } from './entities/ad-placement.entity';
@@ -6,11 +6,22 @@ import { CreateAdPlacementDto } from './dto/create-placement.dto';
 import { UpdateAdPlacementDto } from './dto/update-placement.dto';
 
 @Injectable()
-export class AdPlacementService {
+export class AdPlacementService implements OnModuleInit {
+  private readonly logger = new Logger(AdPlacementService.name);
+
   constructor(
     @InjectRepository(AdPlacement)
     private readonly placementRepo: Repository<AdPlacement>,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    const count = await this.placementRepo.count();
+    if (count === 0) {
+      this.logger.log('No ad placements found, initializing defaults...');
+      await this.initDefaults();
+      this.logger.log('Default ad placements initialized');
+    }
+  }
 
   async findAll(activeOnly = true): Promise<AdPlacement[]> {
     if (activeOnly) {
@@ -63,5 +74,12 @@ export class AdPlacementService {
         await this.placementRepo.save(this.placementRepo.create(def));
       }
     }
+  }
+
+  async activateAll(): Promise<void> {
+    await this.placementRepo.createQueryBuilder()
+      .update(AdPlacement)
+      .set({ isActive: true })
+      .execute();
   }
 }
