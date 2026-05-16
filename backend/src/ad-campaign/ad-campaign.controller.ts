@@ -7,6 +7,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { UserRole } from '../users/entities/user.entity';
 
 @Controller('ad/campaigns')
 export class AdCampaignController {
@@ -50,7 +51,7 @@ export class AdCampaignController {
 
   @Put(':id/review')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   async review(@Param('id') id: string, @Body('action') action: 'approve' | 'reject') {
     const status = action === 'approve' ? CampaignStatus.ACTIVE : CampaignStatus.PAUSED;
     return this.service.updateStatus(id, status);
