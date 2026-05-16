@@ -225,6 +225,10 @@ onUnmounted(() => {
   height: 400px;
 }
 
+.ad-banner--C1 {
+  height: 300px;
+}
+
 .ad-banner--D1 {
   height: 150px;
 }

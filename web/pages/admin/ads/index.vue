@@ -674,8 +674,21 @@ const sortedPlacements = computed(() =>
 
 function getPositionText(p: any): string {
   const map: Record<string, string> = {
-    hero: '首页顶部', feed: '首页中部', footer: '首页底部',
-    sidebar: '右侧边栏', splash: '开屏',
+    // 原始位置
+    hero: '首页顶部(Hero)', feed: '首页中部(Feed)', footer: '首页底部(Footer)',
+    sidebar: '右侧边栏(Sidebar)', splash: '开屏(Splash)',
+    // 左侧广告位
+    'left-top': '左侧-上 (B1)',
+    'left-middle': '左侧-中',
+    'left-bottom': '左侧-下',
+    // 中间广告位
+    'center-top': '中间-上 (A1)',
+    'center-middle': '中间-中 (C1)',
+    'center-bottom': '中间-下 (D1)',
+    // 右侧广告位
+    'right-top': '右侧-上',
+    'right-middle': '右侧-中',
+    'right-bottom': '右侧-下',
   }
   return map[p.position] || p.position || p.page || '未知'
 }
