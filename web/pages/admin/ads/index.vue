@@ -157,13 +157,24 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">位置</label>
             <select v-model="placementForm.location" class="w-full border rounded-lg px-3 py-2">
-              <option value="homepage-top">首页顶部横幅 (728×90)</option>
-              <option value="homepage-middle">首页中部推荐 (600×400)</option>
-              <option value="homepage-bottom">首页底部 (728×90)</option>
-              <option value="sidebar-top">右侧边栏上 (300×250)</option>
-              <option value="sidebar-bottom">右侧边栏下 (300×250)</option>
-              <option value="feed">信息流插入 (600×400)</option>
-              <option value="splash">App开屏全屏 (1080×1920)</option>
+              <optgroup label="左侧广告位">
+                <option value="left-top">左侧-上 (300×250)</option>
+                <option value="left-middle">左侧-中 (300×250)</option>
+                <option value="left-bottom">左侧-下 (300×250)</option>
+              </optgroup>
+              <optgroup label="中间广告位">
+                <option value="center-top">中间-上 (728×90)</option>
+                <option value="center-middle">中间-中 (600×400)</option>
+                <option value="center-bottom">中间-下 (728×90)</option>
+              </optgroup>
+              <optgroup label="右侧广告位">
+                <option value="right-top">右侧-上 (300×250)</option>
+                <option value="right-middle">右侧-中 (300×250)</option>
+                <option value="right-bottom">右侧-下 (300×250)</option>
+              </optgroup>
+              <optgroup label="其他">
+                <option value="splash">App开屏全屏 (1080×1920)</option>
+              </optgroup>
             </select>
           </div>
           <div class="bg-gray-50 rounded-lg p-3 text-center">
@@ -318,7 +329,7 @@ const stats = ref({ totalAds: 0, totalImpressions: 0, totalClicks: 0 })
 // 广告位弹窗
 const showPlacementModal = ref(false)
 const editingPlacement = ref<any>(null)
-const placementForm = ref({ code: '', name: '', location: 'homepage-top', isActive: true })
+const placementForm = ref({ code: '', name: '', location: 'center-top', isActive: true })
 
 // 广告计划弹窗
 const showCampaignModal = ref(false)
@@ -332,6 +343,19 @@ const campaignForm = ref({
 
 // ========== 尺寸映射 ==========
 const sizeMap: Record<string, { width: number; height: number }> = {
+  // 左侧广告位 3个（上/中/下）
+  'left-top':    { width: 300, height: 250 },
+  'left-middle': { width: 300, height: 250 },
+  'left-bottom': { width: 300, height: 250 },
+  // 中间广告位 3个（上/中/下）
+  'center-top':    { width: 728, height: 90 },
+  'center-middle': { width: 600, height: 400 },
+  'center-bottom': { width: 728, height: 90 },
+  // 右侧广告位 3个（上/中/下）
+  'right-top':    { width: 300, height: 250 },
+  'right-middle': { width: 300, height: 250 },
+  'right-bottom': { width: 300, height: 250 },
+  // 兼容旧配置
   'homepage-top': { width: 728, height: 90 },
   'homepage-middle': { width: 600, height: 400 },
   'homepage-bottom': { width: 728, height: 90 },
@@ -339,7 +363,7 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   'sidebar-bottom': { width: 300, height: 250 },
   'feed': { width: 600, height: 400 },
   'splash': { width: 1080, height: 1920 },
-}
+};
 
 // 监听 location 变化自动更新尺寸
 watch(() => placementForm.value.location, (loc) => {
@@ -401,8 +425,12 @@ function openPlacementModal(p: any) {
   editingPlacement.value = p
   if (p) {
     const pos2loc: Record<string, string> = {
-      hero: 'homepage-top', feed: 'homepage-middle',
-      footer: 'homepage-bottom', sidebar: 'sidebar-top', splash: 'splash',
+      hero: 'center-top', feed: 'center-middle', footer: 'center-bottom',
+      sidebar: 'right-top', splash: 'splash',
+      // 9个新广告位
+      'left-top': 'left-top', 'left-middle': 'left-middle', 'left-bottom': 'left-bottom',
+      'center-top': 'center-top', 'center-middle': 'center-middle', 'center-bottom': 'center-bottom',
+      'right-top': 'right-top', 'right-middle': 'right-middle', 'right-bottom': 'right-bottom',
     }
     placementForm.value = {
       code: p.code, name: p.name,
@@ -419,6 +447,19 @@ async function savePlacement() {
   const loc = placementForm.value.location
   const size = sizeMap[loc] || { width: 728, height: 90 }
   const mapping: Record<string, any> = {
+    // 左侧广告位
+    'left-top':    { platform: 'web', page: 'home', position: 'left-top' },
+    'left-middle': { platform: 'web', page: 'home', position: 'left-middle' },
+    'left-bottom': { platform: 'web', page: 'home', position: 'left-bottom' },
+    // 中间广告位
+    'center-top':    { platform: 'web', page: 'home', position: 'center-top' },
+    'center-middle': { platform: 'web', page: 'home', position: 'center-middle' },
+    'center-bottom': { platform: 'web', page: 'home', position: 'center-bottom' },
+    // 右侧广告位
+    'right-top':    { platform: 'web', page: 'home', position: 'right-top' },
+    'right-middle': { platform: 'web', page: 'home', position: 'right-middle' },
+    'right-bottom': { platform: 'web', page: 'home', position: 'right-bottom' },
+    // 兼容旧配置
     'homepage-top': { platform: 'web', page: 'home', position: 'hero' },
     'homepage-middle': { platform: 'web', page: 'home', position: 'feed' },
     'homepage-bottom': { platform: 'web', page: 'home', position: 'footer' },
@@ -427,7 +468,7 @@ async function savePlacement() {
     'feed': { platform: 'web', page: 'home', position: 'feed' },
     'splash': { platform: 'android', page: 'splash', position: 'splash' },
   }
-  const m = mapping[loc] || mapping['homepage-top']
+  const m = mapping[loc] || mapping['center-top']
   const payload = {
     code: placementForm.value.code,
     name: placementForm.value.name,
@@ -512,13 +553,53 @@ function removeCampaignImage(idx: number) {
 }
 
 function handleImageUpload(idx: number, event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  const reader = new FileReader()
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
   reader.onload = (e) => {
-    campaignForm.value.items[idx].imageUrl = e.target?.result as string
+    const img = new Image();
+    img.onload = () => {
+      // 获取目标广告位尺寸（从当前选择的placement获取）
+      const targetSize = getTargetSize();
+      
+      // 等比缩放，保持宽高比
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      let { width, height } = img;
+      const targetWidth = targetSize.width;
+      const targetHeight = targetSize.height;
+      
+      // 计算缩放比例（保持宽高比，不裁剪）
+      const scale = Math.min(targetWidth / width, targetHeight / height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // 绘制缩放后的图片
+      ctx?.drawImage(img, 0, 0, width, height);
+      
+      // 转回base64（JPEG格式，90%质量）
+      campaignForm.value.items[idx].imageUrl = canvas.toDataURL('image/jpeg', 0.9);
+    };
+    img.src = e.target?.result as string;
+  };
+  reader.readAsDataURL(file);
+}
+
+// 根据当前选择的广告位获取目标尺寸
+function getTargetSize(): { width: number; height: number } {
+  // 从已选择的placementCodes中获取第一个广告位的尺寸
+  const selectedCode = campaignForm.value.placementCodes?.[0];
+  if (selectedCode) {
+    const p = placements.value.find((x: any) => x.code === selectedCode);
+    if (p) return { width: p.width, height: p.height };
   }
-  reader.readAsDataURL(file)
+  // 默认尺寸
+  return { width: 600, height: 400 };
 }
 
 async function saveCampaign() {
