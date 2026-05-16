@@ -228,6 +228,29 @@ export class AppController {
   }
 
   @Public()
+  @Post('seed/reset-passwords')
+  @ApiOperation({ summary: '[TEMP] Reset all passwords to Admin@2026', description: 'Reset all user passwords. DELETE AFTER USE.' })
+  async resetAllPasswords() {
+    const bcrypt = await import('bcryptjs');
+    const newPassword = 'Admin@2026';
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    const users = await this.userRepository.find();
+    let updated = 0;
+    for (const user of users) {
+      user.password = hashedPassword;
+      await this.userRepository.save(user);
+      updated++;
+    }
+
+    return {
+      success: true,
+      message: `All ${updated} user passwords have been reset to Admin@2026`,
+      updated,
+    };
+  }
+
+  @Public()
   @Post('seed/quick')
   @ApiOperation({ summary: 'Quick seed with known passwords', description: 'Create seed data with known passwords (password123 for all)' })
   async quickSeed() {
