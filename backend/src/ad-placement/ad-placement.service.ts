@@ -72,14 +72,10 @@ export class AdPlacementService implements OnModuleInit {
       const existing = await this.placementRepo.findOne({ where: { code: def.code } });
       if (!existing) {
         await this.placementRepo.save(this.placementRepo.create(def));
+      } else if (!existing.isActive) {
+        existing.isActive = true;
+        await this.placementRepo.save(existing);
       }
     }
-  }
-
-  async activateAll(): Promise<void> {
-    await this.placementRepo.createQueryBuilder()
-      .update(AdPlacement)
-      .set({ isActive: true })
-      .execute();
   }
 }

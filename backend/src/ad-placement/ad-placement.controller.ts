@@ -48,10 +48,4 @@ export class AdPlacementController {
     await this.service.initDefaults();
     return { message: 'Default ad placements initialized' };
   }
-
-  @Post('activate-all')
-  async activateAll() {
-    await this.service.activateAll();
-    return { message: 'All ad placements activated' };
-  }
 }
