@@ -121,8 +121,8 @@
         </div>
       </div>
 
-      <!-- ==================== 审核管理 ==================== -->
-      <div v-if="activeTab === 'review'" class="space-y-6">
+      <!-- ==================== 审核管理（仅管理员） ==================== -->
+      <div v-if="activeTab === 'review' && auth.user?.role === 'admin'" class="space-y-6">
         <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
           <h2 class="text-lg font-semibold">待审核广告</h2>
           <span class="text-sm text-gray-500">共 {{ pendingCampaigns.length }} 条待审核</span>
@@ -403,13 +403,19 @@ const API = getApiUrl() + '/ad'
 
 // ========== 状态 ==========
 const activeTab = ref('my-ads')
-const tabs = [
-  { key: 'my-ads', label: '我的广告' },
-  { key: 'publish', label: '发布广告', isLink: true },
-  { key: 'review', label: '审核管理' },
-  { key: 'placements', label: '广告位管理' },
-  { key: 'statistics', label: '数据统计' },
-]
+const tabs = computed(() => {
+  const base = [
+    { key: 'my-ads', label: '我的广告' },
+    { key: 'publish', label: '发布广告', isLink: true },
+    { key: 'placements', label: '广告位管理' },
+    { key: 'statistics', label: '数据统计' },
+  ]
+  // 只有管理员能看到审核管理
+  if (auth.user?.role === 'admin') {
+    base.splice(2, 0, { key: 'review', label: '审核管理' })
+  }
+  return base
+})
 
 const placements = ref<any[]>([])
 const campaigns = ref<any[]>([])
