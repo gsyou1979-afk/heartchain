@@ -338,7 +338,8 @@ const campaignForm = ref({
   name: '',
   items: [] as any[],
   placementCodes: [] as string[],
-  isActive: true,
+  status: 'active',
+  isActive: true, // UI only, converted to status on save
 })
 
 // ========== 尺寸映射 ==========
@@ -534,10 +535,11 @@ function openCampaignModal(c: any) {
       name: c.name,
       items: campaignItems.value[c.id] ? [...campaignItems.value[c.id]] : [],
       placementCodes: c.placements || [],
+      status: c.status || 'active',
       isActive: c.status === 'active',
     }
   } else {
-    campaignForm.value = { name: '', items: [], placementCodes: [], isActive: true }
+    campaignForm.value = { name: '', items: [], placementCodes: [], status: 'active', isActive: true }
   }
   showCampaignModal.value = true
 }
@@ -614,7 +616,7 @@ async function saveCampaign() {
     pricingModel: 'cpm',
     startDate: new Date().toISOString().split('T')[0],
     placements: campaignForm.value.placementCodes,
-    isActive: campaignForm.value.isActive,
+    status: campaignForm.value.isActive ? 'active' : 'paused',
   }
   const isEditing = !!editingCampaign.value
   const url = isEditing ? `${API}/campaigns/${editingCampaign.value.id}` : `${API}/campaigns`
