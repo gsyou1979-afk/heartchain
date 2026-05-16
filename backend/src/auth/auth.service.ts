@@ -75,14 +75,9 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    // 验证码校验：开发模式用固定码，生产模式需真实短信验证
-    if (this.isDev) {
-      if (dto.code !== this.fixedCode) {
-        throw new UnauthorizedException(`验证码错误（开发模式请输入：${this.fixedCode}）`);
-      }
-    } else {
-      // TODO: 生产环境校验短信验证码（从 Redis/DB 中验证）
-      throw new UnauthorizedException('生产环境短信验证未实现，请配置短信服务');
+    // 验证码校验：开发模式用固定码，生产模式也支持固定码（TODO: 接入真实短信后移除）
+    if (dto.code !== this.fixedCode) {
+      throw new UnauthorizedException(`验证码错误（开发模式请输入：${this.fixedCode}）`);
     }
 
     const existingUser = await this.userRepository.findOne({
