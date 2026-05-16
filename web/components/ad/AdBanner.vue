@@ -36,11 +36,13 @@
       </div>
     </div>
 
-    <!-- Fallback -->
+    <!-- Fallback: 无广告时显示招商提示 -->
     <div v-else class="ad-banner__fallback">
       <div class="fallback-content">
-        <h3>HeartChain 志愿服务平台</h3>
-        <p>Join us to make a difference!</p>
+        <div class="fallback-icon">📢</div>
+        <h3>广告位招商</h3>
+        <p>欢迎投放广告，请联系管理员</p>
+        <p class="fallback-sub">该广告位暂无广告内容</p>
       </div>
     </div>
   </div>
@@ -335,20 +337,40 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #4a5568;
   text-align: center;
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+}
+
+.fallback-content {
+  padding: 24px;
+}
+
+.fallback-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.6;
 }
 
 .fallback-content h3 {
-  font-size: 24px;
+  font-size: 20px;
+  font-weight: 600;
   margin: 0 0 8px;
+  color: #2d3748;
 }
 
 .fallback-content p {
   font-size: 14px;
   margin: 0;
-  opacity: 0.9;
+  color: #718096;
+}
+
+.fallback-sub {
+  font-size: 12px !important;
+  color: #a0aec0 !important;
+  margin-top: 4px !important;
 }
 
 /* Loading skeleton */
