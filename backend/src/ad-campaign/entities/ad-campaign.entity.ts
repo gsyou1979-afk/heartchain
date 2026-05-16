@@ -9,6 +9,9 @@ import {
 export enum AdType {
   COMMERCIAL = 'commercial',
   PUBLIC_SERVICE = 'public_service',
+  RECRUITMENT = 'recruitment',
+  SCHOOL = 'school',
+  PROJECT = 'project',
 }
 
 export enum CampaignStatus {

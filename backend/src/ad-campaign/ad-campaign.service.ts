@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AdCampaign, CampaignStatus } from './entities/ad-campaign.entity';
+import { AdCampaign, CampaignStatus, PricingModel } from './entities/ad-campaign.entity';
 import { CreateAdCampaignDto, UpdateAdCampaignDto } from './dto/create-campaign.dto';
+import { PublishAdDto } from './dto/publish-ad.dto';
+import { AdItem } from '../ad-item/entities/ad-item.entity';
 
 @Injectable()
 export class AdCampaignService {
   constructor(
     @InjectRepository(AdCampaign)
     private readonly campaignRepo: Repository<AdCampaign>,
+    @InjectRepository(AdItem)
+    private readonly itemRepo: Repository<AdItem>,
   ) {}
 
   async findAll(advertiserId?: string): Promise<AdCampaign[]> {
@@ -66,6 +70,38 @@ export class AdCampaignService {
       `UPDATE ad_campaigns SET spent = spent + $1 WHERE id = $2`,
       [amount, id],
     );
+  }
+
+  async publish(dto: PublishAdDto, advertiserId: string): Promise<AdCampaign> {
+    const campaign = this.campaignRepo.create({
+      advertiserId,
+      name: dto.name,
+      adType: dto.adType,
+      status: CampaignStatus.PENDING,
+      pricingModel: PricingModel.CPM,
+      startDate: dto.startDate ? new Date(dto.startDate) : new Date(),
+      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      budgetTotal: dto.budgetTotal,
+      placements: dto.placementCodes,
+      targeting: dto.targeting,
+    });
+    const saved = await this.campaignRepo.save(campaign) as AdCampaign;
+
+    if (dto.items?.length > 0) {
+      const items = dto.items.map((item, idx) =>
+        this.itemRepo.create({
+          campaignId: saved.id,
+          imageUrl: item.imageUrl,
+          landingUrl: item.landingUrl || '',
+          taskId: item.taskId || null,
+          rotationSeconds: item.rotationSeconds || 5,
+          sortOrder: idx,
+        }),
+      );
+      await this.itemRepo.save(items);
+    }
+
+    return this.findOne(saved.id);
   }
 
   async remove(id: string): Promise<void> {

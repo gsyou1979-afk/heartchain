@@ -76,8 +76,53 @@
         </div>
       </div>
 
+      <!-- ==================== 我的广告 ==================== -->
+      <div v-if="activeTab === 'my-ads'" class="space-y-6">
+        <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
+          <h2 class="text-lg font-semibold">我的广告</h2>
+          <NuxtLink to="/admin/ads/publish" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">
+            + 发布广告
+          </NuxtLink>
+        </div>
+
+        <div v-if="myCampaigns.length > 0" class="space-y-3">
+          <div v-for="c in myCampaigns" :key="c.id" class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-start justify-between">
+              <div class="flex gap-4">
+                <div class="w-24 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <img v-if="getCampaignThumb(c)" :src="getCampaignThumb(c)" class="w-full h-full object-cover" />
+                  <span v-else class="text-gray-300 text-2xl">📷</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-semibold text-gray-900">{{ c.name }}</h3>
+                    <span class="text-xs px-2 py-0.5 rounded-full" :class="getStatusClass(c.status)">{{ getStatusText(c.status) }}</span>
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    {{ getAdTypeLabel(c.adType) }} · {{ c.placements?.join(', ') || '未设置位置' }}
+                  </div>
+                  <div class="text-xs text-gray-400 mt-1">
+                    {{ formatDate(c.createdAt) }}
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button v-if="c.status === 'paused'" @click="updateCampaignStatus(c.id, 'active')" class="px-3 py-1 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100">启用</button>
+                <button v-if="c.status === 'active'" @click="updateCampaignStatus(c.id, 'paused')" class="px-3 py-1 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100">暂停</button>
+                <button @click="deleteCampaign(c.id)" class="px-3 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100">删除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="bg-white rounded-lg shadow p-8 text-center text-gray-400">
+          <div class="text-4xl mb-2">📢</div>
+          <p>暂无广告，点击上方按钮发布第一条广告</p>
+        </div>
+      </div>
+
       <!-- ==================== 广告计划 ==================== -->
-      <div v-if="activeTab === 'campaigns'" class="space-y-6">
+      <div v-if="activeTab === 'campaigns'\" class="space-y-6">
         <!-- 创建按钮 -->
         <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
           <h2 class="text-lg font-semibold">广告计划列表</h2>
@@ -98,8 +143,8 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between">
                   <h3 class="font-semibold text-gray-900 truncate">{{ c.name }}</h3>
-                  <span class="ml-2 text-xs px-2 py-0.5 rounded-full" :class="getCampaignStatusClass(c.status)">
-                    {{ getCampaignStatusText(c.status) }}
+                  <span class="ml-2 text-xs px-2 py-0.5 rounded-full" :class="getStatusClass(c.status)">
+                    {{ getStatusText(c.status) }}
                   </span>
                 </div>
                 <div class="mt-1 text-xs text-gray-500">
@@ -314,16 +359,18 @@ const router = useRouter()
 const API = getApiUrl() + '/ad'
 
 // ========== 状态 ==========
-const activeTab = ref('placements')
+const activeTab = ref('my-ads')
 const tabs = [
+  { key: 'my-ads', label: '我的广告' },
+  { key: 'publish', label: '发布广告', isLink: true },
   { key: 'placements', label: '广告位管理' },
-  { key: 'campaigns', label: '广告计划' },
   { key: 'statistics', label: '数据统计' },
 ]
 
 const placements = ref<any[]>([])
 const campaigns = ref<any[]>([])
-const campaignItems = ref<Record<string, any[]>>({}) // campaignId -> items[]
+const myCampaigns = ref<any[]>([])
+const campaignItems = ref<Record<string, any[]>>({})
 const stats = ref({ totalAds: 0, totalImpressions: 0, totalClicks: 0 })
 
 // 广告位弹窗
@@ -376,11 +423,11 @@ watch(() => placementForm.value.location, (loc) => {
 // ========== 生命周期 ==========
 onMounted(async () => {
   await auth.restore()
-  if (!auth.isLoggedIn || auth.user?.role !== 'admin') {
+  if (!auth.isLoggedIn) {
     router.push('/')
     return
   }
-  await Promise.all([loadPlacements(), loadCampaigns(), loadStats()])
+  await Promise.all([loadPlacements(), loadCampaigns(), loadMyCampaigns(), loadStats()])
 })
 
 // ========== 数据加载 ==========
@@ -410,6 +457,22 @@ async function loadCampaigns() {
       }
     }
   } catch (e) { console.error('加载广告计划失败', e) }
+}
+
+async function loadMyCampaigns() {
+  try {
+    const res = await fetch(`${API}/campaigns?advertiserId=${auth.user?.id}`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    if (!res.ok) return
+    myCampaigns.value = await res.json()
+    for (const c of myCampaigns.value) {
+      const r = await fetch(`${API}/items/campaign/${c.id}`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      })
+      if (r.ok) campaignItems.value[c.id] = await r.json()
+    }
+  } catch (e) { console.error('加载我的广告失败', e) }
 }
 
 async function loadStats() {
@@ -699,15 +762,15 @@ function getCampaignThumb(c: any): string {
   return campaignItems.value[c.id]?.[0]?.imageUrl || ''
 }
 
-function getCampaignStatusText(status: string): string {
+function getStatusText(status: string): string {
   const map: Record<string, string> = {
-    active: '进行中', draft: '草稿', pending: '待审核',
+    active: '投放中', draft: '草稿', pending: '待审核',
     paused: '已暂停', completed: '已完成',
   }
   return map[status] || status
 }
 
-function getCampaignStatusClass(status: string): string {
+function getStatusClass(status: string): string {
   const map: Record<string, string> = {
     active: 'bg-green-100 text-green-700',
     draft: 'bg-gray-100 text-gray-600',
@@ -716,6 +779,37 @@ function getCampaignStatusClass(status: string): string {
     completed: 'bg-blue-100 text-blue-700',
   }
   return map[status] || 'bg-gray-100 text-gray-600'
+}
+
+function getAdTypeLabel(type: string): string {
+  const map: Record<string, string> = {
+    commercial: '商业广告',
+    public_service: '公益广告',
+    recruitment: '招聘广告',
+    school: '学校广告',
+    project: '项目求助',
+  }
+  return map[type] || type
+}
+
+function formatDate(date: string): string {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('zh-CN');
+}
+
+async function updateCampaignStatus(id: string, status: string) {
+  try {
+    const res = await fetch(`${API}/campaigns/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+      body: JSON.stringify({ status }),
+    });
+    if (res.ok) {
+      await loadMyCampaigns();
+    }
+  } catch (e) {
+    console.error('更新状态失败', e);
+  }
 }
 
 const tabClass = (key: string) =>
