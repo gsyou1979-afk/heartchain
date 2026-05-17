@@ -70,19 +70,20 @@ export class AdServingService {
         dto.userInterests,
       );
 
-      if (projectAds.length > 0) {
-        const projectAd = projectAds[0];
+      // Only use project ad if it has a valid image
+      const validProjectAd = projectAds.find(p => p.imageUrl && p.imageUrl.trim() !== '');
+      if (validProjectAd) {
         ads.push({
           adType: 'project',
-          projectAdId: projectAd.id,
-          title: projectAd.title,
-          description: projectAd.description,
-          imageUrl: projectAd.imageUrl,
-          landingUrl: projectAd.landingUrl,
+          projectAdId: validProjectAd.id,
+          title: validProjectAd.title,
+          description: validProjectAd.description,
+          imageUrl: validProjectAd.imageUrl,
+          landingUrl: validProjectAd.landingUrl,
           badge: '求助',
           tracking: {
-            impression: `/api/v1/ad/impression?projectAdId=${projectAd.id}`,
-            click: `/api/v1/ad/click?projectAdId=${projectAd.id}`,
+            impression: `/api/v1/ad/impression?projectAdId=${validProjectAd.id}`,
+            click: `/api/v1/ad/click?projectAdId=${validProjectAd.id}`,
           },
           source: 'project_auto',
         });
