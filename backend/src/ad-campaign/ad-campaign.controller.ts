@@ -23,6 +23,14 @@ export class AdCampaignController {
     return this.service.findActive();
   }
 
+  // NOTE: POST /publish must be BEFORE GET /:id to avoid route conflict
+  // (NestJS matches routes in order, and :id would catch "publish" as an id)
+  @Post('publish')
+  @UseGuards(JwtAuthGuard)
+  async publish(@Body() dto: PublishAdDto, @CurrentUser('id') userId: string) {
+    return this.service.publish(dto, userId);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.service.findOne(id);
@@ -41,12 +49,6 @@ export class AdCampaignController {
   @Put(':id/status')
   async updateStatus(@Param('id') id: string, @Body('status') status: CampaignStatus) {
     return this.service.updateStatus(id, status);
-  }
-
-  @Post('publish')
-  @UseGuards(JwtAuthGuard)
-  async publish(@Body() dto: PublishAdDto, @CurrentUser('id') userId: string) {
-    return this.service.publish(dto, userId);
   }
 
   @Put(':id/review')
