@@ -370,7 +370,7 @@ async function submitAd() {
 
   submitting.value = true;
   try {
-    const res = await fetch(`${API}/campaigns/publish`, {
+    const res = await fetch(`${API}/campaigns/new`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
       body: JSON.stringify({
