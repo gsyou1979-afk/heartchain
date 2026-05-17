@@ -20,18 +20,21 @@
           </div>
         </div>
       </div>
-      <!-- Wave decoration -->
-      <div class="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 60L60 50C120 40 240 20 360 15C480 10 600 20 720 25C840 30 960 30 1080 25C1200 20 1320 10 1380 5L1440 0V60H0Z" fill="#f9fafb"/>
-        </svg>
-      </div>
     </section>
 
-    <!-- Ad Banner: 首页横幅 (A1=hero) -->
+    <!-- Ad Banner: A1 -->
     <section class="py-8 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <component :is="AdBannerAsync" placement="A1" />
+        <div v-if="homeAd" class="ad-home-banner" :style="{ backgroundImage: `url(${homeAd.imageUrl})` }">
+          <span class="ad-badge">{{ homeAd.badge }}</span>
+          <h3>{{ homeAd.title }}</h3>
+          <p v-if="homeAd.description">{{ homeAd.description }}</p>
+        </div>
+        <div v-else class="ad-home-banner ad-home-banner--fallback">
+          <span class="ad-badge">广告</span>
+          <h3>广告位招商</h3>
+          <p>欢迎投放广告，请联系管理员</p>
+        </div>
       </div>
     </section>
 
@@ -44,13 +47,6 @@
             <div class="text-sm text-gray-500 mt-1">{{ $t(stat.label) }}</div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Ad Banner: 首页信息流广告 (C1=feed) -->
-    <section class="py-4">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <component :is="AdBannerAsync" placement="C1" />
       </div>
     </section>
 
@@ -67,13 +63,6 @@
             <p class="text-sm text-gray-500">{{ $t(step.desc) }}</p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Ad Banner: 首页底部横幅 (D1=footer) -->
-    <section class="py-8 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <component :is="AdBannerAsync" placement="D1" />
       </div>
     </section>
 
@@ -109,14 +98,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
 import { getApiUrl } from '~/utils/api';
-
-const AdBannerAsync = defineAsyncComponent(() => import('~/components/ad/AdBanner.vue'))
 
 useHead({ title: '哈特链 HeartChain - ' + '以爱心链接世界' });
 
 const recentTasks = ref<any[]>([]);
+const homeAd = ref<any>(null);
 
 const stats = ref([
   { value: '0', label: 'home.stats.volunteers' },
@@ -172,8 +159,120 @@ async function fetchStats() {
   }
 }
 
+async function fetchHomeAd() {
+  try {
+    const apiBase = getApiUrl();
+    // Try requestAd first
+    const reqRes = await fetch(`${apiBase}/ad/request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ placementCode: 'A1', deviceId: 'home', platform: 'web' }),
+    });
+    if (reqRes.ok) {
+      const data = await reqRes.json();
+      if (data.ads && data.ads.length > 0 && data.ads[0].imageUrl) {
+        homeAd.value = data.ads[0];
+        return;
+      }
+    }
+    // Fallback: load from active campaigns + AdItems
+    const campaignsRes = await fetch(`${apiBase}/ad/campaigns/active`);
+    if (campaignsRes.ok) {
+      const campaigns = await campaignsRes.json();
+      for (const c of campaigns) {
+        if (!c.placements || !c.placements.includes('A1')) continue;
+        const itemsRes = await fetch(`${apiBase}/ad/items/campaign/${c.id}`);
+        if (itemsRes.ok) {
+          const items = await itemsRes.json();
+          const item = items.find((i: any) => i.imageUrl && i.imageUrl.trim() !== '');
+          if (item) {
+            homeAd.value = {
+              adType: 'commercial',
+              title: c.name,
+              description: '',
+              imageUrl: item.imageUrl,
+              landingUrl: item.landingUrl || '/',
+              badge: '广告',
+            };
+            return;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch home ad:', e);
+  }
+}
+
 onMounted(() => {
   fetchRecentTasks();
   fetchStats();
+  fetchHomeAd();
 });
 </script>
+
+<style scoped>
+.ad-home-banner {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 24px;
+  color: white;
+  overflow: hidden;
+}
+.ad-home-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%);
+}
+.ad-home-banner > * {
+  position: relative;
+  z-index: 1;
+}
+.ad-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #3498db;
+  color: white;
+  margin-bottom: 8px;
+}
+.ad-home-banner h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.ad-home-banner p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+.ad-home-banner--fallback {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #4a5568;
+  border: 2px dashed #cbd5e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.ad-home-banner--fallback .ad-badge {
+  background: #a0aec0;
+}
+.ad-home-banner--fallback h3 {
+  color: #2d3748;
+}
+.ad-home-banner--fallback p {
+  color: #718096;
+}
+</style>
