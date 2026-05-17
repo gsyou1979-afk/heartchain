@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
 import { AdCampaignService } from './ad-campaign.service';
 import { CreateAdCampaignDto, UpdateAdCampaignDto } from './dto/create-campaign.dto';
 import { PublishAdDto } from './dto/publish-ad.dto';
@@ -14,8 +14,8 @@ export class AdCampaignController {
   constructor(private readonly service: AdCampaignService) {}
 
   @Get()
-  async findAll() {
-    return this.service.findAll();
+  async findAll(@Query('advertiserId') advertiserId?: string) {
+    return this.service.findAll(advertiserId);
   }
 
   @Get('active')

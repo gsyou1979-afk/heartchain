@@ -370,31 +370,57 @@ async function submitAd() {
 
   submitting.value = true;
   try {
-    const res = await fetch(`${API}/campaigns/new`, {
+    // Step 1: Create campaign via POST /campaigns (status defaults to 'draft')
+    const createRes = await fetch(`${API}/campaigns`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
       body: JSON.stringify({
+        advertiserId: auth.user?.id || '',
         name: form.name,
         adType: form.adType,
-        description: form.description,
+        pricingModel: 'cpm',
         startDate: form.startDate,
         endDate: form.endDate || undefined,
         budgetTotal: form.budgetTotal || undefined,
-        placementCodes: form.placementCodes,
-        items: form.items.map(item => ({
-          imageUrl: item.imageUrl,
-          landingUrl: item.landingUrl,
-          rotationSeconds: item.rotationSeconds,
-        })),
+        placements: form.placementCodes,
       }),
     });
 
-    if (res.ok) {
-      step.value = 6; // 成功页面
-    } else {
-      const err = await res.json().catch(() => ({ message: '提交失败' }));
-      alert(err.message || '提交失败，请重试');
+    if (!createRes.ok) {
+      const err = await createRes.json().catch(() => ({ message: '创建失败' }));
+      alert(err.message || '创建失败，请重试');
+      return;
     }
+
+    const campaign = await createRes.json();
+
+    // Step 2: Save ad items (images) if any
+    if (form.items.length > 0 && campaign.id) {
+      const itemsPayload = form.items.map((item, idx) => ({
+        campaignId: campaign.id,
+        imageUrl: item.imageUrl,
+        landingUrl: item.landingUrl || '',
+        taskId: item.taskId || null,
+        rotationSeconds: item.rotationSeconds || 5,
+        sortOrder: idx,
+      }));
+      await fetch(`${API}/items/campaign/${campaign.id}/bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify(itemsPayload),
+      });
+    }
+
+    // Step 3: Update status to 'pending' for review
+    if (campaign.id) {
+      await fetch(`${API}/campaigns/${campaign.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ status: 'pending' }),
+      });
+    }
+
+    step.value = 6; // 成功页面
   } catch (e) {
     alert('网络错误，请重试');
   } finally {
