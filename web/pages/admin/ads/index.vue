@@ -533,10 +533,11 @@ const pendingCampaigns = computed(() => {
 async function reviewCampaign(id: string, action: 'approve' | 'reject') {
   if (!confirm(action === 'approve' ? '确定通过该广告？' : '确定拒绝该广告？')) return
   try {
-    const res = await fetch(`${API}/campaigns/${id}/review`, {
+    const status = action === 'approve' ? 'active' : 'paused'
+    const res = await fetch(`${API}/campaigns/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
-      body: JSON.stringify({ action }),
+      body: JSON.stringify({ status }),
     })
     if (res.ok) {
       await loadCampaigns()
