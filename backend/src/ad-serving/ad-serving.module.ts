@@ -13,11 +13,12 @@ import { AdPlacementModule } from '../ad-placement/ad-placement.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AdImpression, AdClick, AdFrequency, ProjectAdConversion]),
+    TypeOrmModule.forFeature([AdImpression, AdClick, AdFrequency, ProjectAdConversion, AdItem]),
     AdProjectModule,
     AdCreativeModule,
     AdCampaignModule,
     AdPlacementModule,
+    AdItemModule,
   ],
   controllers: [AdServingController],
   providers: [AdServingService],

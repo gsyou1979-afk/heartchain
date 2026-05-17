@@ -9,6 +9,7 @@ import { AdProjectService } from '../ad-project/ad-project.service';
 import { AdCreativeService } from '../ad-creative/ad-creative.service';
 import { AdCampaignService } from '../ad-campaign/ad-campaign.service';
 import { AdPlacementService } from '../ad-placement/ad-placement.service';
+import { AdItem } from '../ad-item/entities/ad-item.entity';
 import { AdRequestDto, AdImpressionDto, AdClickDto, ConversionDto } from './dto/ad-request.dto';
 
 export interface AdResponse {
@@ -45,6 +46,8 @@ export class AdServingService {
     private frequencyRepo: Repository<AdFrequency>,
     @InjectRepository(ProjectAdConversion)
     private conversionRepo: Repository<ProjectAdConversion>,
+    @InjectRepository(AdItem)
+    private itemRepo: Repository<AdItem>,
     private projectAdService: AdProjectService,
     private creativeService: AdCreativeService,
     private campaignService: AdCampaignService,
@@ -89,9 +92,9 @@ export class AdServingService {
     // 2. Check commercial ads (if not filled by project ads)
     if (supportedTypes.includes('commercial') && ads.length === 0) {
       const activeCampaigns = await this.campaignService.findActive();
+      
+      // First try to find approved creatives
       const approvedCreatives = await this.creativeService.findApproved();
-
-      // Simple match: take first approved creative with active campaign
       const creative = approvedCreatives.find(c => 
         activeCampaigns.some(camp => camp.id === c.campaignId)
       );
@@ -112,6 +115,32 @@ export class AdServingService {
           },
           source: 'direct',
         });
+      } else {
+        // Fallback: check AdItem records for active campaigns
+        for (const campaign of activeCampaigns) {
+          const items = await this.itemRepo.find({
+            where: { campaignId: campaign.id },
+            order: { sortOrder: 'ASC' },
+            take: 1,
+          });
+          if (items.length > 0 && items[0].imageUrl) {
+            ads.push({
+              adType: 'commercial',
+              creativeId: items[0].id,
+              title: campaign.name,
+              description: '',
+              imageUrl: items[0].imageUrl,
+              landingUrl: items[0].landingUrl || '/',
+              badge: '广告',
+              tracking: {
+                impression: `/api/v1/ad/impression?creativeId=${items[0].id}`,
+                click: `/api/v1/ad/click?creativeId=${items[0].id}`,
+              },
+              source: 'direct',
+            });
+            break;
+          }
+        }
       }
     }
 
