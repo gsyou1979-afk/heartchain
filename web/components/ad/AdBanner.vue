@@ -105,12 +105,62 @@ const fetchAds = async () => {
     if (response.ok) {
       const data = await response.json()
       ads.value = data.ads || []
+      
+      // Fallback: if no ads from requestAd, load from active campaigns + AdItems
+      if (ads.value.length === 0) {
+        await fetchCommercialAds(apiBase)
+      }
+    } else {
+      await fetchCommercialAds(apiBase)
     }
   } catch (error) {
     console.error('Failed to fetch ads:', error)
     ads.value = []
   } finally {
     loading.value = false
+  }
+}
+
+// Fallback: load commercial ads directly from active campaigns
+const fetchCommercialAds = async (apiBase: string) => {
+  try {
+    // Get active campaigns for this placement
+    const campaignsRes = await fetch(`${apiBase}/campaigns/active`)
+    if (!campaignsRes.ok) return
+    const campaigns = await campaignsRes.json()
+    
+    // Find campaigns matching this placement
+    const matchingCampaigns = campaigns.filter((c: any) => 
+      c.placements && c.placements.includes(props.placement)
+    )
+    
+    for (const campaign of matchingCampaigns) {
+      // Get ad items for this campaign
+      const itemsRes = await fetch(`${apiBase}/items/campaign/${campaign.id}`)
+      if (!itemsRes.ok) continue
+      const items = await itemsRes.json()
+      
+      const validItem = items.find((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
+      if (validItem) {
+        ads.value = [{
+          adType: 'commercial',
+          creativeId: validItem.id,
+          title: campaign.name,
+          description: '',
+          imageUrl: validItem.imageUrl,
+          landingUrl: validItem.landingUrl || '/',
+          badge: '广告',
+          tracking: {
+            impression: `/api/v1/ad/impression?creativeId=${validItem.id}`,
+            click: `/api/v1/ad/click?creativeId=${validItem.id}`,
+          },
+          source: 'direct',
+        }]
+        break
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch commercial ads:', e)
   }
 }
 
