@@ -61,6 +61,9 @@ export class AdCreative {
   createdAt: Date;
 
   get campaignId(): string | undefined {
-    return this.campaign?.id;
+    // First try the loaded relation, then fall back to the raw column value
+    if (this.campaign?.id) return this.campaign.id;
+    // Access the raw column value that TypeORM sets via @JoinColumn
+    return (this as any).campaignId ?? undefined;
   }
 }
