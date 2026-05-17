@@ -33,17 +33,20 @@ export class AdCampaignController {
     return this.service.create(dto);
   }
 
-  // Use /new instead of /publish to avoid route conflict with GET /:id
-  // (NestJS matches GET /:id before POST /publish because :id catches "publish")
   @Post('new')
   @UseGuards(JwtAuthGuard)
   async publish(@Body() dto: PublishAdDto, @CurrentUser('id') userId: string) {
     return this.service.publish(dto, userId);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateAdCampaignDto) {
-    return this.service.update(id, dto);
+  // NOTE: /:id/review and /:id/status must come BEFORE /:id
+  // otherwise NestJS matches /:id first and treats "review"/"status" as the id
+  @Put(':id/review')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async review(@Param('id') id: string, @Body('action') action: 'approve' | 'reject') {
+    const status = action === 'approve' ? CampaignStatus.ACTIVE : CampaignStatus.PAUSED;
+    return this.service.updateStatus(id, status);
   }
 
   @Put(':id/status')
@@ -51,12 +54,9 @@ export class AdCampaignController {
     return this.service.updateStatus(id, status);
   }
 
-  @Put(':id/review')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async review(@Param('id') id: string, @Body('action') action: 'approve' | 'reject') {
-    const status = action === 'approve' ? CampaignStatus.ACTIVE : CampaignStatus.PAUSED;
-    return this.service.updateStatus(id, status);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateAdCampaignDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')
