@@ -31,7 +31,7 @@
     <!-- Ad Banner: 首页横幅 (A1=hero) -->
     <section class="py-8 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdBanner placement="A1" />
+        <component :is="AdBannerAsync" placement="A1" />
       </div>
     </section>
 
@@ -50,7 +50,7 @@
     <!-- Ad Banner: 首页信息流广告 (C1=feed) -->
     <section class="py-4">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdBanner placement="C1" />
+        <component :is="AdBannerAsync" placement="C1" />
       </div>
     </section>
 
@@ -73,7 +73,7 @@
     <!-- Ad Banner: 首页底部横幅 (D1=footer) -->
     <section class="py-8 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdBanner placement="D1" />
+        <component :is="AdBannerAsync" placement="D1" />
       </div>
     </section>
 
@@ -109,8 +109,10 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import { getApiUrl } from '~/utils/api';
-import AdBanner from '~/components/ad/AdBanner.vue'
+
+const AdBannerAsync = defineAsyncComponent(() => import('~/components/ad/AdBanner.vue'))
 
 useHead({ title: '哈特链 HeartChain - ' + '以爱心链接世界' });
 
