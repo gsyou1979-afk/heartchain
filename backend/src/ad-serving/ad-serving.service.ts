@@ -97,7 +97,7 @@ export class AdServingService {
       // First try to find approved creatives
       const approvedCreatives = await this.creativeService.findApproved();
       const creative = approvedCreatives.find(c => 
-        activeCampaigns.some(camp => camp.id === c.campaignId)
+        activeCampaigns.some(camp => camp.id === (c.campaign?.id || c.campaignId))
       );
 
       if (creative) {

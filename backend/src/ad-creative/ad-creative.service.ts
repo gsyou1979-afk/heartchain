@@ -28,6 +28,7 @@ export class AdCreativeService {
     return this.creativeRepo.find({
       where: { status: CreativeStatus.APPROVED },
       order: { createdAt: 'DESC' },
+      relations: ['campaign'],
     });
   }
 
