@@ -409,6 +409,31 @@ async function submitAd() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
         body: JSON.stringify(itemsPayload),
       });
+
+      // Step 2b: Create AdCreative from first item (so requestAd can find it)
+      const firstItem = form.items[0];
+      if (firstItem.imageUrl) {
+        const creativeRes = await fetch(`${API}/creatives`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({
+            campaignId: campaign.id,
+            title: form.name,
+            description: form.description || '',
+            imageUrl: firstItem.imageUrl,
+            landingUrl: firstItem.landingUrl || '/',
+            creativeType: 'image',
+          }),
+        });
+        if (creativeRes.ok) {
+          const creative = await creativeRes.json();
+          // Auto-approve the creative
+          await fetch(`${API}/creatives/${creative.id}/approve`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${auth.token}` },
+          });
+        }
+      }
     }
 
     // Step 3: Update status to 'pending' for review
