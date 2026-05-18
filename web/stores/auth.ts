@@ -103,35 +103,10 @@ export const useAuthStore = defineStore('auth', {
         if (data) {
           try {
             const parsed = JSON.parse(data);
-            
-            // 验证用户是否仍然存在于后端
             if (parsed.user?.id && parsed.token) {
-              try {
-                const response = await fetch(`${getApiUrl()}/users/${parsed.user.id}`, {
-                  headers: { 'Authorization': `Bearer ${parsed.token}` }
-                });
-                
-                if (response.ok) {
-                  const userData = await response.json();
-                  this.isLoggedIn = true;
-                  this.user = userData;
-                  this.token = parsed.token;
-                  
-                  // 更新本地存储的用户信息
-                  localStorage.setItem('heartchain_auth', JSON.stringify({ 
-                    user: userData, 
-                    token: parsed.token 
-                  }));
-                } else {
-                  // 用户不存在，清除 localStorage
-                  localStorage.removeItem('heartchain_auth');
-                }
-              } catch {
-                // 网络错误，保持本地状态
-                this.isLoggedIn = true;
-                this.user = parsed.user;
-                this.token = parsed.token;
-              }
+              this.isLoggedIn = true;
+              this.user = parsed.user;
+              this.token = parsed.token;
             }
           } catch (e) {
             localStorage.removeItem('heartchain_auth');
