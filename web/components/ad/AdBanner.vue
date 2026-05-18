@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { getApiUrl } from '~/utils/api'
 
 interface Ad {
   id: string
@@ -90,7 +91,7 @@ const getBadgeText = (type: string) => {
 
 const fetchAds = async () => {
   try {
-    const apiBase = '/api/v1/ad'
+    const apiBase = getApiUrl() + '/ad'
     const response = await fetch(`${apiBase}/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -169,7 +170,7 @@ const handleAdClick = async () => {
 
   // Report click
   try {
-    await fetch('/api/v1/ad/click', {
+    await fetch(getApiUrl() + '/ad/click', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -232,7 +233,7 @@ const reportImpression = async () => {
   if (!currentAd.value) return
 
   try {
-    await fetch('/api/v1/ad/impression', {
+    await fetch(getApiUrl() + '/ad/impression', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
