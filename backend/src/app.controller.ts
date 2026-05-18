@@ -251,6 +251,41 @@ export class AppController {
   }
 
   @Public()
+  @Post('seed/fix-users')
+  @ApiOperation({ summary: '[TEMP] Fix masked phone numbers and reset passwords', description: 'Fix all masked phone numbers to real format and reset passwords to Admin@2026' })
+  async fixUsers() {
+    const bcrypt = await import('bcryptjs');
+    const newPassword = 'Admin@2026';
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Map of masked phones to real phones
+    const phoneMap: Record<string, string> = {
+      '+821****8999': '+821000008999',
+      '+821****5432': '+821000005432',
+    };
+
+    const users = await this.userRepository.find();
+    const results: any = { fixed: [], skipped: [], errors: [] };
+
+    for (const user of users) {
+      try {
+        // Fix masked phone numbers
+        if (phoneMap[user.phone]) {
+          user.phone = phoneMap[user.phone];
+        }
+        // Reset password to known value
+        user.password = hashedPassword;
+        await this.userRepository.save(user);
+        results.fixed.push({ id: user.id, phone: user.phone, nickname: user.nickname });
+      } catch (e: any) {
+        results.errors.push({ id: user.id, error: e.message });
+      }
+    }
+
+    return { success: true, ...results };
+  }
+
+  @Public()
   @Post('seed/quick')
   @ApiOperation({ summary: 'Quick seed with known passwords', description: 'Create seed data with known passwords (password123 for all)' })
   async quickSeed() {

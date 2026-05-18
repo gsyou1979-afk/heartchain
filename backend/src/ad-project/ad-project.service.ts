@@ -37,24 +37,41 @@ export class AdProjectService {
   }
 
   async findForTargeting(geoCity?: string, interests?: string[]): Promise<ProjectAd[]> {
-    const qb = this.projectAdRepo
-      .createQueryBuilder('pa')
-      .where('pa.status = :status', { status: ProjectAdStatus.ACTIVE })
-      .andWhere('pa.quotaUsed < pa.quotaTotal');
+    try {
+      const qb = this.projectAdRepo
+        .createQueryBuilder('pa')
+        .where('pa.status = :status', { status: ProjectAdStatus.ACTIVE })
+        .andWhere('pa.quotaUsed < pa.quotaTotal');
 
-    if (geoCity) {
-      qb.andWhere("(pa.geoTarget->>'city' = :city OR pa.geoTarget->>'province' = :province)", { city: geoCity, province: geoCity });
+      // Only add geo filter if geoCity is provided and not empty
+      if (geoCity && geoCity.trim() !== '') {
+        qb.andWhere(
+          "(pa.geoTarget IS NULL OR pa.geoTarget = ''::jsonb OR (pa.geoTarget->>'city' = :city OR pa.geoTarget->>'province' = :province))",
+          { city: geoCity, province: geoCity }
+        );
+      }
+
+      if (interests && interests.length > 0) {
+        qb.andWhere(
+          "(pa.interestTarget IS NULL OR pa.interestTarget = '[]'::jsonb OR pa.interestTarget && ARRAY[:...interests]::varchar[])",
+          { interests }
+        );
+      }
+
+      return qb
+        .orderBy('pa.urgency', 'DESC')
+        .addOrderBy('pa.priorityScore', 'DESC')
+        .take(10)
+        .getMany();
+    } catch (e) {
+      // If JSON query fails (e.g. SQLite), fall back to simple query
+      console.warn('findForTargeting JSON query failed, falling back:', (e as Error).message);
+      return this.projectAdRepo.find({
+        where: { status: ProjectAdStatus.ACTIVE },
+        order: { priorityScore: 'DESC', createdAt: 'DESC' },
+        take: 5,
+      });
     }
-
-    if (interests && interests.length > 0) {
-      qb.andWhere('pa.interestTarget && ARRAY[:...interests]::varchar[]', { interests });
-    }
-
-    return qb
-      .orderBy('pa.urgency', 'DESC')
-      .addOrderBy('pa.priorityScore', 'DESC')
-      .take(10)
-      .getMany();
   }
 
   async generate(projectId: string, dto: GenerateProjectAdDto): Promise<ProjectAd> {

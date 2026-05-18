@@ -65,83 +65,91 @@ export class AdServingService {
 
     // 1. Check project ads (highest priority) if supported
     if (supportedTypes.includes('project')) {
-      const projectAds = await this.projectAdService.findForTargeting(
-        dto.geoInfo?.city,
-        dto.userInterests,
-      );
+      try {
+        const projectAds = await this.projectAdService.findForTargeting(
+          dto.geoInfo?.city,
+          dto.userInterests,
+        );
 
-      // Only use project ad if it has a valid image
-      const validProjectAd = projectAds.find(p => p.imageUrl && p.imageUrl.trim() !== '');
-      if (validProjectAd) {
-        ads.push({
-          adType: 'project',
-          projectAdId: validProjectAd.id,
-          title: validProjectAd.title,
-          description: validProjectAd.description,
-          imageUrl: validProjectAd.imageUrl,
-          landingUrl: validProjectAd.landingUrl,
-          badge: '求助',
-          tracking: {
-            impression: `/api/v1/ad/impression?projectAdId=${validProjectAd.id}`,
-            click: `/api/v1/ad/click?projectAdId=${validProjectAd.id}`,
-          },
-          source: 'project_auto',
-        });
+        // Only use project ad if it has a valid image
+        const validProjectAd = projectAds.find(p => p.imageUrl && p.imageUrl.trim() !== '');
+        if (validProjectAd) {
+          ads.push({
+            adType: 'project',
+            projectAdId: validProjectAd.id,
+            title: validProjectAd.title,
+            description: validProjectAd.description,
+            imageUrl: validProjectAd.imageUrl,
+            landingUrl: validProjectAd.landingUrl,
+            badge: '求助',
+            tracking: {
+              impression: `/api/v1/ad/impression?projectAdId=${validProjectAd.id}`,
+              click: `/api/v1/ad/click?projectAdId=${validProjectAd.id}`,
+            },
+            source: 'project_auto',
+          });
+        }
+      } catch (e) {
+        console.warn('Project ad lookup failed:', (e as Error).message);
       }
     }
 
     // 2. Check commercial ads (if not filled by project ads)
     if (supportedTypes.includes('commercial') && ads.length === 0) {
-      const activeCampaigns = await this.campaignService.findActive();
-      
-      // First try to find approved creatives
-      const approvedCreatives = await this.creativeService.findApproved();
-      const creative = approvedCreatives.find(c => 
-        activeCampaigns.some(camp => camp.id === (c.campaign?.id || c.campaignId))
-      );
+      try {
+        const activeCampaigns = await this.campaignService.findActive();
+        
+        // First try to find approved creatives
+        const approvedCreatives = await this.creativeService.findApproved();
+        const creative = approvedCreatives.find(c => 
+          activeCampaigns.some(camp => camp.id === (c.campaign?.id || c.campaignId))
+        );
 
-      if (creative) {
-        ads.push({
-          adType: 'commercial',
-          creativeId: creative.id,
-          title: creative.title,
-          description: creative.description,
-          imageUrl: creative.imageUrl,
-          videoUrl: creative.videoUrl,
-          landingUrl: creative.landingUrl,
-          badge: '广告',
-          tracking: {
-            impression: `/api/v1/ad/impression?creativeId=${creative.id}`,
-            click: `/api/v1/ad/click?creativeId=${creative.id}`,
-          },
-          source: 'direct',
-        });
-      } else {
-        // Fallback: check AdItem records for active campaigns
-        for (const campaign of activeCampaigns) {
-          const items = await this.itemRepo.find({
-            where: { campaignId: campaign.id },
-            order: { sortOrder: 'ASC' },
-            take: 1,
+        if (creative) {
+          ads.push({
+            adType: 'commercial',
+            creativeId: creative.id,
+            title: creative.title,
+            description: creative.description,
+            imageUrl: creative.imageUrl,
+            videoUrl: creative.videoUrl,
+            landingUrl: creative.landingUrl,
+            badge: '广告',
+            tracking: {
+              impression: `/api/v1/ad/impression?creativeId=${creative.id}`,
+              click: `/api/v1/ad/click?creativeId=${creative.id}`,
+            },
+            source: 'direct',
           });
-          if (items.length > 0 && items[0].imageUrl) {
-            ads.push({
-              adType: 'commercial',
-              creativeId: items[0].id,
-              title: campaign.name,
-              description: '',
-              imageUrl: items[0].imageUrl,
-              landingUrl: items[0].landingUrl || '/',
-              badge: '广告',
-              tracking: {
-                impression: `/api/v1/ad/impression?creativeId=${items[0].id}`,
-                click: `/api/v1/ad/click?creativeId=${items[0].id}`,
-              },
-              source: 'direct',
+        } else {
+          // Fallback: check AdItem records for active campaigns
+          for (const campaign of activeCampaigns) {
+            const items = await this.itemRepo.find({
+              where: { campaignId: campaign.id },
+              order: { sortOrder: 'ASC' },
+              take: 1,
             });
-            break;
+            if (items.length > 0 && items[0].imageUrl) {
+              ads.push({
+                adType: 'commercial',
+                creativeId: items[0].id,
+                title: campaign.name,
+                description: '',
+                imageUrl: items[0].imageUrl,
+                landingUrl: items[0].landingUrl || '/',
+                badge: '广告',
+                tracking: {
+                  impression: `/api/v1/ad/impression?creativeId=${items[0].id}`,
+                  click: `/api/v1/ad/click?creativeId=${items[0].id}`,
+                },
+                source: 'direct',
+              });
+              break;
+            }
           }
         }
+      } catch (e) {
+        console.warn('Commercial ad lookup failed:', (e as Error).message);
       }
     }
 
