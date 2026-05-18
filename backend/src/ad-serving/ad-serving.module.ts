@@ -10,6 +10,8 @@ import { AdProjectModule } from '../ad-project/ad-project.module';
 import { AdCreativeModule } from '../ad-creative/ad-creative.module';
 import { AdCampaignModule } from '../ad-campaign/ad-campaign.module';
 import { AdPlacementModule } from '../ad-placement/ad-placement.module';
+import { AdItemModule } from '../ad-item/ad-item.module';
+import { AdItem } from '../ad-item/entities/ad-item.entity';
 
 @Module({
   imports: [

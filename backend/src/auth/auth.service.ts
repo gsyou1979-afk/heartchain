@@ -171,7 +171,7 @@ export class AuthService {
   // DEV ONLY: quick login as first admin user
   async devLogin(): Promise<AuthResponseDto> {
     const admin = await this.userRepository.findOne({
-      where: { role: 'admin' },
+      where: { role: UserRole.ADMIN },
       order: { createdAt: 'ASC' },
     });
     if (!admin) {
