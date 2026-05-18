@@ -44,17 +44,13 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchCurrentUser() {
       if (!this.token) return;
-      
       try {
         const response = await fetch(`${getApiUrl()}/users/me`, {
           headers: { 'Authorization': `Bearer ${this.token}` }
         });
-        
         if (response.ok) {
           const userData = await response.json();
           this.user = userData;
-          
-          // 更新 localStorage
           if (import.meta.client) {
             localStorage.setItem('heartchain_auth', JSON.stringify({ 
               user: userData, 
@@ -63,7 +59,8 @@ export const useAuthStore = defineStore('auth', {
           }
         }
       } catch (e) {
-        console.error('获取用户信息失败', e);
+        // Network error (CORS etc) - keep existing user data
+        console.warn('fetchCurrentUser failed, keeping cached data');
       }
     },
 
