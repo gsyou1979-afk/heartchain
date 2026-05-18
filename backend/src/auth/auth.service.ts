@@ -168,6 +168,18 @@ export class AuthService {
     }
   }
 
+  // DEV ONLY: quick login as first admin user
+  async devLogin(): Promise<AuthResponseDto> {
+    const admin = await this.userRepository.findOne({
+      where: { role: 'admin' },
+      order: { createdAt: 'ASC' },
+    });
+    if (!admin) {
+      throw new UnauthorizedException('No admin user found');
+    }
+    return this.generateTokens(admin);
+  }
+
   private async generateTokens(user: User): Promise<AuthResponseDto> {
     const payload = { sub: user.id, phone: user.phone };
 

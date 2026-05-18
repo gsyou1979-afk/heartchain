@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpCode, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SendSmsDto, PhoneLoginDto, RegisterDto, RefreshTokenDto, PasswordLoginDto, AuthResponseDto, ResetPasswordDto } from './dto/auth.dto';
@@ -55,5 +55,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token' })
   async refresh(@Body() dto: RefreshTokenDto): Promise<AuthResponseDto> {
     return this.authService.refreshToken(dto.refreshToken);
+  }
+
+  // DEV ONLY: quick login for testing
+  @Public()
+  @Get('dev-login')
+  @ApiOperation({ summary: '[DEV] Quick login as admin' })
+  async devLogin() {
+    return this.authService.devLogin();
   }
 }
