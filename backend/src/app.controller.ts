@@ -258,25 +258,32 @@ export class AppController {
     const newPassword = 'Admin@2026';
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Map of masked phones to real phones
-    const phoneMap: Record<string, string> = {
-      '+821****8999': '+821000008999',
-      '+821****5432': '+821000005432',
-    };
+    // Map of masked phones to real phones - use regex pattern matching
+    const phonePatterns: Array<{ pattern: RegExp; replacement: string }> = [
+      { pattern: /^\+821\*+8999$/, replacement: '+821000008999' },
+      { pattern: /^\+821\*+5432$/, replacement: '+821000005432' },
+      { pattern: /^\+821\*+5678$/, replacement: '+821000005678' },
+      { pattern: /^\+821\*+3333$/, replacement: '+821000003333' },
+    ];
 
     const users = await this.userRepository.find();
     const results: any = { fixed: [], skipped: [], errors: [] };
 
     for (const user of users) {
       try {
-        // Fix masked phone numbers
-        if (phoneMap[user.phone]) {
-          user.phone = phoneMap[user.phone];
+        let phoneFixed = false;
+        // Try to match and fix masked phone numbers
+        for (const { pattern, replacement } of phonePatterns) {
+          if (pattern.test(user.phone)) {
+            user.phone = replacement;
+            phoneFixed = true;
+            break;
+          }
         }
         // Reset password to known value
         user.password = hashedPassword;
         await this.userRepository.save(user);
-        results.fixed.push({ id: user.id, phone: user.phone, nickname: user.nickname });
+        results.fixed.push({ id: user.id, phone: user.phone, nickname: user.nickname, phoneFixed });
       } catch (e: any) {
         results.errors.push({ id: user.id, error: e.message });
       }
