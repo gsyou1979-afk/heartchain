@@ -339,24 +339,55 @@ function handleDrop(e: DragEvent) {
   if (files) addFiles(Array.from(files));
 }
 
-function addFiles(files: File[]) {
+async function addFiles(files: File[]) {
   for (const file of files) {
     if (!file.type.startsWith('image/')) continue;
     if (file.size > 5 * 1024 * 1024) {
       alert(`文件 ${file.name} 超过5MB限制`);
       continue;
     }
-    // 创建本地预览
+
+    // Add item with uploading state
+    const itemIdx = form.items.length;
+    form.items.push({
+      imageUrl: '',
+      fileName: file.name,
+      landingUrl: '',
+      rotationSeconds: 5,
+      uploading: true,
+      error: '',
+    });
+
+    // Read file as base64 for upload
     const reader = new FileReader();
-    reader.onload = (e) => {
-      form.items.push({
-        imageUrl: e.target?.result as string,
-        fileName: file.name,
-        landingUrl: '',
-        rotationSeconds: 5,
-        uploading: false,
-        error: '',
-      });
+    reader.onload = async (e) => {
+      const base64Data = e.target?.result as string;
+      try {
+        // Upload to server to get a real URL
+        const uploadRes = await fetch(`${API}/items/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageData: base64Data, fileName: file.name }),
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success && uploadData.url) {
+          // Build full URL from relative path
+          const fullUrl = uploadData.url.startsWith('http')
+            ? uploadData.url
+            : `${getApiUrl().replace('/api/v1', '')}${uploadData.url}`;
+          form.items[itemIdx].imageUrl = fullUrl;
+        } else {
+          // Fallback: use base64 if upload fails (not ideal but won't block user)
+          form.items[itemIdx].imageUrl = base64Data;
+          form.items[itemIdx].error = '服务器上传失败，使用本地预览';
+        }
+      } catch (err) {
+        // Fallback to base64 preview
+        form.items[itemIdx].imageUrl = base64Data;
+        form.items[itemIdx].error = '上传失败，使用本地预览';
+      } finally {
+        form.items[itemIdx].uploading = false;
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -377,8 +408,14 @@ async function submitAd() {
   if (form.items.length === 0) { alert('请至少上传一张图片'); return; }
   if (form.placementCodes.length === 0) { alert('请选择至少一个投放位置'); return; }
 
+  // Check if any images are still uploading
+  const stillUploading = form.items.some(item => item.uploading);
+  if (stillUploading) { alert('图片正在上传中，请稍候...'); return; }
+
   submitting.value = true;
   try {
+    const firstImageUrl = form.items[0]?.imageUrl || '';
+
     // Step 1: Create campaign via POST /campaigns (status defaults to 'draft')
     const createRes = await fetch(`${API}/campaigns`, {
       method: 'POST',
@@ -392,6 +429,8 @@ async function submitAd() {
         endDate: form.endDate || undefined,
         budgetTotal: form.budgetTotal || undefined,
         placements: form.placementCodes,
+        imageUrl: firstImageUrl,
+        landingUrl: form.items[0]?.landingUrl || '/',
       }),
     });
 

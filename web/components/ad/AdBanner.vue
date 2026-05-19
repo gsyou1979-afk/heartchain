@@ -147,7 +147,7 @@ const fetchCommercialAds = async (apiBase: string) => {
       if (!itemsRes.ok) continue
       const items = await itemsRes.json()
       
-      const validItem = items.find((item: any) => item.imageUrl && item.imageUrl.trim() !== '')
+      const validItem = items.find((item: any) => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.startsWith('data:'))
       if (validItem) {
         ads.value = [{
           adType: 'commercial',

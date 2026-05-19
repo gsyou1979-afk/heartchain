@@ -98,49 +98,62 @@ export class AdServingService {
     if (supportedTypes.includes('commercial') && ads.length === 0) {
       try {
         const activeCampaigns = await this.campaignService.findActive();
-        
-        // First try to find approved creatives
-        const approvedCreatives = await this.creativeService.findApproved();
-        const creative = approvedCreatives.find(c => 
-          activeCampaigns.some(camp => camp.id === (c.campaign?.id || c.campaignId))
+
+        // Filter campaigns that match the requested placement
+        const matchingCampaigns = activeCampaigns.filter(c =>
+          c.placements && Array.isArray(c.placements) && c.placements.includes(dto.placementCode)
         );
 
-        if (creative) {
-          ads.push({
-            adType: 'commercial',
-            creativeId: creative.id,
-            title: creative.title,
-            description: creative.description,
-            imageUrl: creative.imageUrl,
-            videoUrl: creative.videoUrl,
-            landingUrl: creative.landingUrl,
-            badge: '广告',
-            tracking: {
-              impression: `/api/v1/ad/impression?creativeId=${creative.id}`,
-              click: `/api/v1/ad/click?creativeId=${creative.id}`,
-            },
-            source: 'direct',
-          });
-        } else {
-          // Fallback: check AdItem records for active campaigns
-          for (const campaign of activeCampaigns) {
+        // First try: find approved creatives linked to matching campaigns
+        if (matchingCampaigns.length > 0) {
+          const approvedCreatives = await this.creativeService.findApproved();
+          const matchingCampaignIds = matchingCampaigns.map(c => c.id);
+
+          const creative = approvedCreatives.find(c =>
+            matchingCampaignIds.includes(c.campaign?.id || (c as any).campaignId)
+          );
+
+          if (creative && creative.imageUrl) {
+            ads.push({
+              adType: 'commercial',
+              creativeId: creative.id,
+              title: creative.title,
+              description: creative.description,
+              imageUrl: creative.imageUrl,
+              videoUrl: creative.videoUrl,
+              landingUrl: creative.landingUrl,
+              badge: '广告',
+              tracking: {
+                impression: `/api/v1/ad/impression?creativeId=${creative.id}`,
+                click: `/api/v1/ad/click?creativeId=${creative.id}`,
+              },
+              source: 'direct',
+            });
+          }
+        }
+
+        // Fallback: check AdItem records for matching campaigns (if no creative found)
+        if (ads.length === 0) {
+          const campaignsToSearch = matchingCampaigns.length > 0 ? matchingCampaigns : activeCampaigns;
+          for (const campaign of campaignsToSearch) {
             const items = await this.itemRepo.find({
               where: { campaignId: campaign.id },
               order: { sortOrder: 'ASC' },
               take: 1,
             });
-            if (items.length > 0 && items[0].imageUrl) {
+            const validItem = items.find(item => item.imageUrl && !item.imageUrl.startsWith('data:'));
+            if (validItem) {
               ads.push({
                 adType: 'commercial',
-                creativeId: items[0].id,
+                creativeId: validItem.id,
                 title: campaign.name,
                 description: '',
-                imageUrl: items[0].imageUrl,
-                landingUrl: items[0].landingUrl || '/',
+                imageUrl: validItem.imageUrl,
+                landingUrl: validItem.landingUrl || '/',
                 badge: '广告',
                 tracking: {
-                  impression: `/api/v1/ad/impression?creativeId=${items[0].id}`,
-                  click: `/api/v1/ad/click?creativeId=${items[0].id}`,
+                  impression: `/api/v1/ad/impression?creativeId=${validItem.id}`,
+                  click: `/api/v1/ad/click?creativeId=${validItem.id}`,
                 },
                 source: 'direct',
               });

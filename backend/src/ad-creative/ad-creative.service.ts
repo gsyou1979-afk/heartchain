@@ -12,8 +12,8 @@ export class AdCreativeService {
   ) {}
 
   async findAll(campaignId?: string): Promise<AdCreative[]> {
-    const where = campaignId ? { campaignId } : {};
-    return this.creativeRepo.find({ where, order: { createdAt: 'DESC' } });
+    const where = campaignId ? { campaign: { id: campaignId } } : {};
+    return this.creativeRepo.find({ where, order: { createdAt: 'DESC' }, relations: campaignId ? ['campaign'] : [] });
   }
 
   async findOne(id: string): Promise<AdCreative> {
@@ -33,7 +33,14 @@ export class AdCreativeService {
   }
 
   async create(dto: CreateAdCreativeDto): Promise<AdCreative> {
-    const creative = this.creativeRepo.create(dto);
+    const { campaignId, ...rest } = dto;
+    const creative = this.creativeRepo.create(rest);
+
+    // Explicitly set the campaign relation so TypeORM saves campaignId FK
+    if (campaignId) {
+      creative.campaign = { id: campaignId } as any;
+    }
+
     return this.creativeRepo.save(creative);
   }
 
