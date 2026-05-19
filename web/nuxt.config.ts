@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     host: '0.0.0.0',
   },
   
-  // 禁用 SSR - 解决开发环境代理问题
+  // 禁用 SSR - SPA 模式
   ssr: false,
   
   // 启用 pages 路由（必须显式配置）
