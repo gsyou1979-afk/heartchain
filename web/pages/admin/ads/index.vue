@@ -107,6 +107,7 @@
                 </div>
               </div>
               <div class="flex gap-2">
+                <button v-if="c.status === 'pending' && auth.user?.role === 'admin'" @click="updateCampaignStatus(c.id, 'active')" class="px-3 py-1 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100">审核通过</button>
                 <button v-if="c.status === 'paused'" @click="updateCampaignStatus(c.id, 'active')" class="px-3 py-1 bg-green-50 text-green-600 rounded text-xs hover:bg-green-100">启用</button>
                 <button v-if="c.status === 'active'" @click="updateCampaignStatus(c.id, 'paused')" class="px-3 py-1 bg-yellow-50 text-yellow-600 rounded text-xs hover:bg-yellow-100">暂停</button>
                 <button @click="deleteCampaign(c.id)" class="px-3 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100">删除</button>
