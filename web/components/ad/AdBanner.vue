@@ -11,9 +11,15 @@
         <div 
           :key="currentIndex" 
           class="ad-banner__slide"
-          :style="{ backgroundImage: `url(${currentAd.imageUrl})` }"
           @click="handleAdClick"
         >
+          <img 
+            v-if="currentAd.imageUrl" 
+            :src="currentAd.imageUrl" 
+            class="ad-banner__image"
+            :alt="currentAd.title"
+          />
+          <div class="ad-banner__overlay"></div>
           <div class="ad-banner__content">
             <span class="ad-badge" :class="`ad-badge--${currentAd.adType}`">
               {{ getBadgeText(currentAd.adType) }}
@@ -295,18 +301,26 @@ onUnmounted(() => {
 .ad-banner__slide {
   position: absolute;
   inset: 0;
-  background-size: cover;
-  background-position: center;
   cursor: pointer;
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
 }
 
-.ad-banner__slide::before {
-  content: '';
+.ad-banner__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.ad-banner__overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
 }
 
 .ad-banner__content {

@@ -121,10 +121,10 @@
               <div class="flex-1 space-y-2">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-medium text-gray-500">图片 {{ idx + 1 }}</span>
+                  <span class="text-xs text-gray-400 truncate">{{ item.fileName || '已上传' }}</span>
                   <span v-if="item.uploading" class="text-xs text-blue-500">上传中...</span>
                   <span v-if="item.error" class="text-xs text-red-500">{{ item.error }}</span>
                 </div>
-                <input v-model="item.imageUrl" type="text" class="w-full border rounded px-2 py-1 text-xs" placeholder="图片URL（或等待上传完成）" />
                 <div class="grid grid-cols-2 gap-2">
                   <input v-model="item.landingUrl" type="text" class="border rounded px-2 py-1 text-xs" placeholder="跳转链接（可选）" />
                   <input v-model.number="item.rotationSeconds" type="number" min="1" max="60" class="border rounded px-2 py-1 text-xs" placeholder="轮播秒数" />
@@ -272,7 +272,14 @@ const form = reactive({
   endDate: '',
   budgetTotal: 0,
   placementCodes: [] as string[],
-  items: [] as any[],
+  items: [] as Array<{
+    imageUrl: string;
+    fileName: string;
+    landingUrl: string;
+    rotationSeconds: number;
+    uploading: boolean;
+    error: string;
+  }>,
 });
 
 onMounted(async () => {
@@ -343,6 +350,7 @@ function addFiles(files: File[]) {
     reader.onload = (e) => {
       form.items.push({
         imageUrl: e.target?.result as string,
+        fileName: file.name,
         landingUrl: '',
         rotationSeconds: 5,
         uploading: false,
