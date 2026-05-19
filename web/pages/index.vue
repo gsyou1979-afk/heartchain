@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Hero Section -->
+    <!-- Hero Section - Ad Banner below -->
     <section class="relative bg-gradient-to-br from-red-500 via-pink-500 to-orange-400 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
         <div class="text-center max-w-3xl mx-auto">
