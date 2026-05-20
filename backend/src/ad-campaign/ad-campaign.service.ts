@@ -36,8 +36,11 @@ export class AdCampaignService {
   }
 
   async create(dto: CreateAdCampaignDto): Promise<AdCampaign> {
+    // Force status to 'pending' — all new campaigns must go through review
+    const { status, ...restDto } = dto;
     const campaign = this.campaignRepo.create({
-      ...dto,
+      ...restDto,
+      status: CampaignStatus.PENDING,
       startDate: new Date(dto.startDate),
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
     });

@@ -53,7 +53,7 @@ export class AdPlacementService implements OnModuleInit {
   }
 
   async remove(id: string): Promise<void> {
-    await this.placementRepo.update(id, { isActive: false });
+    await this.placementRepo.delete(id);
   }
 
   async initDefaults(): Promise<void> {

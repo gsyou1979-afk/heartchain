@@ -80,9 +80,6 @@
       <div v-if="activeTab === 'my-ads'" class="space-y-6">
         <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
           <h2 class="text-lg font-semibold">我的广告</h2>
-          <NuxtLink to="/admin/ads/publish" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">
-            + 发布广告
-          </NuxtLink>
         </div>
 
         <div v-if="myCampaigns.length > 0" class="space-y-3">
@@ -118,7 +115,7 @@
 
         <div v-else class="bg-white rounded-lg shadow p-8 text-center text-gray-400">
           <div class="text-4xl mb-2">📢</div>
-          <p>暂无广告，点击上方按钮发布第一条广告</p>
+          <p>暂无广告，请先创建广告计划</p>
         </div>
       </div>
 
@@ -407,7 +404,6 @@ const activeTab = ref('my-ads')
 const tabs = computed(() => {
   const base = [
     { key: 'my-ads', label: '我的广告' },
-    { key: 'publish', label: '发布广告', isLink: true },
     { key: 'placements', label: '广告位管理' },
     { key: 'statistics', label: '数据统计' },
   ]
@@ -427,7 +423,7 @@ const stats = ref({ totalAds: 0, totalImpressions: 0, totalClicks: 0 })
 // 广告位弹窗
 const showPlacementModal = ref(false)
 const editingPlacement = ref<any>(null)
-const placementForm = ref({ code: '', name: '', location: 'center-top', isActive: true })
+const placementForm = ref({ code: '', name: '', location: 'center-top', isActive: true, width: 728, height: 90 })
 
 // 广告计划弹窗
 const showCampaignModal = ref(false)
@@ -534,11 +530,10 @@ const pendingCampaigns = computed(() => {
 async function reviewCampaign(id: string, action: 'approve' | 'reject') {
   if (!confirm(action === 'approve' ? '确定通过该广告？' : '确定拒绝该广告？')) return
   try {
-    const status = action === 'approve' ? 'active' : 'paused'
-    const res = await fetch(`${API}/campaigns/${id}/status`, {
+    const res = await fetch(`${API}/campaigns/${id}/review`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ action }),
     })
     if (res.ok) {
       await loadCampaigns()
@@ -573,13 +568,17 @@ function openPlacementModal(p: any) {
       'center-top': 'center-top', 'center-middle': 'center-middle', 'center-bottom': 'center-bottom',
       'right-top': 'right-top', 'right-middle': 'right-middle', 'right-bottom': 'right-bottom',
     }
+    const loc = pos2loc[p.position] || 'center-top'
+    const size = sizeMap[loc] || { width: 728, height: 90 }
     placementForm.value = {
       code: p.code, name: p.name,
-      location: pos2loc[p.position] || 'homepage-top',
+      location: loc,
       isActive: p.isActive ?? false,
+      width: p.width || size.width,
+      height: p.height || size.height,
     }
   } else {
-    placementForm.value = { code: '', name: '', location: 'homepage-top', isActive: true }
+    placementForm.value = { code: '', name: '', location: 'center-top', isActive: true }
   }
   showPlacementModal.value = true
 }
@@ -641,7 +640,7 @@ async function savePlacement() {
 async function togglePlacementActive(p: any, event: Event) {
   const target = event.target as HTMLInputElement
   const newVal = target.checked
-  // 先更新本地UI
+  // Optimistic update
   p.isActive = newVal
   const res = await fetch(`${API}/placements/${p.id}`, {
     method: 'PUT',
@@ -649,8 +648,9 @@ async function togglePlacementActive(p: any, event: Event) {
     body: JSON.stringify({ isActive: newVal }),
   })
   if (!res.ok) {
-    p.isActive = !newVal // 回滚
-    alert('状态更新失败')
+    p.isActive = !newVal // Rollback
+    const err = await res.json().catch(() => ({}))
+    alert('状态更新失败: ' + (err.message || `HTTP ${res.status}`))
   }
 }
 
@@ -741,7 +741,8 @@ async function saveCampaign() {
     pricingModel: 'cpm',
     startDate: new Date().toISOString().split('T')[0],
     placements: campaignForm.value.placementCodes,
-    status: campaignForm.value.isActive ? 'active' : 'paused',
+    // New campaigns always go to 'pending' for review; editing preserves existing status
+    status: isEditing ? (editingCampaign.value?.status || 'pending') : 'pending',
   }
   const isEditing = !!editingCampaign.value
   const url = isEditing ? `${API}/campaigns/${editingCampaign.value.id}` : `${API}/campaigns`
@@ -861,13 +862,18 @@ function formatDate(date: string): string {
 
 async function updateCampaignStatus(id: string, status: string) {
   try {
-    const res = await fetch(`${API}/campaigns/${id}/status`, {
+    // Use /review endpoint for admin actions (PUT /status requires admin guard)
+    const action = status === 'active' ? 'approve' : 'reject'
+    const res = await fetch(`${API}/campaigns/${id}/review`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ action }),
     });
     if (res.ok) {
       await loadMyCampaigns();
+    } else {
+      const err = await res.json().catch(() => ({ message: '操作失败' }));
+      alert(err.message || '操作失败');
     }
   } catch (e) {
     console.error('更新状态失败', e);

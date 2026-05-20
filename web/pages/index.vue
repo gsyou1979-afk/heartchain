@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Hero Section - Ad Banner below -->
+    <!-- Hero Section -->
     <section class="relative bg-gradient-to-br from-red-500 via-pink-500 to-orange-400 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
         <div class="text-center max-w-3xl mx-auto">
@@ -22,8 +22,8 @@
       </div>
     </section>
 
-    <!-- Ad Banner A1 - 直接写死，避免 tree shaking -->
-    <section class="py-8 bg-gray-50">
+    <!-- Ad Banner A1 - 首页顶部横幅 -->
+    <section class="py-6 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ClientOnly>
           <AdBanner placement="A1" />
@@ -59,26 +59,58 @@
       </div>
     </section>
 
-    <!-- Recent Tasks -->
+    <!-- Main Content + Sidebar Layout with Ads -->
     <section class="py-16 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold">任务大厅</h2>
-          <NuxtLink to="/tasks" class="text-red-500 hover:text-red-600 text-sm font-medium">查看更多 →</NuxtLink>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div v-for="task in recentTasks" :key="task.id" class="card hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between mb-3">
-              <span class="badge">{{ task.taskType }}</span>
-              <span class="text-sm text-gray-400">{{ task.pointsReward }} HRT</span>
+        <div class="flex flex-col lg:flex-row gap-8">
+          <!-- Sidebar Ads (B1, B2) -->
+          <aside class="hidden lg:block w-[300px] flex-shrink-0 space-y-6">
+            <ClientOnly>
+              <AdSidebar placement="B1" />
+            </ClientOnly>
+            <ClientOnly>
+              <AdSidebar placement="B2" />
+            </ClientOnly>
+          </aside>
+
+          <!-- Main Content Area -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-8">
+              <h2 class="text-2xl font-bold">任务大厅</h2>
+              <NuxtLink to="/tasks" class="text-red-500 hover:text-red-600 text-sm font-medium">查看更多 →</NuxtLink>
             </div>
-            <h3 class="font-semibold mb-2">{{ task.title }}</h3>
-            <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ task.description }}</p>
-          </div>
-          <div v-if="recentTasks.length === 0" class="col-span-3 text-center py-8 text-gray-400">
-            暂无任务，去任务大厅发布吧！
+
+            <!-- Ad Banner C1 - 信息流上方 -->
+            <div class="mb-6">
+              <ClientOnly>
+                <AdBanner placement="C1" />
+              </ClientOnly>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div v-for="task in recentTasks" :key="task.id" class="card hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="badge">{{ task.taskType }}</span>
+                  <span class="text-sm text-gray-400">{{ task.pointsReward }} HRT</span>
+                </div>
+                <h3 class="font-semibold mb-2">{{ task.title }}</h3>
+                <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ task.description }}</p>
+              </div>
+              <div v-if="recentTasks.length === 0" class="col-span-2 text-center py-8 text-gray-400">
+                暂无任务，去任务大厅发布吧！
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Ad Banner D1 - 底部通栏 -->
+    <section class="py-6 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ClientOnly>
+          <AdBanner placement="D1" />
+        </ClientOnly>
       </div>
     </section>
   </div>
@@ -87,6 +119,7 @@
 <script setup lang="ts">
 import { getApiUrl } from '~/utils/api'
 import AdBanner from '~/components/ad/AdBanner.vue'
+import AdSidebar from '~/components/ad/AdSidebar.vue'
 
 useHead({ title: '哈特链 HeartChain - 以爱心链接世界' })
 

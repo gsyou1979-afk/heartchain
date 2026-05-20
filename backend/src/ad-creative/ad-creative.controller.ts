@@ -1,6 +1,10 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { AdCreativeService } from './ad-creative.service';
 import { CreateAdCreativeDto, UpdateAdCreativeDto } from './dto/create-creative.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 
 @Controller('ad/creatives')
 export class AdCreativeController {
@@ -32,11 +36,15 @@ export class AdCreativeController {
   }
 
   @Put(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async approve(@Param('id') id: string) {
     return this.service.approve(id);
   }
 
   @Put(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async reject(@Param('id') id: string) {
     return this.service.reject(id);
   }

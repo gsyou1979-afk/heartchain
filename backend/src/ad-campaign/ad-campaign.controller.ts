@@ -50,6 +50,8 @@ export class AdCampaignController {
   }
 
   @Put(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async updateStatus(@Param('id') id: string, @Body('status') status: CampaignStatus) {
     return this.service.updateStatus(id, status);
   }

@@ -225,8 +225,7 @@
       <div v-if="step === 6" class="bg-white rounded-xl shadow-sm p-8 text-center">
         <div class="text-5xl mb-4">✅</div>
         <h2 class="text-xl font-semibold mb-2">发布成功！</h2>
-        <p v-if="auth.user?.role === 'admin'" class="text-gray-500 mb-6">广告已直接激活，正在各广告位投放中。</p>
-        <p v-else class="text-gray-500 mb-6">广告已提交审核，审核通过后自动投放。</p>
+        <p class="text-gray-500 mb-6">广告已提交审核，审核通过后自动投放。</p>
         <div class="flex justify-center gap-3">
           <NuxtLink to="/admin/ads" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">返回广告管理</NuxtLink>
           <button @click="resetForm" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">继续发布</button>
@@ -461,7 +460,7 @@ async function submitAd() {
       // Step 2b: Create AdCreative from first item (so requestAd can find it)
       const firstItem = form.items[0];
       if (firstItem.imageUrl) {
-        const creativeRes = await fetch(`${API}/creatives`, {
+        await fetch(`${API}/creatives`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
           body: JSON.stringify({
@@ -473,26 +472,17 @@ async function submitAd() {
             creativeType: 'image',
           }),
         });
-        if (creativeRes.ok) {
-          const creative = await creativeRes.json();
-          // Auto-approve the creative
-          await fetch(`${API}/creatives/${creative.id}/approve`, {
-            method: 'PUT',
-            headers: { Authorization: `Bearer ${auth.token}` },
-          });
-        }
+        // Creative will be reviewed by admin — no auto-approve
       }
     }
 
-    // Step 3: Update status
-    // Admin users bypass review → directly 'active'; others go to 'pending' for review
+    // Step 3: All campaigns go to 'pending' for admin review
+    // (Previously admin bypassed review — now unified review flow)
     if (campaign.id) {
-      const isAdmin = auth.user?.role === 'admin';
-      const finalStatus = isAdmin ? 'active' : 'pending';
       await fetch(`${API}/campaigns/${campaign.id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ status: finalStatus }),
+        body: JSON.stringify({ status: 'pending' }),
       });
     }
 
