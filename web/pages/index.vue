@@ -63,13 +63,13 @@
     <section class="py-16 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-8">
-          <!-- Sidebar Ads (B1, B2) -->
+          <!-- Sidebar Ads (A2, A3) -->
           <aside class="hidden lg:block w-[300px] flex-shrink-0 space-y-6">
             <ClientOnly>
-              <AdSidebar placement="B1" />
+              <AdSidebar placement="A2" />
             </ClientOnly>
             <ClientOnly>
-              <AdSidebar placement="B2" />
+              <AdSidebar placement="A3" />
             </ClientOnly>
           </aside>
 

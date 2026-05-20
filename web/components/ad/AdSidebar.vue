@@ -1,8 +1,8 @@
 <template>
   <div class="ad-sidebar">
-    <!-- Sidebar Banner B1 (300x600) -->
-    <div v-if="placement === 'B1'" class="ad-sidebar__banner ad-sidebar__banner--large">
-      <div v-if="loading" class="ad-sidebar__skeleton skeleton-large"></div>
+    <!-- Sidebar Banner A2 (300x250) -->
+    <div v-if="placement === 'A2'" class="ad-sidebar__banner ad-sidebar__banner--medium">
+      <div v-if="loading" class="ad-sidebar__skeleton skeleton-medium"></div>
       <div v-else-if="currentAd" class="ad-sidebar__item" @click="handleClick">
         <img :src="currentAd.imageUrl" :alt="currentAd.title" />
         <div class="ad-sidebar__overlay">
@@ -17,8 +17,8 @@
       </div>
     </div>
 
-    <!-- Sidebar Rectangle B2 (300x250) -->
-    <div v-else-if="placement === 'B2'" class="ad-sidebar__banner ad-sidebar__banner--medium">
+    <!-- Sidebar Rectangle A3 (300x250) -->
+    <div v-else-if="placement === 'A3'" class="ad-sidebar__banner ad-sidebar__banner--medium">
       <div v-if="loading" class="ad-sidebar__skeleton skeleton-medium"></div>
       <div v-else-if="currentAd" class="ad-sidebar__item" @click="handleClick">
         <img :src="currentAd.imageUrl" :alt="currentAd.title" />
@@ -47,9 +47,9 @@ interface Ad {
 }
 
 const props = withDefaults(defineProps<{
-  placement?: 'B1' | 'B2'
+  placement?: 'A2' | 'A3'
 }>(), {
-  placement: 'B1'
+  placement: 'A2'
 })
 
 const loading = ref(true)
@@ -66,7 +66,8 @@ const getBadgeText = (type: string) => {
 
 const fetchAd = async () => {
   try {
-    const response = await fetch('/api/v1/ad/request', {
+    const apiBase = '/api/v1/ad'
+    const response = await fetch(`${apiBase}/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -80,10 +81,50 @@ const fetchAd = async () => {
       const data = await response.json()
       currentAd.value = data.ads?.[0] || null
     }
+
+    // Fallback: if no ad from request, load from active campaigns
+    if (!currentAd.value) {
+      await fetchCommercialAd(apiBase)
+    }
   } catch (error) {
     console.error('Failed to fetch sidebar ad:', error)
   } finally {
     loading.value = false
+  }
+}
+
+// Fallback: load commercial ad directly from active campaigns
+const fetchCommercialAd = async (apiBase: string) => {
+  try {
+    const campaignsRes = await fetch(`${apiBase}/campaigns/active`)
+    if (!campaignsRes.ok) return
+    const campaigns = await campaignsRes.json()
+
+    const matchingCampaigns = campaigns.filter((c: any) =>
+      c.placements && c.placements.includes(props.placement)
+    )
+
+    for (const campaign of matchingCampaigns) {
+      const itemsRes = await fetch(`${apiBase}/items/campaign/${campaign.id}`)
+      if (!itemsRes.ok) continue
+      const items = await itemsRes.json()
+      const validItem = items.find((item: any) =>
+        item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.startsWith('data:')
+      )
+      if (validItem) {
+        currentAd.value = {
+          id: validItem.id,
+          adType: 'commercial',
+          creativeId: validItem.id,
+          title: campaign.name,
+          imageUrl: validItem.imageUrl,
+          landingUrl: validItem.landingUrl || '/',
+        }
+        break
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch commercial sidebar ad:', e)
   }
 }
 
