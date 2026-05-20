@@ -52,7 +52,14 @@ export class AdPlacementService implements OnModuleInit {
     await this.placementRepo.delete(id);
   }
 
+  /**
+   * 迁移旧数据到新的广告位体系
+   * 根据 code 来识别和修复，不依赖 position 值
+   */
   private async migrateOldPlacements(): Promise<void> {
+    this.logger.log('Starting placement migration...');
+
+    // 1. B1 → A2 (左侧-上)
     const b1 = await this.placementRepo.findOne({ where: { code: 'B1' } });
     if (b1) {
       b1.code = 'A2';
@@ -61,10 +68,13 @@ export class AdPlacementService implements OnModuleInit {
       b1.width = 300;
       b1.height = 250;
       b1.description = '左侧边栏上方广告';
+      b1.supportedTypes = ['commercial', 'public_service'];
+      b1.floorCpm = 30.00;
       await this.placementRepo.save(b1);
-      this.logger.log('Migrated B1 → A2');
+      this.logger.log('Migrated B1 → A2 (left-top 300x250)');
     }
 
+    // 2. B2 → A3 (左侧-下)
     const b2 = await this.placementRepo.findOne({ where: { code: 'B2' } });
     if (b2) {
       b2.code = 'A3';
@@ -73,9 +83,69 @@ export class AdPlacementService implements OnModuleInit {
       b2.width = 300;
       b2.height = 250;
       b2.description = '左侧边栏下方广告';
+      b2.supportedTypes = ['commercial', 'public_service'];
+      b2.floorCpm = 20.00;
       await this.placementRepo.save(b2);
-      this.logger.log('Migrated B2 → A3');
+      this.logger.log('Migrated B2 → A3 (left-bottom 300x250)');
     }
+
+    // 3. 修复 A1: position 应该是 hero，尺寸 1200x400
+    const a1 = await this.placementRepo.findOne({ where: { code: 'A1' } });
+    if (a1) {
+      let changed = false;
+      if (a1.position !== 'hero') { a1.position = 'hero'; changed = true; }
+      if (a1.width !== 1200) { a1.width = 1200; changed = true; }
+      if (a1.height !== 400) { a1.height = 400; changed = true; }
+      if (changed) {
+        await this.placementRepo.save(a1);
+        this.logger.log('Fixed A1: position=hero, 1200x400');
+      }
+    }
+
+    // 4. 修复 D1: position 应该是 footer，尺寸 1200x150
+    const d1 = await this.placementRepo.findOne({ where: { code: 'D1' } });
+    if (d1) {
+      let changed = false;
+      if (d1.position !== 'footer') { d1.position = 'footer'; changed = true; }
+      if (d1.width !== 1200) { d1.width = 1200; changed = true; }
+      if (d1.height !== 150) { d1.height = 150; changed = true; }
+      if (changed) {
+        await this.placementRepo.save(d1);
+        this.logger.log('Fixed D1: position=footer, 1200x150');
+      }
+    }
+
+    // 5. 修复 A2 (如果已存在但 position 不对): position 应该是 left-top
+    const a2 = await this.placementRepo.findOne({ where: { code: 'A2' } });
+    if (a2 && a2.position !== 'left-top') {
+      a2.position = 'left-top';
+      a2.width = 300;
+      a2.height = 250;
+      await this.placementRepo.save(a2);
+      this.logger.log('Fixed A2: position=left-top, 300x250');
+    }
+
+    // 6. 修复 A3 (如果已存在但 position 不对): position 应该是 left-bottom
+    const a3 = await this.placementRepo.findOne({ where: { code: 'A3' } });
+    if (a3 && a3.position !== 'left-bottom') {
+      a3.position = 'left-bottom';
+      a3.width = 300;
+      a3.height = 250;
+      await this.placementRepo.save(a3);
+      this.logger.log('Fixed A3: position=left-bottom, 300x250');
+    }
+
+    // 7. 修复 C1/C2: position 应该是 feed
+    for (const code of ['C1', 'C2']) {
+      const c = await this.placementRepo.findOne({ where: { code } });
+      if (c && c.position !== 'feed') {
+        c.position = 'feed';
+        await this.placementRepo.save(c);
+        this.logger.log(`Fixed ${code}: position=feed`);
+      }
+    }
+
+    this.logger.log('Placement migration completed');
   }
 
   async initDefaults(): Promise<void> {
@@ -94,9 +164,11 @@ export class AdPlacementService implements OnModuleInit {
       const existing = await this.placementRepo.findOne({ where: { code: def.code } });
       if (!existing) {
         await this.placementRepo.save(this.placementRepo.create(def));
+        this.logger.log(`Created placement: ${def.code}`);
       } else if (!existing.isActive) {
         existing.isActive = true;
         await this.placementRepo.save(existing);
+        this.logger.log(`Reactivated placement: ${def.code}`);
       }
     }
   }
