@@ -73,10 +73,12 @@ export class AdItemController {
         : `ad_${timestamp}`;
       const filename = `${safeName}_${random}.${ext}`;
 
-      // Save to uploads directory
+      // Save to uploads directory (must match static serving path in main.ts)
       const fs = await import('fs');
       const path = await import('path');
-      const uploadDir = path.join(process.cwd(), '..', 'uploads', 'ads');
+      // Use process.cwd()/uploads/ads so it's inside the static serve directory
+      // (main.ts serves from __dirname/../uploads which resolves to <project>/uploads)
+      const uploadDir = path.join(process.cwd(), 'uploads', 'ads');
 
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
