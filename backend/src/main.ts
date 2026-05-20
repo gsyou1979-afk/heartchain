@@ -2,10 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { json, urlencoded } from 'express';
+import { json, urlencoded, static as expressStatic } from 'express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { join } from 'path';
+import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
@@ -27,7 +28,7 @@ async function bootstrap() {
 
   // CORS - 生产环境限制来源，开发环境允许所有
   const allowedOrigins = nodeEnv === 'production'
-    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app').split(',')
+    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app,https://heartchain.vercel.app,https://heartchain-web.onrender.com').split(',')
     : '*';
 
   app.enableCors({
@@ -40,7 +41,6 @@ async function bootstrap() {
   // Serve static files from uploads directory
   const uploadsDir = join(__dirname, '..', 'uploads');
   app.use('/uploads', (req: any, res: any, next: any) => {
-    const fs = require('fs');
     const filePath = join(uploadsDir, req.path);
     if (fs.existsSync(filePath)) {
       res.sendFile(filePath);
@@ -48,6 +48,31 @@ async function bootstrap() {
       res.status(404).json({ message: 'File not found' });
     }
   });
+
+  // Serve frontend static files (SPA) from web/dist directory
+  const webDistDir = join(__dirname, '..', '..', 'web', 'dist');
+  const webOutputDir = join(__dirname, '..', '..', 'web', '.output', 'public');
+  const frontendDir = fs.existsSync(webDistDir) ? webDistDir : webOutputDir;
+
+  if (fs.existsSync(frontendDir)) {
+    console.log('[DEBUG] Serving frontend from:', frontendDir);
+    app.use(expressStatic(frontendDir, { index: false }));
+
+    // SPA fallback: all non-API routes serve index.html
+    app.use((req: any, res: any, next: any) => {
+      if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+        return next();
+      }
+      const indexPath = join(frontendDir, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        next();
+      }
+    });
+  } else {
+    console.log('[DEBUG] Frontend dist not found, API-only mode');
+  }
 
   // Global validation pipe
   app.useGlobalPipes(
