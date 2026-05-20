@@ -3,10 +3,14 @@ import { AdItemService } from './ad-item.service';
 import { CreateAdItemDto, UpdateAdItemDto } from './dto/ad-item.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { StorageService } from '../common/storage.service';
 
 @Controller('ad/items')
 export class AdItemController {
-  constructor(private readonly service: AdItemService) {}
+  constructor(
+    private readonly service: AdItemService,
+    private readonly storage: StorageService,
+  ) {}
 
   /** 按广告计划ID获取轮播图片列表 */
   @Get('campaign/:campaignId')
@@ -44,7 +48,7 @@ export class AdItemController {
     return this.service.bulkCreate(campaignId, items);
   }
 
-  /** 上传图片：接收base64数据，保存为文件，返回URL */
+  /** 上传图片：接收base64数据，上传到Cloudinary，返回CDN URL */
   @Public()
   @Post('upload')
   async uploadImage(@Body() body: { imageData: string; fileName?: string }) {
@@ -62,8 +66,7 @@ export class AdItemController {
       }
 
       const ext = matches[1] || 'png';
-      const base64Data = matches[2];
-      const buffer = Buffer.from(base64Data, 'base64');
+      const base64Data = imageData; // Full base64 string
 
       // Generate filename
       const timestamp = Date.now();
@@ -71,30 +74,40 @@ export class AdItemController {
       const safeName = fileName
         ? fileName.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 50)
         : `ad_${timestamp}`;
-      const filename = `${safeName}_${random}.${ext}`;
+      const filename = `${safeName}_${random}`;
 
-      // Save to uploads directory (must match static serving path in main.ts)
+      // Try Cloudinary first, fall back to local storage
+      const result = await this.storage.uploadBase64(base64Data, 'heartchain/ads', filename);
+
+      if (result) {
+        return {
+          success: true,
+          url: result.url,
+          publicId: result.publicId,
+          size: Buffer.from(matches[2], 'base64').length,
+          storage: 'cloudinary',
+        };
+      }
+
+      // Fallback: save locally (for development without Cloudinary)
       const fs = await import('fs');
       const path = await import('path');
-      // Use process.cwd()/uploads/ads so it's inside the static serve directory
-      // (main.ts serves from __dirname/../uploads which resolves to <project>/uploads)
       const uploadDir = path.join(process.cwd(), 'uploads', 'ads');
-
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
-
-      const filePath = path.join(uploadDir, filename);
+      const buffer = Buffer.from(matches[2], 'base64');
+      const localFilename = `${filename}.${ext}`;
+      const filePath = path.join(uploadDir, localFilename);
       fs.writeFileSync(filePath, buffer);
-
-      // Return public URL
-      const publicUrl = `/uploads/ads/${filename}`;
+      const publicUrl = `/uploads/ads/${localFilename}`;
 
       return {
         success: true,
         url: publicUrl,
-        filename,
+        filename: localFilename,
         size: buffer.length,
+        storage: 'local',
       };
     } catch (error: any) {
       return { success: false, message: `Upload failed: ${error.message}` };
