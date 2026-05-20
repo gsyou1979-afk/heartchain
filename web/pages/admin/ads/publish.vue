@@ -358,9 +358,9 @@ function getAdTypeLabel(type: string) {
 
 function getPositionText(p: any): string {
   const map: Record<string, string> = {
-    hero: '首页顶部', feed: '首页中部', footer: '首页底部',
-    sidebar: '右侧边栏', splash: '开屏',
-    'left-top': '左侧-上', 'left-middle': '左侧-中', 'left-bottom': '左侧-下',
+    hero: '首页顶部(A1)', feed: '首页中部(C1/C2)', footer: '首页底部(D1)',
+    sidebar: '左侧边栏', splash: '开屏',
+    'left-top': '左侧-上(A2)', 'left-bottom': '左侧-下(A3)',
     'center-top': '中间-上', 'center-middle': '中间-中', 'center-bottom': '中间-下',
     'right-top': '右侧-上', 'right-middle': '右侧-中', 'right-bottom': '右侧-下',
   };

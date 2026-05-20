@@ -15,12 +15,8 @@ export class AdPlacementService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    const count = await this.placementRepo.count();
-    if (count === 0) {
-      this.logger.log('No ad placements found, initializing defaults...');
-      await this.initDefaults();
-      this.logger.log('Default ad placements initialized');
-    }
+    await this.migrateOldPlacements();
+    await this.initDefaults();
   }
 
   async findAll(activeOnly = true): Promise<AdPlacement[]> {
@@ -56,14 +52,40 @@ export class AdPlacementService implements OnModuleInit {
     await this.placementRepo.delete(id);
   }
 
+  private async migrateOldPlacements(): Promise<void> {
+    const b1 = await this.placementRepo.findOne({ where: { code: 'B1' } });
+    if (b1) {
+      b1.code = 'A2';
+      b1.name = '左侧-上';
+      b1.position = 'left-top';
+      b1.width = 300;
+      b1.height = 250;
+      b1.description = '左侧边栏上方广告';
+      await this.placementRepo.save(b1);
+      this.logger.log('Migrated B1 → A2');
+    }
+
+    const b2 = await this.placementRepo.findOne({ where: { code: 'B2' } });
+    if (b2) {
+      b2.code = 'A3';
+      b2.name = '左侧-下';
+      b2.position = 'left-bottom';
+      b2.width = 300;
+      b2.height = 250;
+      b2.description = '左侧边栏下方广告';
+      await this.placementRepo.save(b2);
+      this.logger.log('Migrated B2 → A3');
+    }
+  }
+
   async initDefaults(): Promise<void> {
     const defaults = [
       { code: 'A1', name: '首页Hero横幅', description: '首页首屏导航下方轮播横幅', platform: 'web', page: 'home', position: 'hero', width: 1200, height: 400, supportedTypes: ['commercial', 'public_service', 'project'], floorCpm: 80.00, isActive: true },
-      { code: 'B1', name: '左侧竖幅', description: '左侧栏顶部竖幅广告', platform: 'web', page: 'home', position: 'sidebar', width: 300, height: 600, supportedTypes: ['commercial', 'public_service'], floorCpm: 30.00, isActive: true },
-      { code: 'B2', name: '左侧矩形', description: '左侧栏中部矩形广告', platform: 'web', page: 'home', position: 'sidebar', width: 300, height: 250, supportedTypes: ['commercial', 'public_service'], floorCpm: 20.00, isActive: true },
+      { code: 'D1', name: '底部通栏', description: '页面底部Footer上方横幅', platform: 'web', page: 'home', position: 'footer', width: 1200, height: 150, supportedTypes: ['commercial'], floorCpm: 15.00, isActive: true },
+      { code: 'A2', name: '左侧-上', description: '左侧边栏上方广告', platform: 'web', page: 'home', position: 'left-top', width: 300, height: 250, supportedTypes: ['commercial', 'public_service'], floorCpm: 30.00, isActive: true },
+      { code: 'A3', name: '左侧-下', description: '左侧边栏下方广告', platform: 'web', page: 'home', position: 'left-bottom', width: 300, height: 250, supportedTypes: ['commercial', 'public_service'], floorCpm: 20.00, isActive: true },
       { code: 'C1', name: '信息流原生广告1', description: '内容流中穿插原生广告', platform: 'web', page: 'home', position: 'feed', width: 580, height: 300, supportedTypes: ['commercial', 'project'], floorCpm: 0.50, isActive: true },
       { code: 'C2', name: '信息流原生广告2', description: '内容流中穿插原生广告', platform: 'web', page: 'home', position: 'feed', width: 580, height: 300, supportedTypes: ['commercial', 'project'], floorCpm: 0.50, isActive: true },
-      { code: 'D1', name: '底部通栏', description: '页面底部Footer上方横幅', platform: 'web', page: 'home', position: 'footer', width: 1200, height: 150, supportedTypes: ['commercial'], floorCpm: 15.00, isActive: true },
       { code: 'MA1', name: '开屏广告', description: 'App启动时全屏广告', platform: 'android', page: 'splash', position: 'splash', width: 1080, height: 1920, supportedTypes: ['commercial'], floorCpm: 200.00, isActive: true },
       { code: 'MB1', name: '首页信息流', description: 'App首页活动列表中广告', platform: 'android', page: 'home', position: 'feed', width: 1080, height: 540, supportedTypes: ['commercial', 'public_service', 'project'], floorCpm: 0.80, isActive: true },
     ];

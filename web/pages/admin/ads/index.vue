@@ -299,15 +299,14 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">位置</label>
             <select v-model="placementForm.location" class="w-full border rounded-lg px-3 py-2">
-              <optgroup label="左侧广告位">
-                <option value="left-top">左侧-上 (300×250)</option>
-                <option value="left-middle">左侧-中 (300×250)</option>
-                <option value="left-bottom">左侧-下 (300×250)</option>
-              </optgroup>
               <optgroup label="中间广告位">
-                <option value="center-top">中间-上 (728×90)</option>
-                <option value="center-middle">中间-中 (600×400)</option>
-                <option value="center-bottom">中间-下 (728×90)</option>
+                <option value="center-top">中间-上 / Hero横幅 (1200×400)</option>
+                <option value="center-middle">中间-中 / 信息流 (600×400)</option>
+                <option value="center-bottom">中间-下 / 底部通栏 (1200×150)</option>
+              </optgroup>
+              <optgroup label="左侧广告位">
+                <option value="left-top">左侧-上 / A2 (300×250)</option>
+                <option value="left-bottom">左侧-下 / A3 (300×250)</option>
               </optgroup>
               <optgroup label="右侧广告位">
                 <option value="right-top">右侧-上 (300×250)</option>
@@ -497,22 +496,22 @@ const campaignForm = ref({
 
 // ========== 尺寸映射 ==========
 const sizeMap: Record<string, { width: number; height: number }> = {
-  // 左侧广告位 3个（上/中/下）
+  // 左侧广告位
   'left-top':    { width: 300, height: 250 },
-  'left-middle': { width: 300, height: 250 },
   'left-bottom': { width: 300, height: 250 },
-  // 中间广告位 3个（上/中/下）
-  'center-top':    { width: 728, height: 90 },
-  'center-middle': { width: 600, height: 400 },
-  'center-bottom': { width: 728, height: 90 },
-  // 右侧广告位 3个（上/中/下）
+  // 中间广告位
+  'center-top':    { width: 1200, height: 400 },  // A1 Hero
+  'center-middle': { width: 600, height: 400 },   // 信息流
+  'center-bottom': { width: 1200, height: 150 },  // D1 底部通栏
+  // 右侧广告位
   'right-top':    { width: 300, height: 250 },
   'right-middle': { width: 300, height: 250 },
   'right-bottom': { width: 300, height: 250 },
   // 兼容旧配置
-  'homepage-top': { width: 728, height: 90 },
+  'homepage-top': { width: 1200, height: 400 },
   'homepage-middle': { width: 600, height: 400 },
-  'homepage-bottom': { width: 728, height: 90 },
+  'homepage-bottom': { width: 1200, height: 150 },
+  'sidebar': { width: 300, height: 250 },
   'sidebar-top': { width: 300, height: 250 },
   'sidebar-bottom': { width: 300, height: 250 },
   'feed': { width: 600, height: 400 },
@@ -728,10 +727,12 @@ function openPlacementModal(p: any) {
   if (p) {
     const pos2loc: Record<string, string> = {
       hero: 'center-top', feed: 'center-middle', footer: 'center-bottom',
-      sidebar: 'right-top', splash: 'splash',
-      // 9个新广告位
-      'left-top': 'left-top', 'left-middle': 'left-middle', 'left-bottom': 'left-bottom',
+      sidebar: 'left-top', splash: 'splash',
+      // 左侧广告位
+      'left-top': 'left-top', 'left-bottom': 'left-bottom',
+      // 中间广告位
       'center-top': 'center-top', 'center-middle': 'center-middle', 'center-bottom': 'center-bottom',
+      // 右侧广告位
       'right-top': 'right-top', 'right-middle': 'right-middle', 'right-bottom': 'right-bottom',
     }
     const loc = pos2loc[p.position] || 'center-top'
@@ -755,12 +756,11 @@ async function savePlacement() {
   const mapping: Record<string, any> = {
     // 左侧广告位
     'left-top':    { platform: 'web', page: 'home', position: 'left-top' },
-    'left-middle': { platform: 'web', page: 'home', position: 'left-middle' },
     'left-bottom': { platform: 'web', page: 'home', position: 'left-bottom' },
     // 中间广告位
-    'center-top':    { platform: 'web', page: 'home', position: 'center-top' },
-    'center-middle': { platform: 'web', page: 'home', position: 'center-middle' },
-    'center-bottom': { platform: 'web', page: 'home', position: 'center-bottom' },
+    'center-top':    { platform: 'web', page: 'home', position: 'hero' },
+    'center-middle': { platform: 'web', page: 'home', position: 'feed' },
+    'center-bottom': { platform: 'web', page: 'home', position: 'footer' },
     // 右侧广告位
     'right-top':    { platform: 'web', page: 'home', position: 'right-top' },
     'right-middle': { platform: 'web', page: 'home', position: 'right-middle' },
@@ -769,6 +769,7 @@ async function savePlacement() {
     'homepage-top': { platform: 'web', page: 'home', position: 'hero' },
     'homepage-middle': { platform: 'web', page: 'home', position: 'feed' },
     'homepage-bottom': { platform: 'web', page: 'home', position: 'footer' },
+    'sidebar': { platform: 'web', page: 'home', position: 'sidebar' },
     'sidebar-top': { platform: 'web', page: 'home', position: 'sidebar' },
     'sidebar-bottom': { platform: 'web', page: 'home', position: 'sidebar' },
     'feed': { platform: 'web', page: 'home', position: 'feed' },
@@ -970,16 +971,15 @@ const sortedPlacements = computed(() =>
 function getPositionText(p: any): string {
   const map: Record<string, string> = {
     // 原始位置
-    hero: '首页顶部(Hero)', feed: '首页中部(Feed)', footer: '首页底部(Footer)',
-    sidebar: '右侧边栏(Sidebar)', splash: '开屏(Splash)',
+    hero: '首页顶部(A1)', feed: '首页中部(C1/C2)', footer: '首页底部(D1)',
+    sidebar: '左侧边栏', splash: '开屏',
     // 左侧广告位
-    'left-top': '左侧-上 (B1)',
-    'left-middle': '左侧-中',
-    'left-bottom': '左侧-下',
+    'left-top': '左侧-上(A2)',
+    'left-bottom': '左侧-下(A3)',
     // 中间广告位
-    'center-top': '中间-上 (A1)',
-    'center-middle': '中间-中 (C1)',
-    'center-bottom': '中间-下 (D1)',
+    'center-top': '中间-上',
+    'center-middle': '中间-中',
+    'center-bottom': '中间-下',
     // 右侧广告位
     'right-top': '右侧-上',
     'right-middle': '右侧-中',
