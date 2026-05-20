@@ -89,7 +89,7 @@ import { MediaAsset } from './media-asset/entities/media-asset.entity';
                 },
               },
               entities: allEntities,
-              synchronize: isDev,
+              synchronize: true,
               logging: ['error', 'warn'],
             } as any;
           } catch (e) {
