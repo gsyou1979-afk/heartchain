@@ -135,36 +135,43 @@ const fetchCommercialAds = async (apiBase: string) => {
     const campaignsRes = await fetch(`${apiBase}/campaigns/active`)
     if (!campaignsRes.ok) return
     const campaigns = await campaignsRes.json()
-    
+
     // Find campaigns matching this placement
-    const matchingCampaigns = campaigns.filter((c: any) => 
+    const matchingCampaigns = campaigns.filter((c: any) =>
       c.placements && c.placements.includes(props.placement)
     )
-    
+
+    // Collect ALL valid items from ALL matching campaigns (for carousel)
+    const allAds: Ad[] = []
     for (const campaign of matchingCampaigns) {
       // Get ad items for this campaign
       const itemsRes = await fetch(`${apiBase}/items/campaign/${campaign.id}`)
       if (!itemsRes.ok) continue
       const items = await itemsRes.json()
-      
-      const validItem = items.find((item: any) => item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.startsWith('data:'))
-      if (validItem) {
-        ads.value = [{
-          adType: 'commercial',
-          creativeId: validItem.id,
-          title: campaign.name,
-          description: '',
-          imageUrl: validItem.imageUrl,
-          landingUrl: validItem.landingUrl || '/',
-          badge: '广告',
-          tracking: {
-            impression: `/api/v1/ad/impression?creativeId=${validItem.id}`,
-            click: `/api/v1/ad/click?creativeId=${validItem.id}`,
-          },
-          source: 'direct',
-        }]
-        break
+
+      // Add ALL valid items from this campaign
+      for (const item of items) {
+        if (item.imageUrl && item.imageUrl.trim() !== '' && !item.imageUrl.startsWith('data:')) {
+          allAds.push({
+            adType: 'commercial',
+            creativeId: item.id,
+            title: campaign.name,
+            description: '',
+            imageUrl: item.imageUrl,
+            landingUrl: item.landingUrl || '/',
+            badge: '广告',
+            tracking: {
+              impression: `/api/v1/ad/impression?creativeId=${item.id}`,
+              click: `/api/v1/ad/click?creativeId=${item.id}`,
+            },
+            source: 'direct',
+          })
+        }
       }
+    }
+
+    if (allAds.length > 0) {
+      ads.value = allAds
     }
   } catch (e) {
     console.error('Failed to fetch commercial ads:', e)

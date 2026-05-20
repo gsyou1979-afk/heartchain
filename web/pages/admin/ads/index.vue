@@ -351,20 +351,21 @@
 
           <!-- 广告位置 -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">投放广告位</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">投放广告位（单选）</label>
             <div class="grid grid-cols-2 gap-2">
-              <label
+              <div
                 v-for="p in placements"
                 :key="p.code"
+                @click="campaignForm.placementCode = p.code"
                 class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50"
-                :class="campaignForm.placementCodes.includes(p.code) ? 'border-red-500 bg-red-50' : 'border-gray-200'"
+                :class="campaignForm.placementCode === p.code ? 'border-red-500 bg-red-50' : 'border-gray-200'"
               >
-                <input type="checkbox" :value="p.code" v-model="campaignForm.placementCodes" class="rounded" />
+                <input type="radio" :checked="campaignForm.placementCode === p.code" readonly class="rounded" />
                 <div class="min-w-0">
                   <div class="text-xs font-mono font-semibold text-red-600">{{ p.code }}</div>
                   <div class="text-xs text-gray-500 truncate">{{ p.name }}</div>
                 </div>
-              </label>
+              </div>
             </div>
           </div>
 
@@ -434,9 +435,9 @@ const editingCampaign = ref<any>(null)
 const campaignForm = ref({
   name: '',
   items: [] as any[],
-  placementCodes: [] as string[],
+  placementCode: '',  // 单选
   status: 'active',
-  isActive: true, // UI only, converted to status on save
+  isActive: true,
 })
 
 // ========== 尺寸映射 ==========
@@ -677,12 +678,12 @@ function openCampaignModal(c: any) {
     campaignForm.value = {
       name: c.name,
       items: campaignItems.value[c.id] ? [...campaignItems.value[c.id]] : [],
-      placementCodes: c.placements || [],
+      placementCode: c.placements?.[0] || '',
       status: c.status || 'active',
       isActive: c.status === 'active',
     }
   } else {
-    campaignForm.value = { name: '', items: [], placementCodes: [], status: 'active', isActive: true }
+    campaignForm.value = { name: '', items: [], placementCode: '', status: 'active', isActive: true }
   }
   showCampaignModal.value = true
 }
@@ -743,7 +744,7 @@ async function saveCampaign() {
     adType: 'commercial',
     pricingModel: 'cpm',
     startDate: new Date().toISOString().split('T')[0],
-    placements: campaignForm.value.placementCodes,
+    placements: campaignForm.value.placementCode ? [campaignForm.value.placementCode] : [],
     // New campaigns always go to 'pending' for review; editing preserves existing status
     status: isEditing ? (editingCampaign.value?.status || 'pending') : 'pending',
   }

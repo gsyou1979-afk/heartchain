@@ -104,61 +104,69 @@ export class AdServingService {
           c.placements && Array.isArray(c.placements) && c.placements.includes(dto.placementCode)
         );
 
-        // First try: find approved creatives linked to matching campaigns
+        // First try: find ALL approved creatives linked to matching campaigns (for carousel)
         if (matchingCampaigns.length > 0) {
           const approvedCreatives = await this.creativeService.findApproved();
           const matchingCampaignIds = matchingCampaigns.map(c => c.id);
 
-          const creative = approvedCreatives.find(c =>
+          // Collect ALL matching approved creatives (not just the first)
+          const matchingApproved = approvedCreatives.filter(c =>
             matchingCampaignIds.includes(c.campaign?.id || (c as any).campaignId)
           );
 
-          if (creative && creative.imageUrl) {
-            ads.push({
-              adType: 'commercial',
-              creativeId: creative.id,
-              title: creative.title,
-              description: creative.description,
-              imageUrl: creative.imageUrl,
-              videoUrl: creative.videoUrl,
-              landingUrl: creative.landingUrl,
-              badge: '广告',
-              tracking: {
-                impression: `/api/v1/ad/impression?creativeId=${creative.id}`,
-                click: `/api/v1/ad/click?creativeId=${creative.id}`,
-              },
-              source: 'direct',
-            });
+          for (const creative of matchingApproved) {
+            if (creative.imageUrl) {
+              ads.push({
+                adType: 'commercial',
+                creativeId: creative.id,
+                title: creative.title,
+                description: creative.description,
+                imageUrl: creative.imageUrl,
+                videoUrl: creative.videoUrl,
+                landingUrl: creative.landingUrl,
+                badge: '广告',
+                tracking: {
+                  impression: `/api/v1/ad/impression?creativeId=${creative.id}`,
+                  click: `/api/v1/ad/click?creativeId=${creative.id}`,
+                },
+                source: 'direct',
+              });
+            }
           }
         }
 
         // Fallback: check AdItem records for matching campaigns (if no creative found)
+        // Return ALL matching items from ALL matching campaigns for carousel/rotation
         if (ads.length === 0) {
           const campaignsToSearch = matchingCampaigns.length > 0 ? matchingCampaigns : activeCampaigns;
+          const allItems: Array<{ item: any; campaign: any }> = [];
           for (const campaign of campaignsToSearch) {
             const items = await this.itemRepo.find({
               where: { campaignId: campaign.id },
               order: { sortOrder: 'ASC' },
-              take: 1,
             });
-            const validItem = items.find(item => item.imageUrl && !item.imageUrl.startsWith('data:'));
-            if (validItem) {
-              ads.push({
-                adType: 'commercial',
-                creativeId: validItem.id,
-                title: campaign.name,
-                description: '',
-                imageUrl: validItem.imageUrl,
-                landingUrl: validItem.landingUrl || '/',
-                badge: '广告',
-                tracking: {
-                  impression: `/api/v1/ad/impression?creativeId=${validItem.id}`,
-                  click: `/api/v1/ad/click?creativeId=${validItem.id}`,
-                },
-                source: 'direct',
-              });
-              break;
+            for (const item of items) {
+              if (item.imageUrl && !item.imageUrl.startsWith('data:')) {
+                allItems.push({ item, campaign });
+              }
             }
+          }
+          // Return ALL valid items for this placement (for carousel)
+          for (const { item, campaign } of allItems) {
+            ads.push({
+              adType: 'commercial',
+              creativeId: item.id,
+              title: campaign.name,
+              description: '',
+              imageUrl: item.imageUrl,
+              landingUrl: item.landingUrl || '/',
+              badge: '广告',
+              tracking: {
+                impression: `/api/v1/ad/impression?creativeId=${item.id}`,
+                click: `/api/v1/ad/click?creativeId=${item.id}`,
+              },
+              source: 'direct',
+            });
           }
         }
       } catch (e) {

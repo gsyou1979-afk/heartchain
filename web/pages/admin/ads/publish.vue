@@ -144,19 +144,19 @@
       <!-- Step 4: 选择投放位置 -->
       <div v-if="step === 4" class="bg-white rounded-xl shadow-sm p-6">
         <h2 class="text-lg font-semibold mb-4">选择投放位置</h2>
-        <p class="text-sm text-gray-500 mb-4">选择广告展示的位置，可多选</p>
+        <p class="text-sm text-gray-500 mb-4">选择广告展示的位置（单选）</p>
 
         <div class="space-y-3">
           <div
             v-for="p in availablePlacements"
             :key="p.code"
-            @click="togglePlacement(p.code)"
+            @click="form.placementCode = p.code"
             class="border rounded-lg p-4 cursor-pointer transition-all"
-            :class="form.placementCodes.includes(p.code) ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'"
+            :class="form.placementCode === p.code ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <input type="checkbox" :checked="form.placementCodes.includes(p.code)" class="rounded" />
+                <input type="radio" :checked="form.placementCode === p.code" class="rounded" readonly />
                 <div>
                   <div class="font-medium text-gray-900">{{ p.name }}</div>
                   <div class="text-xs text-gray-500">{{ p.code }} · {{ p.width }}×{{ p.height }} · {{ getPositionText(p) }}</div>
@@ -169,7 +169,7 @@
 
         <div class="mt-6 flex justify-between">
           <button @click="step = 3" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">← 上一步</button>
-          <button @click="step = 5" :disabled="form.placementCodes.length === 0" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50">下一步 →</button>
+          <button @click="step = 5" :disabled="!form.placementCode" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50">下一步 →</button>
         </div>
       </div>
 
@@ -192,7 +192,7 @@
               </div>
             </div>
             <div class="flex flex-wrap gap-1">
-              <span v-for="code in form.placementCodes" :key="code" class="text-xs px-2 py-0.5 bg-gray-100 rounded">{{ code }}</span>
+              <span v-if="form.placementCode" class="text-xs px-2 py-0.5 bg-gray-100 rounded">{{ form.placementCode }}</span>
             </div>
           </div>
         </div>
@@ -271,7 +271,7 @@ const form = reactive({
   startDate: new Date().toISOString().split('T')[0],
   endDate: '',
   budgetTotal: 0,
-  placementCodes: [] as string[],
+  placementCode: '',  // 单选
   items: [] as Array<{
     imageUrl: string;
     fileName: string;
@@ -314,14 +314,7 @@ function getPositionText(p: any): string {
   return map[p.position] || p.position || '未知';
 }
 
-function togglePlacement(code: string) {
-  const idx = form.placementCodes.indexOf(code);
-  if (idx >= 0) {
-    form.placementCodes.splice(idx, 1);
-  } else {
-    form.placementCodes.push(code);
-  }
-}
+// togglePlacement removed — now single-select
 
 function triggerUpload() {
   fileInput.value?.click();
@@ -405,7 +398,7 @@ async function saveDraft() {
 async function submitAd() {
   if (!form.name.trim()) { alert('请输入广告名称'); return; }
   if (form.items.length === 0) { alert('请至少上传一张图片'); return; }
-  if (form.placementCodes.length === 0) { alert('请选择至少一个投放位置'); return; }
+  if (!form.placementCode) { alert('请选择投放位置'); return; }
 
   // Check if any images are still uploading
   const stillUploading = form.items.some(item => item.uploading);
@@ -427,7 +420,7 @@ async function submitAd() {
         startDate: form.startDate,
         endDate: form.endDate || undefined,
         budgetTotal: form.budgetTotal || undefined,
-        placements: form.placementCodes,
+        placements: [form.placementCode],
         imageUrl: firstImageUrl,
         landingUrl: form.items[0]?.landingUrl || '/',
       }),
@@ -502,7 +495,7 @@ function resetForm() {
   form.startDate = new Date().toISOString().split('T')[0];
   form.endDate = '';
   form.budgetTotal = 0;
-  form.placementCodes = [];
+  form.placementCode = '';
   form.items = [];
 }
 </script>
