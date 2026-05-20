@@ -697,51 +697,36 @@ function removeCampaignImage(idx: number) {
 function handleImageUpload(idx: number, event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (!file) return;
-  
+
   const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      // 获取目标广告位尺寸（从当前选择的placement获取）
-      const targetSize = getTargetSize();
-      
-      // 等比缩放，保持宽高比
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      let { width, height } = img;
-      const targetWidth = targetSize.width;
-      const targetHeight = targetSize.height;
-      
-      // 计算缩放比例（保持宽高比，不裁剪）
-      const scale = Math.min(targetWidth / width, targetHeight / height);
-      width = Math.round(width * scale);
-      height = Math.round(height * scale);
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      // 绘制缩放后的图片
-      ctx?.drawImage(img, 0, 0, width, height);
-      
-      // 转回base64（JPEG格式，90%质量）
-      campaignForm.value.items[idx].imageUrl = canvas.toDataURL('image/jpeg', 0.9);
-    };
-    img.src = e.target?.result as string;
+  reader.onload = async (e) => {
+    const base64Data = e.target?.result as string;
+    try {
+      // Upload to server to get a real URL (same pattern as publish.vue)
+      const uploadRes = await fetch(`${API}/items/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData: base64Data, fileName: file.name }),
+      });
+      const uploadData = await uploadRes.json();
+      if (uploadData.success && uploadData.url) {
+        // Build full URL from relative path
+        const fullUrl = uploadData.url.startsWith('http')
+          ? uploadData.url
+          : `${getApiUrl().replace('/api/v1', '')}${uploadData.url}`;
+        campaignForm.value.items[idx].imageUrl = fullUrl;
+      } else {
+        // Fallback: use base64 if upload fails (not ideal but won't block user)
+        campaignForm.value.items[idx].imageUrl = base64Data;
+        console.warn('Server upload failed, using base64 fallback');
+      }
+    } catch (err) {
+      // Fallback to base64 preview
+      campaignForm.value.items[idx].imageUrl = base64Data;
+      console.warn('Upload failed, using base64 fallback:', err);
+    }
   };
   reader.readAsDataURL(file);
-}
-
-// 根据当前选择的广告位获取目标尺寸
-function getTargetSize(): { width: number; height: number } {
-  // 从已选择的placementCodes中获取第一个广告位的尺寸
-  const selectedCode = campaignForm.value.placementCodes?.[0];
-  if (selectedCode) {
-    const p = placements.value.find((x: any) => x.code === selectedCode);
-    if (p) return { width: p.width, height: p.height };
-  }
-  // 默认尺寸
-  return { width: 600, height: 400 };
 }
 
 async function saveCampaign() {
