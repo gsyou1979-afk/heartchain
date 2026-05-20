@@ -795,7 +795,8 @@ async function deleteCampaign(id: string) {
     await loadCampaigns()
     await loadStats()
   } else {
-    alert('删除失败')
+    const err = await res.json().catch(() => ({}))
+    alert('删除失败: ' + (err.message || `HTTP ${res.status}`))
   }
 }
 

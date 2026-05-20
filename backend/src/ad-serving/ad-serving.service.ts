@@ -100,9 +100,16 @@ export class AdServingService {
         const activeCampaigns = await this.campaignService.findActive();
 
         // Filter campaigns that match the requested placement
-        const matchingCampaigns = activeCampaigns.filter(c =>
-          c.placements && Array.isArray(c.placements) && c.placements.includes(dto.placementCode)
-        );
+        const matchingCampaigns = activeCampaigns.filter(c => {
+          if (!c.placements || !Array.isArray(c.placements) || c.placements.length === 0) return false;
+          // 正常情况：placements 是单值数组如 ["A2"]，用 includes 匹配
+          if (c.placements.length === 1) {
+            return c.placements.includes(dto.placementCode);
+          }
+          // 脏数据情况：placements 是多值数组如 ["A1","A2","D1"]，
+          // 只匹配 placements[0]，避免一个 campaign 污染多个广告位
+          return c.placements[0] === dto.placementCode;
+        });
 
         // First try: find ALL approved creatives linked to matching campaigns (for carousel)
         if (matchingCampaigns.length > 0) {
@@ -136,11 +143,10 @@ export class AdServingService {
         }
 
         // Fallback: check AdItem records for matching campaigns (if no creative found)
-        // Return ALL matching items from ALL matching campaigns for carousel/rotation
-        if (ads.length === 0) {
-          const campaignsToSearch = matchingCampaigns.length > 0 ? matchingCampaigns : activeCampaigns;
+        // 注意：只搜索匹配当前 placement 的 campaign，不能 fallback 到全部！
+        if (ads.length === 0 && matchingCampaigns.length > 0) {
           const allItems: Array<{ item: any; campaign: any }> = [];
-          for (const campaign of campaignsToSearch) {
+          for (const campaign of matchingCampaigns) {
             const items = await this.itemRepo.find({
               where: { campaignId: campaign.id },
               order: { sortOrder: 'ASC' },

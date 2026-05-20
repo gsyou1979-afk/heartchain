@@ -108,6 +108,31 @@ export class AdCampaignService {
   }
 
   async remove(id: string): Promise<void> {
+    // 先删关联的 AdItem（外键约束）
+    await this.itemRepo.delete({ campaignId: id });
+    // 再删 campaign 本身
     await this.campaignRepo.delete(id);
+  }
+
+  /**
+   * 清理脏数据：将 placements 多值数组（旧bug导致）统一为单值数组
+   * 只保留第一个 placement，其余丢弃。
+   * 仅管理员可调用。
+   */
+  async cleanupPlacements(): Promise<{ fixed: number; details: any[] }> {
+    const all = await this.campaignRepo.find();
+    let fixed = 0;
+    const details: any[] = [];
+    for (const c of all) {
+      if (!c.placements || !Array.isArray(c.placements) || c.placements.length <= 1) continue;
+      // 脏数据：多值数组，只保留第一个
+      const kept = c.placements[0];
+      const discarded = c.placements.slice(1);
+      c.placements = [kept];
+      await this.campaignRepo.save(c);
+      fixed++;
+      details.push({ id: c.id, name: c.name, kept, discarded });
+    }
+    return { fixed, details };
   }
 }

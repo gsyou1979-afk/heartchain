@@ -66,4 +66,12 @@ export class AdCampaignController {
     await this.service.remove(id);
     return { message: 'Campaign deleted' };
   }
+
+  /** 清理脏数据：将多值 placements 统一为单值（仅管理员） */
+  @Post('cleanup-placements')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async cleanupPlacements() {
+    return this.service.cleanupPlacements();
+  }
 }
