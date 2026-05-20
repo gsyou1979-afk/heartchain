@@ -80,6 +80,9 @@
       <div v-if="activeTab === 'my-ads'" class="space-y-6">
         <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
           <h2 class="text-lg font-semibold">我的广告</h2>
+          <NuxtLink to="/admin/ads/publish" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">
+            + 发布广告
+          </NuxtLink>
         </div>
 
         <div v-if="myCampaigns.length > 0" class="space-y-3">
