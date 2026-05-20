@@ -26,7 +26,7 @@ export class AdCreative {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => AdCampaign, { nullable: true })
+  @ManyToOne(() => AdCampaign, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'campaignId' })
   campaign: AdCampaign;
 

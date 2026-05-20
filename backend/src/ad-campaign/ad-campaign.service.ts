@@ -5,6 +5,7 @@ import { AdCampaign, CampaignStatus, PricingModel } from './entities/ad-campaign
 import { CreateAdCampaignDto, UpdateAdCampaignDto } from './dto/create-campaign.dto';
 import { PublishAdDto } from './dto/publish-ad.dto';
 import { AdItem } from '../ad-item/entities/ad-item.entity';
+import { AdCreative } from '../ad-creative/entities/ad-creative.entity';
 
 @Injectable()
 export class AdCampaignService {
@@ -13,6 +14,8 @@ export class AdCampaignService {
     private readonly campaignRepo: Repository<AdCampaign>,
     @InjectRepository(AdItem)
     private readonly itemRepo: Repository<AdItem>,
+    @InjectRepository(AdCreative)
+    private readonly creativeRepo: Repository<AdCreative>,
   ) {}
 
   async findAll(advertiserId?: string): Promise<AdCampaign[]> {
@@ -107,9 +110,11 @@ export class AdCampaignService {
   }
 
   async remove(id: string): Promise<void> {
-    // 先删关联的 AdItem（外键约束）
+    // 先删关联的 AdCreative（外键约束）
+    await this.creativeRepo.delete({ campaign: { id } } as any);
+    // 再删关联的 AdItem
     await this.itemRepo.delete({ campaignId: id });
-    // 再删 campaign 本身
+    // 最后删 campaign 本身
     await this.campaignRepo.delete(id);
   }
 
