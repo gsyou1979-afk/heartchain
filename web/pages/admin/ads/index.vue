@@ -207,6 +207,60 @@
         </div>
       </div>
 
+      <!-- ==================== 素材库 ==================== -->
+      <div v-if="activeTab === 'media'" class="space-y-6">
+        <!-- 上传区域 -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">素材库</h2>
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-gray-500">共 {{ mediaAssets.length }} 个素材</span>
+              <button @click="triggerMediaUpload" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">
+                + 上传素材
+              </button>
+              <input ref="mediaFileInput" type="file" accept="image/*" multiple class="hidden" @change="handleMediaFileSelect" />
+            </div>
+          </div>
+
+          <!-- 拖拽上传区 -->
+          <div
+            @click="triggerMediaUpload"
+            @dragover.prevent="mediaDragOver = true"
+            @dragleave="mediaDragOver = false"
+            @drop.prevent="handleMediaDrop"
+            class="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors"
+            :class="mediaDragOver ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'"
+          >
+            <div class="text-4xl mb-2">📁</div>
+            <div class="text-gray-600">拖拽图片到此处，或点击上传</div>
+            <div class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF，单张最大 5MB</div>
+          </div>
+        </div>
+
+        <!-- 素材列表 -->
+        <div v-if="mediaAssets.length > 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div v-for="asset in mediaAssets" :key="asset.id" class="bg-white rounded-lg shadow overflow-hidden group relative">
+            <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+              <img :src="getAssetUrl(asset.url)" :alt="asset.fileName" class="w-full h-full object-cover" />
+            </div>
+            <div class="p-2">
+              <div class="text-xs text-gray-600 truncate" :title="asset.fileName">{{ asset.fileName }}</div>
+              <div class="text-xs text-gray-400 mt-0.5">{{ formatFileSize(asset.size) }}</div>
+            </div>
+            <!-- 悬停操作 -->
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <button @click="copyAssetUrl(asset.url)" class="px-3 py-1 bg-white text-gray-700 rounded text-xs hover:bg-gray-100">复制链接</button>
+              <button @click="deleteAsset(asset.id)" class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">删除</button>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="bg-white rounded-lg shadow p-8 text-center text-gray-400">
+          <div class="text-4xl mb-2">🖼️</div>
+          <p>暂无素材，请先上传图片</p>
+        </div>
+      </div>
+
       <!-- ==================== 数据统计 ==================== -->
       <div v-if="activeTab === 'statistics'" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -409,6 +463,7 @@ const tabs = computed(() => {
   const base = [
     { key: 'my-ads', label: '我的广告' },
     { key: 'placements', label: '广告位管理' },
+    { key: 'media', label: '素材库' },
     { key: 'statistics', label: '数据统计' },
   ]
   // 只有管理员能看到审核管理
@@ -478,7 +533,7 @@ onMounted(async () => {
     router.push('/')
     return
   }
-  await Promise.all([loadPlacements(), loadCampaigns(), loadMyCampaigns(), loadStats()])
+  await Promise.all([loadPlacements(), loadCampaigns(), loadMyCampaigns(), loadStats(), loadMediaAssets()])
 })
 
 // ========== 数据加载 ==========
@@ -558,6 +613,113 @@ async function loadStats() {
     })
     if (res.ok) stats.value = await res.json()
   } catch (e) { console.error('加载统计失败', e) }
+}
+
+// ========== 素材库 ==========
+const mediaAssets = ref<any[]>([])
+const mediaDragOver = ref(false)
+const mediaFileInput = ref<HTMLInputElement | null>(null)
+
+async function loadMediaAssets() {
+  try {
+    const res = await fetch(`${API}/media`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    if (res.ok) mediaAssets.value = await res.json()
+  } catch (e) { console.error('加载素材库失败', e) }
+}
+
+function triggerMediaUpload() {
+  mediaFileInput.value?.click()
+}
+
+function handleMediaFileSelect(e: Event) {
+  const files = (e.target as HTMLInputElement).files
+  if (files) addMediaFiles(Array.from(files))
+}
+
+function handleMediaDrop(e: DragEvent) {
+  mediaDragOver.value = false
+  const files = e.dataTransfer?.files
+  if (files) addMediaFiles(Array.from(files))
+}
+
+async function addMediaFiles(files: File[]) {
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`文件 ${file.name} 超过5MB限制`)
+      continue
+    }
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const base64Data = e.target?.result as string
+      try {
+        const res = await fetch(`${API}/media/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({ imageData: base64Data, fileName: file.name }),
+        })
+        const data = await res.json()
+        if (data.success) {
+          await loadMediaAssets()
+        } else {
+          alert('上传失败：' + (data.message || '未知错误'))
+        }
+      } catch (err) {
+        alert('上传失败，请重试')
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+function getAssetUrl(url: string): string {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  // Prepend API base for local paths
+  const base = getApiUrl().replace('/api/v1', '')
+  return `${base}${url}`
+}
+
+function formatFileSize(bytes: number): string {
+  if (!bytes) return '未知'
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+function copyAssetUrl(url: string) {
+  const fullUrl = url.startsWith('http') ? url : `${getApiUrl().replace('/api/v1', '')}${url}`
+  navigator.clipboard.writeText(fullUrl).then(() => {
+    alert('链接已复制')
+  }).catch(() => {
+    // Fallback
+    const input = document.createElement('input')
+    input.value = fullUrl
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+    alert('链接已复制')
+  })
+}
+
+async function deleteAsset(id: string) {
+  if (!confirm('确定删除该素材？')) return
+  try {
+    const res = await fetch(`${API}/media/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    if (res.ok) {
+      await loadMediaAssets()
+    } else {
+      alert('删除失败')
+    }
+  } catch (e) {
+    alert('删除失败，请重试')
+  }
 }
 
 // ========== 广告位 CRUD ==========

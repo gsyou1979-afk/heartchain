@@ -95,19 +95,61 @@
         <h2 class="text-lg font-semibold mb-4">上传素材</h2>
         <p class="text-sm text-gray-500 mb-4">支持多张图片轮播，建议尺寸：横幅 1200×400，信息流 580×300</p>
 
-        <!-- 上传区域 -->
-        <div
-          @click="triggerUpload"
-          @dragover.prevent="dragOver = true"
-          @dragleave="dragOver = false"
-          @drop.prevent="handleDrop"
-          class="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors"
-          :class="dragOver ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'"
-        >
-          <div class="text-4xl mb-2">📷</div>
-          <div class="text-gray-600">拖拽图片到此处，或点击上传</div>
-          <div class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF，单张最大 5MB</div>
-          <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleFileSelect" />
+        <!-- 上传方式选择 -->
+        <div class="flex gap-3 mb-4">
+          <button
+            type="button"
+            @click="showMediaPicker = false"
+            class="px-4 py-2 rounded-lg text-sm"
+            :class="!showMediaPicker ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          >
+            📤 本地上传
+          </button>
+          <button
+            type="button"
+            @click="showMediaPicker = true"
+            class="px-4 py-2 rounded-lg text-sm"
+            :class="showMediaPicker ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          >
+            🖼️ 从素材库选择
+          </button>
+        </div>
+
+        <!-- 本地上传区域 -->
+        <div v-if="!showMediaPicker">
+          <div
+            @click="triggerUpload"
+            @dragover.prevent="dragOver = true"
+            @dragleave="dragOver = false"
+            @drop.prevent="handleDrop"
+            class="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors"
+            :class="dragOver ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'"
+          >
+            <div class="text-4xl mb-2">📷</div>
+            <div class="text-gray-600">拖拽图片到此处，或点击上传</div>
+            <div class="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF，单张最大 5MB</div>
+            <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleFileSelect" />
+          </div>
+        </div>
+
+        <!-- 素材库选择区域 -->
+        <div v-else>
+          <div v-if="mediaAssets.length > 0" class="grid grid-cols-3 md:grid-cols-5 gap-3 max-h-64 overflow-y-auto">
+            <div
+              v-for="asset in mediaAssets"
+              :key="asset.id"
+              @click="selectMediaAsset(asset)"
+              class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 transition-all hover:border-red-400"
+              :class="form.items.some(i => i.imageUrl && i.imageUrl.includes(asset.url)) ? 'border-red-500' : 'border-transparent'"
+            >
+              <img :src="getAssetUrl(asset.url)" :alt="asset.fileName" class="w-full h-full object-cover" />
+            </div>
+          </div>
+          <div v-else class="text-center py-8 text-gray-400">
+            <div class="text-3xl mb-2">🖼️</div>
+            <p>素材库为空，请先上传素材</p>
+            <button type="button" @click="showMediaPicker = false" class="mt-2 text-sm text-red-500 hover:text-red-600">去本地上传 →</button>
+          </div>
         </div>
 
         <!-- 图片列表 -->
@@ -263,6 +305,8 @@ const submitting = ref(false);
 const dragOver = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 const availablePlacements = ref<any[]>([]);
+const mediaAssets = ref<any[]>([]);
+const showMediaPicker = ref(false);
 
 const form = reactive({
   adType: '',
@@ -296,6 +340,15 @@ onMounted(async () => {
     if (res.ok) availablePlacements.value = await res.json();
   } catch (e) {
     console.error('加载广告位失败', e);
+  }
+  // 加载素材库
+  try {
+    const res = await fetch(`${API}/media`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+    if (res.ok) mediaAssets.value = await res.json();
+  } catch (e) {
+    console.error('加载素材库失败', e);
   }
 });
 
@@ -355,23 +408,24 @@ async function addFiles(files: File[]) {
     reader.onload = async (e) => {
       const base64Data = e.target?.result as string;
       try {
-        // Upload to server to get a real URL
-        const uploadRes = await fetch(`${API}/items/upload`, {
+        // Upload to media library (persistent storage)
+        const uploadRes = await fetch(`${API}/media/upload`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
           body: JSON.stringify({ imageData: base64Data, fileName: file.name }),
         });
         const uploadData = await uploadRes.json();
-        if (uploadData.success && uploadData.url) {
-          // Build full URL from relative path
-          const fullUrl = uploadData.url.startsWith('http')
-            ? uploadData.url
-            : `${getApiUrl().replace('/api/v1', '')}${uploadData.url}`;
+        if (uploadData.success && uploadData.asset) {
+          // Use the persistent URL from media library
+          const asset = uploadData.asset;
+          const fullUrl = asset.url.startsWith('http')
+            ? asset.url
+            : `${getApiUrl().replace('/api/v1', '')}${asset.url}`;
           form.items[itemIdx].imageUrl = fullUrl;
         } else {
-          // Fallback: use base64 if upload fails (not ideal but won't block user)
+          // Fallback: use base64 if upload fails
           form.items[itemIdx].imageUrl = base64Data;
-          form.items[itemIdx].error = '服务器上传失败，使用本地预览';
+          form.items[itemIdx].error = '素材库上传失败，使用本地预览';
         }
       } catch (err) {
         // Fallback to base64 preview
@@ -387,6 +441,33 @@ async function addFiles(files: File[]) {
 
 function removeItem(idx: number) {
   form.items.splice(idx, 1);
+}
+
+function getAssetUrl(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  const base = getApiUrl().replace('/api/v1', '');
+  return `${base}${url}`;
+}
+
+function selectMediaAsset(asset: any) {
+  const fullUrl = getAssetUrl(asset.url);
+  // Check if already selected
+  const existingIdx = form.items.findIndex(i => i.imageUrl === fullUrl);
+  if (existingIdx >= 0) {
+    // Deselect
+    form.items.splice(existingIdx, 1);
+  } else {
+    // Select
+    form.items.push({
+      imageUrl: fullUrl,
+      fileName: asset.fileName,
+      landingUrl: '',
+      rotationSeconds: 5,
+      uploading: false,
+      error: '',
+    });
+  }
 }
 
 async function saveDraft() {
