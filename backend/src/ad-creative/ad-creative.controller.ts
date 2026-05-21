@@ -26,11 +26,13 @@ export class AdCreativeController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(@Body() dto: CreateAdCreativeDto) {
     return this.service.create(dto);
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() dto: UpdateAdCreativeDto) {
     return this.service.update(id, dto);
   }
@@ -50,6 +52,7 @@ export class AdCreativeController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string) {
     await this.service.remove(id);
     return { message: 'Creative deleted' };

@@ -1,7 +1,9 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AdReportService } from './ad-report.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @Controller('ad/reports')
+@UseGuards(JwtAuthGuard)
 export class AdReportController {
   constructor(private readonly service: AdReportService) {}
 

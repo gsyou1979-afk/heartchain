@@ -11,7 +11,7 @@ import * as fs from 'fs';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
 
-  // Custom body parser with larger limit for base64 image uploads (default 100KB is too small)
+  // Custom body parser with larger limit for base64 image uploads
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 
@@ -23,56 +23,33 @@ async function bootstrap() {
   const apiPrefix = configService.get<string>('API_PREFIX', 'api/v1');
   const nodeEnv = configService.get<string>('NODE_ENV', 'development');
 
-  // Global prefix
-  app.setGlobalPrefix(apiPrefix);
-
-  // CORS - 生产环境限制来源，开发环境允许所有
+  // CORS
   const allowedOrigins = nodeEnv === 'production'
-    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app,https://heartchain.vercel.app,https://heartchain-web.onrender.com').split(',')
+    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app').split(',')
     : '*';
 
   app.enableCors({
     origin: allowedOrigins,
-    credentials: false,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Serve static files from uploads directory
   const uploadsDir = join(__dirname, '..', 'uploads');
-  app.use('/uploads', (req: any, res: any, next: any) => {
-    const filePath = join(uploadsDir, req.path);
-    if (fs.existsSync(filePath)) {
-      res.sendFile(filePath);
-    } else {
-      res.status(404).json({ message: 'File not found' });
-    }
-  });
-
-  // Serve frontend static files (SPA) from web/dist directory
-  const webDistDir = join(__dirname, '..', '..', 'web', 'dist');
-  const webOutputDir = join(__dirname, '..', '..', 'web', '.output', 'public');
-  const frontendDir = fs.existsSync(webDistDir) ? webDistDir : webOutputDir;
-
-  if (fs.existsSync(frontendDir)) {
-    console.log('[DEBUG] Serving frontend from:', frontendDir);
-    app.use(expressStatic(frontendDir, { index: false }));
-
-    // SPA fallback: all non-API routes serve index.html
-    app.use((req: any, res: any, next: any) => {
-      if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
-        return next();
-      }
-      const indexPath = join(frontendDir, 'index.html');
-      if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
+  if (fs.existsSync(uploadsDir)) {
+    app.use('/uploads', (req: any, res: any, next: any) => {
+      const filePath = join(uploadsDir, req.path);
+      if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
       } else {
-        next();
+        res.status(404).json({ message: 'File not found' });
       }
     });
-  } else {
-    console.log('[DEBUG] Frontend dist not found, API-only mode');
   }
+
+  // Global prefix — set BEFORE SPA fallback so API routes work
+  app.setGlobalPrefix(apiPrefix);
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -109,23 +86,41 @@ async function bootstrap() {
     },
   });
 
+  // Serve frontend static files (SPA) — MUST be after all API routes
+  const frontendDir = join(__dirname, 'frontend');
+  const frontendIndex = join(frontendDir, 'index.html');
+
+  if (fs.existsSync(frontendIndex)) {
+    console.log('[DEBUG] Serving frontend from:', frontendDir);
+    app.use(expressStatic(frontendDir, { index: false }));
+
+    // SPA fallback: all non-API/non-upload routes serve index.html
+    // This must be registered AFTER all other routes
+    const expressAdapter = app.getHttpAdapter();
+    const expressApp = expressAdapter.getInstance();
+    expressApp.get('*', (req: any, res: any, next: any) => {
+      if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+        return next();
+      }
+      res.sendFile(frontendIndex);
+    });
+  } else {
+    console.log('[DEBUG] Frontend dist not found, API-only mode');
+  }
+
   await app.listen(port, '0.0.0.0');
 
-  // Debug: 打印配置信息（不输出敏感值）
   console.log('[DEBUG] NODE_ENV:', nodeEnv);
   console.log('[DEBUG] CORS_ORIGINS:', allowedOrigins);
-  console.log('[DEBUG] DATABASE_URL:', configService.get('DATABASE_URL') ? 'SET (length: ' + configService.get('DATABASE_URL').length + ')' : 'NOT SET');
   console.log('[DEBUG] PORT:', port);
-
-  console.log(`
-  ╔══════════════════════════════════════════════════╗
+  console.log(`\n  ╔══════════════════════════════════════════════════╗
   ║           HeartChain API Server                   ║
   ║           哈特链 - 区块链好人好事平台               ║
   ╠══════════════════════════════════════════════════╣
-  ║  Server:  http://localhost:${port}                   ║
-  ║  API:     http://localhost:${port}/${apiPrefix}        ║
-  ║  Swagger: http://localhost:${port}/${apiPrefix}/docs   ║
-  ║  Env:     ${nodeEnv}                                ║
+  ║  Server:  http://localhost:${port}
+  ║  API:     http://localhost:${port}/${apiPrefix}
+  ║  Swagger: http://localhost:${port}/${apiPrefix}/docs
+  ║  Env:     ${nodeEnv}
   ╚══════════════════════════════════════════════════╝
   `);
 }

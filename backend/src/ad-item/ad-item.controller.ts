@@ -24,16 +24,19 @@ export class AdItemController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(@Body() dto: CreateAdItemDto) {
     return this.service.create(dto);
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() dto: UpdateAdItemDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string) {
     await this.service.remove(id);
     return { success: true };
@@ -41,6 +44,7 @@ export class AdItemController {
 
   /** 批量保存（替换）广告计划的所有轮播图片 */
   @Post('campaign/:campaignId/bulk')
+  @UseGuards(JwtAuthGuard)
   async bulkSave(
     @Param('campaignId') campaignId: string,
     @Body() items: CreateAdItemDto[],
