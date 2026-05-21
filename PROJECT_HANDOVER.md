@@ -1,5 +1,6 @@
 # HeartChain (哈特链) 项目接管文档
-# 生成时间: 2026-05-15
+# 生成时间: 2026-05-21
+# 最后更新: 2026-05-21 (安全修复)
 # 接管人: OWL (Hermes Agent)
 
 ---
@@ -169,22 +170,44 @@ DB_DATABASE=heartchain
 ## 7. 已知问题
 
 ### 🔴 严重
-1. **密码安全性**: 使用MD5+salt哈希，生产环境必须改用bcrypt
-2. **固定验证码**: 开发模式验证码硬编码123456
-3. **CORS配置**: origin: '*' 允许所有来源
-4. **synchronize: true**: TypeORM自动同步数据库，生产环境应该用migration
+1. ~~密码安全性~~ ✅ 已修复 — 新用户使用bcrypt(12 rounds)，旧MD5用户仍兼容
+2. **固定验证码**: 开发模式验证码硬编码123456（开发环境可接受）
+3. ~~CORS配置~~ ✅ 已修复 — 生产环境默认限制为Vercel URL，credentials: true
+4. ~~synchronize: true~~ ✅ 已修复 — DATABASE_URL路径改为synchronize: isDev
 5. **团队任务并发**: assignTask没有加锁，可能超员
 
 ### 🟡 中等
 6. JSON字段手动序列化（requiredSkills、schedule等）
-7. 缺少输入验证和错误处理
+7. 缺少输入验证和错误处理（部分模块已有class-validator）
 8. 前端stats数据硬编码
-9. 大量调试脚本散落在根目录
+9. 大量调试脚本散落在根目录（start.bat, stop-services.bat等）
+10. **ad-targeting控制器缺少Auth Guard** — POST/DELETE端点未保护
 
 ### 🟢 小
-10. 缺少单元测试
-11. 合约ABI不完整
-12. batch文件编码问题
+11. 缺少单元测试
+12. 合约ABI不完整
+13. batch文件编码问题
+
+---
+
+## 7.1 安全修复记录（2026-05-21）
+
+### 已修复的安全问题：
+| 文件 | 问题 | 修复 |
+|------|------|------|
+| ad-placement.controller.ts | POST/PUT/DELETE/init/admin-all 无认证 | 添加JwtAuthGuard+RolesGuard(ADMIN) |
+| ad-project.controller.ts | POST init/seed/seed-quick/generate 无认证 | 添加JwtAuthGuard，seed操作需ADMIN |
+| ad-project item controller | PUT/DELETE/pause/resume/approve/reject 无认证 | 添加JwtAuthGuard，approve/reject需ADMIN |
+| ad-item.controller.ts | POST/PUT/DELETE/bulk 无认证 | 添加JwtAuthGuard |
+| ad-creative.controller.ts | POST/PUT/DELETE 无认证 | 添加JwtAuthGuard |
+| ad-report.controller.ts | 所有端点无认证 | 整个控制器添加JwtAuthGuard |
+| app.module.ts | DATABASE_URL路径synchronize: true | 改为synchronize: isDev |
+| main.ts | CORS credentials: false, 默认origin * | 改为credentials: true, 默认Vercel URL |
+| AdSidebar.vue | 使用相对路径/api/v1/ad | 改用getApiUrl() |
+
+### 待修复：
+- ad-targeting.controller.ts 的 POST/DELETE 端点仍缺少Auth Guard
+- ad-serving.controller.ts 的 impression/click 上报端点未认证（低风险，前端公开调用）
 
 ---
 
@@ -291,13 +314,19 @@ npm run preview
 - [x] 技术栈已确认
 - [x] 部署信息已记录
 - [x] 测试账号已记录
+- [x] 安全审计完成（2026-05-21）
+- [x] Auth Guard已添加到所有广告端点
+- [x] CORS配置已修复
+- [x] synchronize已修复为isDev
+- [x] AdSidebar.vue API路径已修复
 - [ ] 生产环境数据库连接需要确认
 - [ ] Render环境变量需要确认（DATABASE_URL, JWT_SECRET等）
 - [ ] Vercel部署状态需要确认
 - [ ] Flutter APK需要构建
 - [ ] 区块链合约地址需要确认
-- [ ] 密码哈希需要升级为bcrypt
+- [x] 密码哈希已升级为bcrypt（新用户）
 - [ ] 单元测试需要补充
+- [ ] ad-targeting.controller.ts 需要添加Auth Guard
 
 ---
 
