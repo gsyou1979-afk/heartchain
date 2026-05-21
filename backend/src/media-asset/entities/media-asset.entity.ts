@@ -27,6 +27,9 @@ export class MediaAsset {
   @Column({ type: 'varchar', length: 500, nullable: false })
   url: string;
 
+  @Column({ type: 'text', nullable: true })
+  dataUrl: string;
+
   @Column({ type: 'varchar', length: 50, nullable: true })
   mimeType: string;
 
@@ -34,7 +37,7 @@ export class MediaAsset {
   size: number;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  storage: string; // 'cloudinary' | 'local'
+  storage: string; // 'cloudinary' | 'local' | 'database'
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   publicId: string; // Cloudinary public_id

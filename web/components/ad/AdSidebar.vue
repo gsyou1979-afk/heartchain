@@ -94,6 +94,21 @@ const fetchAd = async () => {
   }
 }
 
+// Legacy placement code mapping
+const PLACEMENT_CODE_MAP: Record<string, string> = {
+  'B1': 'A2',
+  'B2': 'A3',
+};
+
+function matchesPlacement(campaignPlacements: string[], requestedPlacement: string): boolean {
+  if (!campaignPlacements) return false;
+  if (campaignPlacements.includes(requestedPlacement)) return true;
+  for (const cp of campaignPlacements) {
+    if (PLACEMENT_CODE_MAP[cp] === requestedPlacement) return true;
+  }
+  return false;
+}
+
 // Fallback: load commercial ad directly from active campaigns
 const fetchCommercialAd = async (apiBase: string) => {
   try {
@@ -102,7 +117,7 @@ const fetchCommercialAd = async (apiBase: string) => {
     const campaigns = await campaignsRes.json()
 
     const matchingCampaigns = campaigns.filter((c: any) =>
-      c.placements && c.placements.includes(props.placement)
+      matchesPlacement(c.placements, props.placement)
     )
 
     for (const campaign of matchingCampaigns) {

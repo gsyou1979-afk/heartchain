@@ -46,7 +46,7 @@ export class MediaAssetService {
     const filename = `${safeName}_${random}`;
 
     let url = '';
-    let storage = 'local';
+    let storage = 'database';
     let publicId: string | null = null;
 
     // Try Cloudinary first
@@ -62,28 +62,20 @@ export class MediaAssetService {
         storage = 'cloudinary';
       }
     } catch (e) {
-      console.warn('[MediaAsset] Cloudinary upload failed, falling back to local:', e);
+      console.warn('[MediaAsset] Cloudinary upload failed, using database storage:', e);
     }
 
-    // Fallback: save locally
+    // Fallback: store in database as base64 data URL
     if (!url) {
-      const fs = await import('fs');
-      const path = await import('path');
-      const uploadDir = path.join(process.cwd(), 'uploads', 'assets');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      const localFilename = `${filename}.${ext}`;
-      const filePath = path.join(uploadDir, localFilename);
-      fs.writeFileSync(filePath, buffer);
-      url = `/uploads/assets/${localFilename}`;
-      storage = 'local';
+      url = `/api/v1/ad/media/${this.repo.create({}).id}/data`; // placeholder, will update after save
+      storage = 'database';
     }
 
     const asset = this.repo.create({
       uploaderId: uploaderId || null,
       fileName: fileName || `${filename}.${ext}`,
-      url,
+      url: storage === 'database' ? '' : url,
+      dataUrl: imageData, // Always store base64 in database for reliability
       mimeType,
       size,
       storage,
@@ -91,7 +83,13 @@ export class MediaAssetService {
       assetType: 'image',
     });
 
-    return this.repo.save(asset);
+    const saved = await this.repo.save(asset);
+    // Update URL to point to database endpoint
+    if (storage === 'database') {
+      saved.url = `/api/v1/ad/media/${saved.id}/data`;
+      return this.repo.save(saved);
+    }
+    return saved;
   }
 
   async remove(id: string): Promise<void> {

@@ -128,6 +128,25 @@ const fetchAds = async () => {
   }
 }
 
+// Legacy placement code mapping: old codes -> new codes
+const PLACEMENT_CODE_MAP: Record<string, string> = {
+  'B1': 'A2',
+  'B2': 'A3',
+};
+
+// Resolve placement code: if the requested code is an old code, map it to the new one
+// Also check if a campaign's placement list contains old codes that map to the requested code
+function matchesPlacement(campaignPlacements: string[], requestedPlacement: string): boolean {
+  if (!campaignPlacements) return false;
+  // Direct match
+  if (campaignPlacements.includes(requestedPlacement)) return true;
+  // Check if any old code in the campaign maps to the requested new code
+  for (const cp of campaignPlacements) {
+    if (PLACEMENT_CODE_MAP[cp] === requestedPlacement) return true;
+  }
+  return false;
+}
+
 // Fallback: load commercial ads directly from active campaigns
 const fetchCommercialAds = async (apiBase: string) => {
   try {
@@ -136,9 +155,9 @@ const fetchCommercialAds = async (apiBase: string) => {
     if (!campaignsRes.ok) return
     const campaigns = await campaignsRes.json()
 
-    // Find campaigns matching this placement
+    // Find campaigns matching this placement (with legacy code support)
     const matchingCampaigns = campaigns.filter((c: any) =>
-      c.placements && c.placements.includes(props.placement)
+      matchesPlacement(c.placements, props.placement)
     )
 
     // Collect ALL valid items from ALL matching campaigns (for carousel)

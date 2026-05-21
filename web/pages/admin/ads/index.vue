@@ -676,6 +676,8 @@ async function addMediaFiles(files: File[]) {
 function getAssetUrl(url: string): string {
   if (!url) return ''
   if (url.startsWith('http')) return url
+  // Database-stored images use /api/v1/ad/media/:id/data endpoint
+  if (url.startsWith('/api/v1/')) return `${getApiUrl().replace('/api/v1', '')}${url}`
   // Prepend API base for local paths
   const base = getApiUrl().replace('/api/v1', '')
   return `${base}${url}`

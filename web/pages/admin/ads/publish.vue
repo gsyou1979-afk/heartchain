@@ -446,6 +446,7 @@ function removeItem(idx: number) {
 function getAssetUrl(url: string): string {
   if (!url) return '';
   if (url.startsWith('http')) return url;
+  if (url.startsWith('/api/v1/')) return `${getApiUrl().replace('/api/v1', '')}${url}`;
   const base = getApiUrl().replace('/api/v1', '');
   return `${base}${url}`;
 }
