@@ -80,7 +80,7 @@ export class MediaAssetService {
       storage = 'local';
     }
 
-    // Build asset data - include dataUrl only if column exists
+    // Build asset data
     const assetData: any = {
       uploaderId: uploaderId || null,
       fileName: fileName || `${filename}.${ext}`,
@@ -92,21 +92,24 @@ export class MediaAssetService {
       assetType: 'image',
     };
 
-    // Try to include dataUrl for database storage (new column)
+    // Check if dataUrl column exists
+    let hasDataUrlColumn = false;
     try {
-      const repo = this.repo;
-      // Check if dataUrl column exists by attempting a query
-      const testRecord = repo.create({ ...assetData, dataUrl: imageData });
-      const saved = await repo.save(testRecord);
-      console.log(`[MediaAsset] Saved with dataUrl, id=${saved.id}`);
-      return saved;
+      const result = await this.repo.query(
+        "SELECT column_name FROM information_schema.columns WHERE table_name='media_assets' AND column_name='dataUrl'"
+      );
+      hasDataUrlColumn = result && result.length > 0;
     } catch (e) {
-      // dataUrl column doesn't exist yet, save without it
-      console.warn('[MediaAsset] dataUrl column not available, saving without it');
+      console.warn('[MediaAsset] Could not check dataUrl column:', e);
+    }
+
+    if (hasDataUrlColumn) {
+      assetData.dataUrl = imageData;
     }
 
     const asset = this.repo.create(assetData);
-    return this.repo.save(asset);
+    const saved = await this.repo.save(asset);
+    return saved;
   }
 
   async remove(id: string): Promise<void> {
