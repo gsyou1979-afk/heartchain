@@ -1,0 +1,197 @@
+<h2>设置菜单 + 整体导航设计</h2>
+<p class="subtitle">所有功能性收入设置菜单，点击展开</p>
+
+<div class="section">
+  <h3>方案 A：侧边滑出菜单（推荐）</h3>
+  <div class="mockup">
+    <div class="mockup-header">📱 设置 — 侧边滑出</div>
+    <div class="mockup-body" style="background:#f5f5f5;padding:0;min-height:480px;border-radius:8px;position:relative;overflow:hidden">
+      
+      <!-- 背景模糊的首页 -->
+      <div style="opacity:0.2;filter:blur(3px);padding:12px">
+        <div style="font-size:18px;font-weight:700;margin-bottom:10px">❤️ HeartChain</div>
+        <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+          <div style="font-size:13px">🛒 帮忙买药</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+          <div style="font-size:13px">🚗 帮忙搬行李</div>
+        </div>
+      </div>
+
+      <!-- 侧边菜单 -->
+      <div style="position:absolute;top:0;left:0;bottom:0;width:280px;background:white;box-shadow:4px 0 20px rgba(0,0,0,0.15);padding:0;display:flex;flex-direction:column">
+        
+        <!-- 用户信息区 -->
+        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:24px 20px;color:white">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:24px">👤</div>
+            <div>
+              <div style="font-size:16px;font-weight:700">김영수</div>
+              <div style="font-size:12px;opacity:0.7">+82 10-2209-8999</div>
+              <div style="font-size:12px;opacity:0.7;margin-top:2px">⭐ 4.8 · 会员等级 Lv.3</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <div style="flex:1;text-align:center">
+              <div style="font-size:18px;font-weight:700">12</div>
+              <div style="font-size:10px;opacity:0.6">帮助次数</div>
+            </div>
+            <div style="flex:1;text-align:center">
+              <div style="font-size:18px;font-weight:700">2,400</div>
+              <div style="font-size:10px;opacity:0.6">爱心积分</div>
+            </div>
+            <div style="flex:1;text-align:center">
+              <div style="font-size:18px;font-weight:700">#3</div>
+              <div style="font-size:10px;opacity:0.6">本月排名</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 菜单列表 -->
+        <div style="flex:1;overflow-y:auto;padding:8px 0">
+          
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#f0f7ff">
+            <span style="font-size:18px">📋</span>
+            <span style="font-size:14px;font-weight:500;color:#1976d2">我的任务</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">📝</span>
+            <span style="font-size:14px;color:#333">发布求助</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">💳</span>
+            <span style="font-size:14px;color:#333">钱包</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">🏆</span>
+            <span style="font-size:14px;color:#333">成就</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">📊</span>
+            <span style="font-size:14px;color:#333">统计</span>
+          </div>
+          
+          <div style="height:1px;background:#e0e0e0;margin:8px 20px"></div>
+          
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">📍</span>
+            <span style="font-size:14px;color:#333">定位设置</span>
+            <span style="margin-left:auto;font-size:11px;color:#888">5km</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">🔔</span>
+            <span style="font-size:14px;color:#333">通知设置</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">🌐</span>
+            <span style="font-size:14px;color:#333">语言/Language</span>
+            <span style="margin-left:auto;font-size:11px;color:#888">한국어</span>
+          </div>
+          
+          <div style="height:1px;background:#e0e0e0;margin:8px 20px"></div>
+          
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">❓</span>
+            <span style="font-size:14px;color:#333">帮助中心</span>
+          </div>
+          <div style="padding:10px 20px;display:flex;align-items:center;gap:12px;cursor:pointer">
+            <span style="font-size:18px">⚙️</span>
+            <span style="font-size:14px;color:#333">系统设置</span>
+          </div>
+
+        </div>
+
+        <!-- 底部 -->
+        <div style="padding:12px 20px;border-top:1px solid #e0e0e0">
+          <div style="padding:8px 0;display:flex;align-items:center;gap:12px;cursor:pointer;color:#f44336">
+            <span style="font-size:18px">🚪</span>
+            <span style="font-size:14px">退出登录</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>方案 B：全屏设置页面</h3>
+  <div class="mockup">
+    <div class="mockup-header">📱 设置 — 全屏页面</div>
+    <div class="mockup-body" style="background:#f5f5f5;padding:0;min-height:480px;border-radius:8px">
+      
+      <!-- 顶部 -->
+      <div style="background:white;padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #e0e0e0">
+        <span style="font-size:18px;cursor:pointer">←</span>
+        <span style="font-size:17px;font-weight:600">设置</span>
+      </div>
+
+      <!-- 用户卡片 -->
+      <div style="background:white;margin:12px;border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:24px">👤</div>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:600">김영수</div>
+          <div style="font-size:12px;color:#888">+82 10-2209-8999</div>
+        </div>
+        <span style="font-size:18px;color:#ccc">›</span>
+      </div>
+
+      <!-- 功能组1 -->
+      <div style="background:white;margin:12px;border-radius:14px;overflow:hidden">
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0">
+          <span style="font-size:18px">📋</span><span style="font-size:14px">我的任务</span><span style="margin-left:auto;color:#ccc">›</span>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0">
+          <span style="font-size:18px">📝</span><span style="font-size:14px">发布求助</span><span style="margin-left:auto;color:#ccc">›</span>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0">
+          <span style="font-size:18px">💳</span><span style="font-size:14px">钱包</span><span style="margin-left:auto;color:#ccc">›</span>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:18px">🏆</span><span style="font-size:14px">成就</span><span style="margin-left:auto;color:#ccc">›</span>
+        </div>
+      </div>
+
+      <!-- 功能组2 -->
+      <div style="background:white;margin:12px;border-radius:14px;overflow:hidden">
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0">
+          <span style="font-size:18px">📍</span><span style="font-size:14px">定位设置</span><span style="margin-left:auto;font-size:12px;color:#888">5km ›</span>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #f0f0f0">
+          <span style="font-size:18px">🔔</span><span style="font-size:14px">通知设置</span><span style="margin-left:auto;color:#ccc">›</span>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:18px">🌐</span><span style="font-size:14px">语言</span><span style="margin-left:auto;font-size:12px;color:#888">한국어 ›</span>
+        </div>
+      </div>
+
+      <!-- 退出 -->
+      <div style="background:white;margin:12px;border-radius:14px;padding:14px 16px;text-align:center;color:#f44336;font-size:14px;font-weight:500">
+        退出登录
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>你更喜欢哪个？</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>侧边滑出</h3>
+      <p>从左侧滑出，顶部用户信息+成就数据。像微信/Instagram侧边栏。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>全屏页面</h3>
+      <p>传统设置页面，分组列表。像苹果系统设置。</p>
+    </div>
+  </div>
+</div>

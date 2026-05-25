@@ -33,7 +33,7 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: '哈特链 HeartChain - 以爱心链接世界 | Blockchain-based Volunteer Service Platform' },
-        { name: 'theme-color', content: '#ef4444' },
+        { name: 'theme-color', content: '#7B1FA2' },
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },

@@ -1,0 +1,173 @@
+<h2>HeartChain 重新设计 — 首页方案</h2>
+<p class="subtitle">像苹果一样简洁，GPS定位5公里内帮助请求</p>
+
+<div class="section">
+  <h3>方案 A：地图+列表混合首页（推荐）</h3>
+  <div class="mockup">
+    <div class="mockup-header">📱 首页 — 地图模式</div>
+    <div class="mockup-body" style="background:linear-gradient(135deg,#e8f5e9,#f5f5f5);padding:12px;min-height:420px;border-radius:8px">
+      
+      <!-- 顶部状态栏 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:18px;font-weight:700;color:#1a1a2e">❤️ HeartChain</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="background:#4caf50;color:white;padding:3px 10px;border-radius:12px;font-size:11px">🟢 5km</span>
+          <span style="background:#2196f3;color:white;padding:3px 10px;border-radius:12px;font-size:11px">⏰ 2h内</span>
+          <div style="width:32px;height:32px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
+        </div>
+      </div>
+
+      <!-- 成就卡片 -->
+      <div style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:white;padding:12px 16px;border-radius:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;opacity:0.9">本月成就</div>
+          <div style="font-size:22px;font-weight:700">12 次帮助 🏆</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;opacity:0.9">爱心积分</div>
+          <div style="font-size:18px;font-weight:700">+2,400 ❤️</div>
+        </div>
+      </div>
+
+      <!-- 地图区域 -->
+      <div style="background:#c8e6c9;border-radius:12px;height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;overflow:hidden">
+        <div style="font-size:40px;opacity:0.3">🗺️</div>
+        <div style="position:absolute;top:35%;left:40%;font-size:24px">📍</div>
+        <div style="position:absolute;top:55%;left:60%;font-size:18px">📌</div>
+        <div style="position:absolute;top:25%;left:70%;font-size:18px">📌</div>
+        <div style="position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,0.9);padding:4px 10px;border-radius:8px;font-size:11px">📋 列表视图</div>
+      </div>
+
+      <!-- 附近任务列表 -->
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:#333">附近 3 个求助</div>
+      
+      <!-- 任务卡片1 -->
+      <div style="background:white;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:#1a1a2e">🛒 帮忙买药</div>
+            <div style="font-size:12px;color:#666;margin-top:4px">距离 0.8km · 需要在 30分钟内</div>
+            <div style="font-size:12px;color:#999;margin-top:2px">서울시 강남구 역삼동</div>
+          </div>
+          <button style="background:#4caf50;color:white;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">我来帮助</button>
+        </div>
+      </div>
+
+      <!-- 任务卡片2 -->
+      <div style="background:white;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:#1a1a2e">🚗 帮忙搬行李</div>
+            <div style="font-size:12px;color:#666;margin-top:4px">距离 1.2km · 需要在 1小时内</div>
+            <div style="font-size:12px;color:#999;margin-top:2px">서울시 강남구 삼성동</div>
+          </div>
+          <button style="background:#4caf50;color:white;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">我来帮助</button>
+        </div>
+      </div>
+
+      <!-- 任务卡片3 -->
+      <div style="background:white;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:#1a1a2e">📱 教老人用手机</div>
+            <div style="font-size:12px;color:#666;margin-top:4px">距离 2.5km · 需要在 2小时内</div>
+            <div style="font-size:12px;color:#999;margin-top:2px">서울시 서초구 반포동</div>
+          </div>
+          <button style="background:#4caf50;color:white;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">我来帮助</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>方案 B：纯列表首页</h3>
+  <div class="mockup">
+    <div class="mockup-header">📱 首页 — 纯列表模式</div>
+    <div class="mockup-body" style="background:#f5f5f5;padding:12px;min-height:300px;border-radius:8px">
+      
+      <!-- 顶部 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:18px;font-weight:700">❤️ HeartChain</div>
+        <div style="display:flex;gap:6px">
+          <span style="background:#4caf50;color:white;padding:3px 8px;border-radius:10px;font-size:10px">5km</span>
+          <span style="background:#2196f3;color:white;padding:3px 8px;border-radius:10px;font-size:10px">2h内</span>
+        </div>
+      </div>
+
+      <!-- 成就 -->
+      <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:10px 14px;border-radius:12px;margin-bottom:12px">
+        <div style="font-size:20px;font-weight:700">🏆 12次帮助 · 2,400❤️</div>
+        <div style="font-size:11px;opacity:0.8">本月排名 #3</div>
+      </div>
+
+      <!-- 筛选标签 -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto">
+        <span style="background:#1a1a2e;color:white;padding:5px 12px;border-radius:16px;font-size:11px;white-space:nowrap">全部</span>
+        <span style="background:#e0e0e0;padding:5px 12px;border-radius:16px;font-size:11px;white-space:nowrap">🛒 跑腿</span>
+        <span style="background:#e0e0e0;padding:5px 12px;border-radius:16px;font-size:11px;white-space:nowrap">🚗 搬运</span>
+        <span style="background:#e0e0e0;padding:5px 12px;border-radius:16px;font-size:11px;white-space:nowrap">📱 教学</span>
+        <span style="background:#e0e0e0;padding:5px 12px;border-radius:16px;font-size:11px;white-space:nowrap">🐕 宠物</span>
+      </div>
+
+      <!-- 任务列表 -->
+      <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:600">🛒 帮忙买药 <span style="color:#f44336;font-size:11px">⏰ 30min</span></div>
+        <div style="font-size:11px;color:#888;margin-top:3px">0.8km · 역삼동</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="font-size:11px;color:#4caf50;font-weight:600">❤️ +200</span>
+          <button style="background:#4caf50;color:white;border:none;padding:5px 14px;border-radius:16px;font-size:11px">我来帮助</button>
+        </div>
+      </div>
+
+      <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:600">🚗 帮忙搬行李 <span style="color:#ff9800;font-size:11px">⏰ 1h</span></div>
+        <div style="font-size:11px;color:#888;margin-top:3px">1.2km · 삼성동</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="font-size:11px;color:#4caf50;font-weight:600">❤️ +350</span>
+          <button style="background:#4caf50;color:white;border:none;padding:5px 14px;border-radius:16px;font-size:11px">我来帮助</button>
+        </div>
+      </div>
+
+      <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:600">📱 教老人用手机 <span style="color:#2196f3;font-size:11px">⏰ 2h</span></div>
+        <div style="font-size:11px;color:#888;margin-top:3px">2.5km · 반포동</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="font-size:11px;color:#4caf50;font-weight:600">❤️ +150</span>
+          <button style="background:#4caf50;color:white;border:none;padding:5px 14px;border-radius:16px;font-size:11px">我来帮助</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>你更喜欢哪个方案？</h3>
+  <p style="color:#666;font-size:13px">或者告诉我你想调整的地方</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>方案A：地图+列表</h3>
+      <p>顶部显示地图，下方滚动任务列表。空间感强，像代驾软件。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>方案B：纯列表</h3>
+      <p>简洁高效，筛选标签快速过滤。信息密度高。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>都要，可切换</h3>
+      <p>默认列表，点击按钮切换到地图模式。兼顾两种体验。</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,169 @@
+<h2>任务详情页设计</h2>
+<p class="subtitle">点击任务卡片后进入详情页</p>
+
+<div class="section">
+  <h3>方案 A：底部弹出式详情（推荐）</h3>
+  <div class="mockup">
+    <div class="mockup-header">📱 任务详情 — 底部弹出</div>
+    <div class="mockup-body" style="background:#f5f5f5;padding:12px;min-height:480px;border-radius:8px;position:relative">
+      
+      <!-- 背景模糊的首页 -->
+      <div style="opacity:0.3;filter:blur(2px)">
+        <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+          <div style="font-size:13px;font-weight:600">🛒 帮忙买药</div>
+          <div style="font-size:11px;color:#888">0.8km · 30min</div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:10px;margin-bottom:6px">
+          <div style="font-size:13px;font-weight:600">🚗 帮忙搬行李</div>
+          <div style="font-size:11px;color:#888">1.2km · 1h</div>
+        </div>
+      </div>
+
+      <!-- 底部弹出的详情卡片 -->
+      <div style="position:absolute;bottom:0;left:0;right:0;background:white;border-radius:20px 20px 0 0;padding:20px;box-shadow:0 -4px 20px rgba(0,0,0,0.15)">
+        <!-- 拖动指示条 -->
+        <div style="width:40px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 16px"></div>
+        
+        <!-- 任务标题 -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#1a1a2e">🛒 帮忙买药</div>
+            <div style="font-size:13px;color:#888;margin-top:4px">发布于 10分钟前</div>
+          </div>
+          <div style="background:#fff3e0;color:#f57c00;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600">⏰ 剩余 20分钟</div>
+        </div>
+
+        <!-- 求助者信息 -->
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:#f8f9fa;border-radius:12px;margin-bottom:12px">
+          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">김영수 님</div>
+            <div style="font-size:12px;color:#888">⭐ 4.8 · 已完成 23次求助</div>
+          </div>
+          <button style="background:#e3f2fd;color:#1976d2;border:none;padding:6px 12px;border-radius:16px;font-size:12px;font-weight:600">💬 聊天</button>
+        </div>
+
+        <!-- 任务详情 -->
+        <div style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:#333">任务详情</div>
+          <div style="font-size:13px;color:#555;line-height:1.6;background:#f8f9fa;padding:12px;border-radius:10px">
+            할머니 댁에 약을 사다 드려야 하는데, 제가 출장중이라 부탁드립니다. 약국은 역삼동 하나로약국이고, 처방전은 사진으로 보내드릴게요.
+          </div>
+        </div>
+
+        <!-- 位置信息 -->
+        <div style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:#333">📍 位置</div>
+          <div style="background:#e8f5e9;border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:20px">🗺️</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500">서울시 강남구 역삼동 123-45</div>
+              <div style="font-size:12px;color:#666">距你 0.8km · 步行约10分钟</div>
+            </div>
+            <button style="background:#4caf50;color:white;border:none;padding:5px 10px;border-radius:12px;font-size:11px">导航</button>
+          </div>
+        </div>
+
+        <!-- 奖励信息 -->
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <div style="flex:1;background:#fff3e0;border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:700;color:#f57c00">+200 ❤️</div>
+            <div style="font-size:11px;color:#888">爱心积分</div>
+          </div>
+          <div style="flex:1;background:#e3f2fd;border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:700;color:#1976d2">₩5,000</div>
+            <div style="font-size:11px;color:#888">报酬（可选）</div>
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div style="display:flex;gap:10px">
+          <button style="flex:1;background:#f5f5f5;color:#666;border:none;padding:14px;border-radius:14px;font-size:15px;font-weight:600">稍后再看</button>
+          <button style="flex:2;background:linear-gradient(135deg,#4caf50,#43a047);color:white;border:none;padding:14px;border-radius:14px;font-size:15px;font-weight:700">✋ 我来帮助</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>方案 B：全页面详情</h3>
+  <div class="mockup">
+    <div class="mockup-header">📱 任务详情 — 全页面</div>
+    <div class="mockup-body" style="background:white;padding:0;min-height:480px;border-radius:8px">
+      
+      <!-- 顶部图片区 -->
+      <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);height:180px;display:flex;align-items:center;justify-content:center;position:relative">
+        <div style="font-size:60px">🛒</div>
+        <div style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.9);padding:4px 10px;border-radius:12px;font-size:12px;cursor:pointer">← 返回</div>
+        <div style="position:absolute;top:12px;right:12px;background:#f44336;color:white;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600">⏰ 剩余20分钟</div>
+      </div>
+
+      <!-- 内容区 -->
+      <div style="padding:16px">
+        <div style="font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:4px">帮忙买药</div>
+        <div style="font-size:13px;color:#888;margin-bottom:16px">发布于 10分钟前 · 역삼동</div>
+
+        <!-- 求助者 -->
+        <div style="display:flex;align-items:center;gap:10px;padding:12px;background:#f8f9fa;border-radius:12px;margin-bottom:16px">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">김영수 님</div>
+            <div style="font-size:12px;color:#888">⭐ 4.8 · 23次求助</div>
+          </div>
+          <button style="background:#e3f2fd;color:#1976d2;border:none;padding:5px 10px;border-radius:14px;font-size:11px">💬</button>
+        </div>
+
+        <!-- 详情 -->
+        <div style="font-size:14px;color:#444;line-height:1.7;margin-bottom:16px">
+          할머니 댁에 약을 사다 드려야 하는데, 제가 출장중이라 부탁드립니다. 약국은 역삼동 하나로약국이고, 처방전은 사진으로 보내드릴게요.
+        </div>
+
+        <!-- 地图小视图 -->
+        <div style="background:#c8e6c9;border-radius:10px;height:100px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+          <span style="font-size:14px;color:#558b2f">🗺️ 地图预览 · 0.8km</span>
+        </div>
+
+        <!-- 奖励 -->
+        <div style="display:flex;gap:10px;margin-bottom:20px">
+          <div style="flex:1;background:#fff3e0;border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:700;color:#f57c00">+200❤️</div>
+            <div style="font-size:11px;color:#888">积分</div>
+          </div>
+          <div style="flex:1;background:#e3f2fd;border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:18px;font-weight:700;color:#1976d2">₩5,000</div>
+            <div style="font-size:11px;color:#888">报酬</div>
+          </div>
+        </div>
+
+        <!-- 按钮 -->
+        <div style="display:flex;gap:10px">
+          <button style="flex:1;background:#f5f5f5;color:#666;border:none;padding:14px;border-radius:14px;font-size:15px;font-weight:600">稍后再看</button>
+          <button style="flex:2;background:linear-gradient(135deg,#4caf50,#43a047);color:white;border:none;padding:14px;border-radius:14px;font-size:15px;font-weight:700">✋ 我来帮助</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>你更喜欢哪个？</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>底部弹出式</h3>
+      <p>从底部滑出，背景模糊显示首页。像苹果地图/滴滴，体验流畅。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>全页面</h3>
+      <p>传统跳转，顶部大图+完整信息。内容展示更充分。</p>
+    </div>
+  </div>
+</div>
