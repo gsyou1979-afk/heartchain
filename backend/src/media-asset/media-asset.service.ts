@@ -46,7 +46,7 @@ export class MediaAssetService {
     const filename = `${safeName}_${random}`;
 
     let url = '';
-    let storage = 'database';
+    let storage = 'local';
     let publicId: string | null = null;
 
     // Try Cloudinary first
@@ -62,34 +62,51 @@ export class MediaAssetService {
         storage = 'cloudinary';
       }
     } catch (e) {
-      console.warn('[MediaAsset] Cloudinary upload failed, using database storage:', e);
+      console.warn('[MediaAsset] Cloudinary upload failed, falling back to local:', e);
     }
 
-    // Fallback: store in database as base64 data URL
+    // Fallback: save locally
     if (!url) {
-      url = `/api/v1/ad/media/${this.repo.create({}).id}/data`; // placeholder, will update after save
-      storage = 'database';
+      const fs = await import('fs');
+      const path = await import('path');
+      const uploadDir = path.join(process.cwd(), 'uploads', 'assets');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const localFilename = `${filename}.${ext}`;
+      const filePath = path.join(uploadDir, localFilename);
+      fs.writeFileSync(filePath, buffer);
+      url = `/uploads/assets/${localFilename}`;
+      storage = 'local';
     }
 
-    const asset = this.repo.create({
+    // Build asset data - include dataUrl only if column exists
+    const assetData: any = {
       uploaderId: uploaderId || null,
       fileName: fileName || `${filename}.${ext}`,
-      url: storage === 'database' ? '' : url,
-      dataUrl: imageData, // Always store base64 in database for reliability
+      url,
       mimeType,
       size,
       storage,
       publicId,
       assetType: 'image',
-    });
+    };
 
-    const saved = await this.repo.save(asset);
-    // Update URL to point to database endpoint
-    if (storage === 'database') {
-      saved.url = `/api/v1/ad/media/${saved.id}/data`;
-      return this.repo.save(saved);
+    // Try to include dataUrl for database storage (new column)
+    try {
+      const repo = this.repo;
+      // Check if dataUrl column exists by attempting a query
+      const testRecord = repo.create({ ...assetData, dataUrl: imageData });
+      const saved = await repo.save(testRecord);
+      console.log(`[MediaAsset] Saved with dataUrl, id=${saved.id}`);
+      return saved;
+    } catch (e) {
+      // dataUrl column doesn't exist yet, save without it
+      console.warn('[MediaAsset] dataUrl column not available, saving without it');
     }
-    return saved;
+
+    const asset = this.repo.create(assetData);
+    return this.repo.save(asset);
   }
 
   async remove(id: string): Promise<void> {
