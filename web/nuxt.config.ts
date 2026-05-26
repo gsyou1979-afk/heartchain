@@ -67,4 +67,9 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: '',
   },
-});
+
+  // 强制 Vercel 重新构建（每次提交更新此值）
+  sourcemap: false,
+  nitro: {
+    preset: 'vercel',
+  },
