@@ -296,7 +296,7 @@
 
           <!-- 退出 -->
           <div class="p-4 border-t border-gray-100">
-            <button @click="handleLogout" class="flex items-center gap-3 text-red-500 font-medium text-sm">
+            <button @click="handleLogout()" class="flex items-center gap-3 text-red-500 font-medium text-sm w-full text-left">
               <span>🚪</span> 退出登录
             </button>
           </div>
