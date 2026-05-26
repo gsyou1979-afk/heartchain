@@ -3,10 +3,13 @@
     <!-- 顶部导航栏 -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div class="flex items-center justify-between px-4 h-14">
-        <!-- 左侧：头像/菜单 -->
-        <button @click="showSideMenu = true" class="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white text-lg font-bold shadow-md">
+        <!-- 左侧：头像/菜单 或 登录按钮 -->
+        <button v-if="isLoggedIn" @click="showSideMenu = true" class="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white text-lg font-bold shadow-md">
           {{ userInitial }}
         </button>
+        <NuxtLink v-else to="/auth/register" class="px-4 py-1.5 rounded-full gradient-primary text-white text-sm font-semibold">
+          登录
+        </NuxtLink>
 
         <!-- 中间：Logo -->
         <div class="flex items-center gap-1.5">
@@ -376,15 +379,18 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
-// 用户数据
-const userName = ref('김영수')
-const userPhone = ref('+82 10-****-8999')
+// 用户数据（从 auth store 读取）
+const userName = computed(() => auth.user?.nickname || '游客')
+const userPhone = computed(() => auth.user?.phone || '')
 const userRating = ref(4.8)
 const userLevel = ref('Lv.3 热心市民')
 const userInitial = computed(() => userName.value.charAt(0))
+const isLoggedIn = computed(() => auth.isLoggedIn)
 
 // 统计
 const stats = ref({
@@ -493,14 +499,26 @@ function isUrgent(deadline) {
 }
 
 function handleLogout() {
-  // 清除登录状态
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
+  auth.logout()
   showSideMenu.value = false
-  router.push('/auth/register')
+  router.push('/')
 }
 
 onMounted(() => {
+  // 清除旧的模拟登录数据
+  const oldAuth = localStorage.getItem('heartchain_auth')
+  if (oldAuth) {
+    try {
+      const parsed = JSON.parse(oldAuth)
+      // 如果是旧的模拟数据（id 为 admin 或 nickname 为 김영수），清除
+      if (parsed.user?.nickname === '김영수' || parsed.user?.role === 'admin') {
+        localStorage.removeItem('heartchain_auth')
+        auth.logout()
+      }
+    } catch (e) {}
+  }
+  // 恢复登录状态
+  auth.restore()
   // TODO: 获取用户GPS位置
   // TODO: 加载附近任务
 })
