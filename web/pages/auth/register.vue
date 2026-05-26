@@ -82,8 +82,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 const isLogin = ref(true)
 const countdown = ref(0)
 
@@ -99,11 +101,15 @@ function sendCode() {
   }, 1000)
 }
 
-function handleLogin() {
+async function handleLogin() {
   if (!loginForm.phone) return alert('请输入手机号')
   if (!loginForm.password) return alert('请输入密码')
-  // TODO: 调用登录API
-  router.push('/')
+  try {
+    await auth.loginWithPhone(loginForm.phone, loginForm.password)
+    router.push('/')
+  } catch (e: any) {
+    alert(e.message || '登录失败')
+  }
 }
 
 function handleRegister() {
