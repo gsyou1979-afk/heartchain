@@ -296,7 +296,7 @@
 
           <!-- 退出 -->
           <div class="p-4 border-t border-gray-100">
-            <button class="flex items-center gap-3 text-red-500 font-medium text-sm">
+            <button @click="handleLogout" class="flex items-center gap-3 text-red-500 font-medium text-sm">
               <span>🚪</span> 退出登录
             </button>
           </div>
@@ -375,6 +375,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 用户数据
 const userName = ref('김영수')
@@ -487,6 +490,14 @@ function formatTimeAgo(date) {
 
 function isUrgent(deadline) {
   return deadline && (new Date(deadline) - Date.now() < 30 * 60000)
+}
+
+function handleLogout() {
+  // 清除登录状态
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  showSideMenu.value = false
+  router.push('/auth/register')
 }
 
 onMounted(() => {
