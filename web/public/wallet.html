@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#7B1FA2">
+<title>钱包 - HeartChain</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#FAF5FF;color:#333;min-height:100vh}
+.header{background:linear-gradient(135deg,#1A1A2E,#16213E);padding:16px;color:#fff;display:flex;align-items:center;gap:12px}
+.back{color:#fff;text-decoration:none;font-size:16px}
+.title{font-size:17px;font-weight:600}
+.tabs{display:flex;gap:8px;padding:20px 16px 16px}
+.tab{flex:1;text-align:center;padding:10px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:rgba(255,255,255,.15);color:rgba(255,255,255,.7)}
+.tab.active{background:#fff;color:#1A1A2E}
+.content{padding:0 16px 32px}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.balance-card{text-align:center;background:linear-gradient(135deg,#1A1A2E,#16213E);color:#fff}
+.balance-label{font-size:13px;opacity:.7;margin-bottom:4px}
+.balance-num{font-size:40px;font-weight:800}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.action-btn{text-align:center;cursor:pointer;padding:12px 0}
+.action-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 6px}
+.action-name{font-size:11px;color:#666}
+.section-title{font-size:14px;font-weight:600;color:#333;margin-bottom:12px;display:flex;justify-content:space-between}
+.section-title .more{font-size:12px;color:#888;font-weight:400}
+.tx-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+.tx-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.tx-info{flex:1}
+.tx-title{font-size:14px;font-weight:500}
+.tx-date{font-size:12px;color:#888}
+.tx-amount{font-size:14px;font-weight:600}
+.tx-amount.in{color:#4CAF50}
+.tx-amount.out{color:#F44336}
+.tx-status{font-size:10px;padding:2px 8px;border-radius:8px;display:inline-block;margin-top:2px}
+.tx-status.done{background:#E8F5E9;color:#4CAF50}
+.tx-status.pending{background:#FFF3E0;color:#F57C00}
+.points-card{background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff;text-align:center}
+.points-num{font-size:36px;font-weight:800}
+.points-sub{font-size:12px;opacity:.7;margin-top:4px}
+.convert-row{display:flex;gap:10px;margin-top:16px}
+.convert-box{flex:1;background:rgba(255,255,255,.15);border-radius:10px;padding:10px;text-align:center}
+.convert-box .num{font-size:16px;font-weight:700}
+.convert-box .label{font-size:10px;opacity:.7}
+.filter-tabs{display:flex;gap:8px;margin-bottom:16px}
+.filter-tab{padding:6px 16px;border-radius:16px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:#f0f0f0;color:#666}
+.filter-tab.active{background:#7B1FA2;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <span class="title">我的钱包</span>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">💰 余额</button>
+  <button class="tab" onclick="switchTab(1)">❤️ 积分</button>
+  <button class="tab" onclick="switchTab(2)">📋 记录</button>
+</div>
+
+<!-- 余额 Tab -->
+<div id="tab-0" class="content">
+  <div class="card balance-card">
+    <div class="balance-label">账户余额</div>
+    <div class="balance-num">₩125,000</div>
+  </div>
+  <div class="grid-4">
+    <div class="action-btn"><div class="action-icon" style="background:#E3F2FD">💳</div><div class="action-name">充值</div></div>
+    <div class="action-btn"><div class="action-icon" style="background:#E8F5E9">🏧</div><div class="action-name">提现</div></div>
+    <div class="action-btn"><div class="action-icon" style="background:#FFF3E0">💸</div><div class="action-name">转账</div></div>
+    <div class="action-btn"><div class="action-icon" style="background:#F3E5F5">📊</div><div class="action-name">明细</div></div>
+  </div>
+  <div class="section-title"><span>最近交易</span><span class="more">全部 ›</span></div>
+  <div class="card" style="padding:0 16px">
+    <div class="tx-item"><div class="tx-icon" style="background:#E8F5E9">✋</div><div class="tx-info"><div class="tx-title">帮助买药</div><div class="tx-date">今天 14:30</div></div><div><div class="tx-amount in">+5,000</div><span class="tx-status done">已完成</span></div></div>
+    <div class="tx-item"><div class="tx-icon" style="background:#E3F2FD">💳</div><div class="tx-info"><div class="tx-title">充值</div><div class="tx-date">今天 10:15</div></div><div><div class="tx-amount in">+50,000</div><span class="tx-status done">已完成</span></div></div>
+    <div class="tx-item"><div class="tx-icon" style="background:#FFF3E0">🏧</div><div class="tx-info"><div class="tx-title">提现</div><div class="tx-date">昨天 18:20</div></div><div><div class="tx-amount out">-20,000</div><span class="tx-status pending">处理中</span></div></div>
+  </div>
+</div>
+
+<!-- 积分 Tab -->
+<div id="tab-1" class="content" style="display:none">
+  <div class="card points-card">
+    <div style="opacity:.7;font-size:13px;margin-bottom:4px">❤️ 爱心积分</div>
+    <div class="points-num">12,400</div>
+    <div class="points-sub">可抵扣 ₩12,400</div>
+    <div class="convert-row">
+      <div class="convert-box"><div class="num">100❤️</div><div class="label">= ₩100</div></div>
+      <div class="convert-box"><div class="num">1,000❤️</div><div class="label">= ₩1,100</div></div>
+      <div class="convert-box"><div class="num">10,000❤️</div><div class="label">= ₩12,000</div></div>
+    </div>
+    <button style="margin-top:16px;width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:14px;font-weight:600;cursor:pointer">兑换积分</button>
+  </div>
+  <div class="section-title">积分记录</div>
+  <div class="card" style="padding:0 16px">
+    <div class="tx-item"><div class="tx-icon" style="background:#F3E5F5">❤️</div><div class="tx-info"><div class="tx-title">帮助买药</div><div class="tx-date">今天 14:30</div></div><div class="tx-amount in">+200❤️</div></div>
+    <div class="tx-item"><div class="tx-icon" style="background:#F3E5F5">❤️</div><div class="tx-info"><div class="tx-title">帮忙搬行李</div><div class="tx-date">昨天 09:45</div></div><div class="tx-amount in">+350❤️</div></div>
+  </div>
+</div>
+
+<!-- 记录 Tab -->
+<div id="tab-2" class="content" style="display:none">
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterHistory('all',this)">全部</button>
+    <button class="filter-tab" onclick="filterHistory('in',this)">收入</button>
+    <button class="filter-tab" onclick="filterHistory('out',this)">支出</button>
+  </div>
+  <div class="card" style="padding:0 16px">
+    <div class="tx-item"><div class="tx-icon" style="background:#E8F5E9">✋</div><div class="tx-info"><div class="tx-title">帮助买药</div><div class="tx-date">今天 14:30</div></div><div class="tx-amount in">+₩5,000<br><small style="font-weight:400">+200❤️</small></div></div>
+    <div class="tx-item"><div class="tx-icon" style="background:#E3F2FD">💳</div><div class="tx-info"><div class="tx-title">充值</div><div class="tx-date">今天 10:15</div></div><div class="tx-amount in">+₩50,000</div></div>
+    <div class="tx-item"><div class="tx-icon" style="background:#FFF3E0">🏧</div><div class="tx-info"><div class="tx-title">提现</div><div class="tx-date">昨天 18:20</div></div><div class="tx-amount out">-₩20,000</div></div>
+  </div>
+</div>
+
+<script>
+function switchTab(i) {
+  document.querySelectorAll('.tabs .tab').forEach((t,j) => t.classList.toggle('active', j===i));
+  [0,1,2].forEach(j => document.getElementById('tab-'+j).style.display = j===i ? 'block' : 'none');
+}
+function filterHistory(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

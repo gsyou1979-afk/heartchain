@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#7B1FA2">
+<title>发布求助 - HeartChain</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#FAF5FF;color:#333;min-height:100vh}
+.header{background:linear-gradient(135deg,#1A1A2E,#16213E);padding:16px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.back{color:#fff;text-decoration:none;font-size:16px}
+.title{font-size:17px;font-weight:600}
+.step-info{font-size:12px;opacity:.7}
+.steps{display:flex;align-items:center;gap:6px;padding:16px}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.step-dot.done{background:#FFB300;color:#fff}
+.step-dot.active{background:#fff;color:#1A1A2E;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.step-dot.todo{background:rgba(255,255,255,.2);color:rgba(255,255,255,.5)}
+.step-line{flex:1;height:2px;background:rgba(255,255,255,.2)}
+.step-label{font-size:11px;color:rgba(255,255,255,.5);margin-top:4px}
+.content{padding:0 16px 80px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.label{font-size:13px;font-weight:600;color:#333;margin-bottom:8px;display:block}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.type-btn{padding:14px 8px;border-radius:14px;border:2px solid transparent;background:#f5f5f5;text-align:center;cursor:pointer}
+.type-btn.selected{border-color:#7B1FA2;background:#F3E5F5}
+.type-btn .emoji{font-size:24px;display:block;margin-bottom:4px}
+.type-btn .name{font-size:11px;font-weight:600;color:#333}
+.input{width:100%;background:#F5F5F5;border:none;border-radius:12px;padding:14px 16px;font-size:15px;outline:none;box-sizing:border-box;margin-bottom:12px}
+.input:focus{background:#fff;box-shadow:0 0 0 2px #7B1FA2}
+textarea.input{min-height:100px;resize:none}
+.btn{width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:700;border:none;cursor:pointer;margin-top:8px}
+.btn-primary{background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff}
+.btn-secondary{background:#f5f5f5;color:#666}
+.btn-group{display:flex;gap:12px}
+.btn-group .btn{flex:1}
+.switch-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0;margin-bottom:8px}
+.switch-label{font-size:14px;color:#333}
+.switch-label small{display:block;font-size:11px;color:#888}
+.switch{width:48px;height:28px;border-radius:14px;position:relative;cursor:pointer;border:none}
+.switch.on{background:#7B1FA2}
+.switch.off{background:#ccc}
+.switch::after{content:'';width:24px;height:24px;background:#fff;border-radius:50%;position:absolute;top:2px;transition:all .2s}
+.switch.on::after{right:2px}
+.switch.off::after{left:2px}
+.reward-row{display:flex;align-items:center;gap:8px}
+.reward-input{flex:1;background:#F5F5F5;border:none;border-radius:12px;padding:16px;font-size:24px;font-weight:700;text-align:center;outline:none}
+.reward-unit{font-size:16px;color:#666}
+.upload-area{border:2px dashed #ddd;border-radius:12px;padding:30px;text-align:center;cursor:pointer;margin-bottom:16px}
+.upload-area:hover{border-color:#7B1FA2}
+.check-item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:#555}
+.check-item input{width:20px;height:20px;accent-color:#7B1FA2}
+.preview-card{background:#FAF5FF;border-radius:12px;padding:16px;margin-bottom:16px}
+.preview-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.preview-desc{font-size:13px;color:#555;margin-bottom:8px;white-space:pre-line}
+.preview-meta{display:flex;gap:12px;font-size:12px;color:#888}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:16px;box-shadow:0 -2px 10px rgba(0,0,0,.1);display:flex;gap:12px}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="javascript:history.back()" class="back">←</a>
+  <span class="title">发布求助</span>
+  <span class="step-info" id="stepInfo">步骤 1/4</span>
+</div>
+<div class="steps" id="stepsBar"></div>
+
+<div class="content" id="stepContent"></div>
+
+<div class="bottom-bar" id="bottomBar">
+  <button class="btn btn-secondary" id="btnPrev" onclick="prevStep()" style="display:none">← 上一步</button>
+  <button class="btn btn-primary" id="btnNext" onclick="nextStep()">下一步 →</button>
+</div>
+
+<script>
+const API = '/api/v1';
+let step = 1;
+const totalSteps = 4;
+const stepNames = ['类型', '时间地点', '报酬图片', '确认'];
+
+const form = {
+  type: '', title: '', description: '', deadlineHours: 2,
+  rewardAmount: 5000, acceptPoints: true, anonymous: false, agreeTerms: false
+};
+
+const types = [
+  {key:'errand',emoji:'🛒',name:'跑腿'},
+  {key:'transport',emoji:'🚗',name:'搬运'},
+  {key:'teach',emoji:'📱',name:'教学'},
+  {key:'pet',emoji:'🐕',name:'宠物'},
+  {key:'repair',emoji:'🔧',name:'维修'},
+  {key:'delivery',emoji:'📦',name:'快递'},
+];
+
+const timeOptions = [
+  {v:0.5,l:'⚡ 30分钟'},{v:2,l:'🕐 1小时'},{v:24,l:'📅 今天'},{v:999,l:'♾️ 不限'}
+];
+
+function renderSteps() {
+  let html = '';
+  for (let i = 1; i <= totalSteps; i++) {
+    const cls = i < step ? 'done' : i === step ? 'active' : 'todo';
+    const txt = i < step ? '✓' : i;
+    html += `<div style="text-align:center"><div class="step-dot ${cls}">${txt}</div><div class="step-label">${stepNames[i-1]}</div></div>`;
+    if (i < totalSteps) html += `<div class="step-line"></div>`;
+  }
+  document.getElementById('stepsBar').innerHTML = html;
+  document.getElementById('stepInfo').textContent = `步骤 ${step}/${totalSteps}`;
+}
+
+function renderStep() {
+  renderSteps();
+  const content = document.getElementById('stepContent');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+
+  btnPrev.style.display = step > 1 ? 'block' : 'none';
+
+  if (step === 1) {
+    btnNext.textContent = '下一步 →';
+    btnNext.disabled = !form.type || !form.title;
+    content.innerHTML = `
+      <div class="card">
+        <label class="label">选择任务类型</label>
+        <div class="type-grid">
+          ${types.map(t => `<div class="type-btn ${form.type===t.key?'selected':''}" onclick="form.type='${t.key}';renderStep()"><span class="emoji">${t.emoji}</span><span class="name">${t.name}</span></div>`).join('')}
+        </div>
+        <label class="label">任务标题</label>
+        <input class="input" placeholder="简短描述你的需求，如：帮忙买药" value="${form.title}" oninput="form.title=this.value;renderStep()">
+        <label class="label">详细描述</label>
+        <textarea class="input" placeholder="详细说明任务内容、注意事项等..." oninput="form.description=this.value">${form.description}</textarea>
+      </div>`;
+  } else if (step === 2) {
+    btnNext.textContent = '下一步 →';
+    content.innerHTML = `
+      <div class="card">
+        <label class="label">⏰ 需要在多长时间内完成？</label>
+        <div class="type-grid">
+          ${timeOptions.map(t => `<div class="type-btn ${form.deadlineHours===t.v?'selected':''}" onclick="form.deadlineHours=${t.v};renderStep()">${t.l}</div>`).join('')}
+        </div>
+        <label class="label">📍 任务地点</label>
+        <div style="background:#E8F5E9;border-radius:12px;padding:12px;display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:20px">📍</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">서울시 강남구 역삼동</div><div style="font-size:11px;color:#4CAF50">GPS 已定位</div></div>
+          <button style="background:#4CAF50;color:#fff;border:none;padding:6px 12px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer">重新定位</button>
+        </div>
+        <input class="input" placeholder="详细地址（可选），如：역삼동 123-45，3楼">
+      </div>`;
+  } else if (step === 3) {
+    btnNext.textContent = '下一步 →';
+    content.innerHTML = `
+      <div class="card">
+        <label class="label">💰 报酬金额</label>
+        <div class="reward-row">
+          <input class="reward-input" type="number" value="${form.rewardAmount}" oninput="form.rewardAmount=this.value" placeholder="0">
+          <span class="reward-unit">원</span>
+        </div>
+        <div style="display:flex;gap:8px;margin:12px 0">
+          ${[3000,5000,10000,20000].map(a => `<button style="flex:1;padding:8px;border-radius:10px;border:none;background:#f5f5f5;font-size:12px;font-weight:600;cursor:pointer" onclick="form.rewardAmount=${a};renderStep()">${a.toLocaleString()}원</button>`).join('')}
+        </div>
+        <div class="switch-row">
+          <div class="switch-label">接受❤️积分代替<br><small>对方可以用积分代替金钱支付</small></div>
+          <button class="switch ${form.acceptPoints?'on':'off'}" onclick="form.acceptPoints=!form.acceptPoints;this.classList.toggle('on');this.classList.toggle('off')"></button>
+        </div>
+        <label class="label" style="margin-top:16px">📷 添加图片（可选）</label>
+        <div class="upload-area" onclick="this.querySelector('input').click()">
+          <div style="font-size:32px;margin-bottom:8px">📷</div>
+          <div style="font-size:13px;color:#888">点击上传 · 最多3张</div>
+          <input type="file" accept="image/*" multiple style="display:none">
+        </div>
+        <div class="check-item"><input type="checkbox" ${form.agreeTerms?'checked':''} onchange="form.agreeTerms=this.checked"> 我已阅读并同意 <a href="#" style="color:#7B1FA2">《服务条款》</a></div>
+      </div>`;
+  } else if (step === 4) {
+    btnNext.textContent = '📢 发布求助';
+    content.innerHTML = `
+      <div class="card" style="text-align:center;margin-bottom:16px">
+        <div style="font-size:40px;margin-bottom:8px">${types.find(t=>t.key===form.type)?.emoji||'📌'}</div>
+        <div style="font-size:13px;color:#888">确认发布信息</div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-title">${types.find(t=>t.key===form.type)?.emoji||'📌'} ${form.title||'未填写标题'}</div>
+        <div class="preview-desc">${form.description||'未填写描述'}</div>
+        <div class="preview-meta">
+          <span>📍 역삼동</span>
+          <span>⏰ ${timeOptions.find(t=>t.v===form.deadlineHours)?.l||'不限'}</span>
+          ${form.rewardAmount>0?`<span>💰 ₩${Number(form.rewardAmount).toLocaleString()}</span>`:''}
+          ${form.acceptPoints?'<span>❤️ 接受积分</span>':''}
+        </div>
+      </div>
+      <div class="card">
+        <div class="switch-row">
+          <div class="switch-label">匿名发布<br><small>不显示你的姓名和头像</small></div>
+          <button class="switch ${form.anonymous?'on':'off'}" onclick="form.anonymous=!form.anonymous;this.classList.toggle('on');this.classList.toggle('off')"></button>
+        </div>
+        <div class="check-item"><input type="checkbox" ${form.agreeTerms?'checked':''} onchange="form.agreeTerms=this.checked"> 我同意 <a href="#" style="color:#7B1FA2">《服务条款》</a></div>
+      </div>`;
+  }
+
+  btnNext.disabled = false;
+  if (step === 1 && (!form.type || !form.title)) btnNext.disabled = true;
+  if (step === 4 && !form.agreeTerms) btnNext.disabled = true;
+}
+
+function nextStep() {
+  if (step < totalSteps) { step++; renderStep(); }
+  else submitTask();
+}
+
+function prevStep() {
+  if (step > 1) { step--; renderStep(); }
+}
+
+async function submitTask() {
+  const auth = localStorage.getItem('heartchain_auth');
+  if (!auth) { alert('请先登录'); location.href = '/auth/register'; return; }
+  const {token} = JSON.parse(auth);
+  try {
+    const res = await fetch(API + '/help', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+      body: JSON.stringify({
+        title: form.title,
+        description: form.description,
+        type: form.type,
+        deadlineHours: form.deadlineHours,
+        rewardAmount: Number(form.rewardAmount) || 0,
+        pointsReward: 100,
+        acceptPoints: form.acceptPoints,
+        anonymous: form.anonymous,
+      })
+    });
+    if (res.ok) {
+      alert('求助已发布！附近的人将收到通知。');
+      location.href = '/';
+    } else {
+      const err = await res.json();
+      alert(err.message || '发布失败');
+    }
+  } catch(e) {
+    alert('网络错误，请重试');
+  }
+}
+
+renderStep();
+</script>
+</body>
+</html>

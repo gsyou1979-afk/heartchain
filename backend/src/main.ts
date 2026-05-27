@@ -86,8 +86,8 @@ async function bootstrap() {
     },
   });
 
-  // Serve frontend static files (SPA) — MUST be after all API routes
-  const frontendDir = join(__dirname, '..', 'public');
+  // Serve frontend static files (SPA)
+  const frontendDir = join(__dirname, 'frontend');
   const frontendIndex = join(frontendDir, 'index.html');
 
   if (fs.existsSync(frontendIndex)) {
