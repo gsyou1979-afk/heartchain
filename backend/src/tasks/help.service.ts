@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { HelpRequest, HelpStatus } from '../entities/help-request.entity';
-import { CreateHelpDto, QueryNearbyDto } from '../dto/help.dto';
+import { HelpRequest, HelpStatus } from './entities/help-request.entity';
+import { CreateHelpDto, QueryNearbyDto } from './dto/help.dto';
 
 @Injectable()
 export class HelpService {

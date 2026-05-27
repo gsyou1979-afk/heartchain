@@ -109,7 +109,7 @@ export class MediaAssetService {
 
     const asset = this.repo.create(assetData);
     const saved = await this.repo.save(asset);
-    return saved;
+    return (Array.isArray(saved) ? saved[0] : saved) as any as MediaAsset;
   }
 
   async remove(id: string): Promise<void> {
