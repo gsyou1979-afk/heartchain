@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#7B1FA2">
+<title>登录 - HeartChain</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:#fff;color:#333;min-height:100vh;display:flex;flex-direction:column}
+.logo-area{text-align:center;padding:60px 0 30px}
+.logo-icon{font-size:56px;margin-bottom:12px}
+.logo-title{font-size:28px;font-weight:800;color:#1A1A2E}
+.logo-sub{font-size:14px;color:#888;margin-top:6px}
+.form-area{flex:1;padding:0 24px}
+label{font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px}
+.input{width:100%;background:#F5F5F5;border:none;border-radius:12px;padding:14px 16px;font-size:16px;outline:none;margin-bottom:16px;box-sizing:border-box}
+.input:focus{background:#fff;box-shadow:0 0 0 2px #7B1FA2}
+.phone-row{display:flex;gap:8px}
+.phone-code{background:#F5F5F5;border-radius:12px;padding:14px 16px;font-size:14px;color:#888;white-space:nowrap}
+.btn{width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px}
+.btn-p{background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff}
+.btn-s{background:#F5F5F5;color:#666}
+.text-right{text-align:right;margin-bottom:24px}
+.text-right a{font-size:13px;color:#7B1FA2;font-weight:600;text-decoration:none}
+.switch-mode{text-align:center;font-size:13px;color:#888;margin-top:16px}
+.switch-mode a{color:#7B1FA2;font-weight:600;text-decoration:none}
+.terms{text-align:center;font-size:12px;color:#999;padding:24px}
+.terms a{color:#7B1FA2;font-weight:600;text-decoration:none}
+.msg{padding:12px;border-radius:12px;font-size:13px;margin-bottom:16px;display:none}
+.msg.e{background:#FFEBEE;color:#C62828;display:block}
+.msg.s{background:#E8F5E9;color:#2E7D32;display:block}
+</style>
+</head>
+<body>
+<div class="logo-area">
+  <div class="logo-icon">❤️</div>
+  <div class="logo-title">HeartChain</div>
+  <div class="logo-sub" id="subTitle">欢迎回来</div>
+</div>
+<div class="form-area">
+  <div id="msg" class="msg"></div>
+
+  <form id="loginForm" onsubmit="return doLogin(event)">
+    <label>手机号</label>
+    <div class="phone-row">
+      <div class="phone-code">🇰🇷 +82</div>
+      <input class="input" id="phone" placeholder="010-XXXX-XXXX" required>
+    </div>
+    <label>密码</label>
+    <input class="input" id="pwd" type="password" placeholder="请输入密码" required>
+    <div class="text-right"><a href="/auth/forgot-password.html">忘记密码？</a></div>
+    <button type="submit" class="btn btn-p">登录</button>
+    <button type="button" class="btn btn-s" onclick="switchMode(false)">注册新账号</button>
+  </form>
+
+  <form id="regForm" style="display:none" onsubmit="return doReg(event)">
+    <label>手机号</label>
+    <div class="phone-row">
+      <div class="phone-code">🇰🇷 +82</div>
+      <input class="input" id="rphone" placeholder="010-XXXX-XXXX" required>
+    </div>
+    <label>验证码</label>
+    <div class="phone-row">
+      <input class="input" id="rcode" placeholder="6位验证码" required>
+      <button type="button" class="btn btn-s" style="width:auto;padding:14px 16px;font-size:13px;white-space:nowrap" onclick="sendCode()">获取验证码</button>
+    </div>
+    <label>设置密码</label>
+    <input class="input" id="rpwd" type="password" placeholder="至少8位" required>
+    <label>确认密码</label>
+    <input class="input" id="rconf" type="password" placeholder="再次输入密码" required>
+    <button type="submit" class="btn btn-p">注册</button>
+    <button type="button" class="btn btn-s" onclick="switchMode(true)">已有账号？去登录</button>
+  </form>
+
+  <div class="terms">注册即表示同意 <a href="#">《服务条款》</a> 和 <a href="#">《隐私政策》</a></div>
+</div>
+
+<script>
+function switchMode(isLogin){
+  document.getElementById('loginForm').style.display=isLogin?'block':'none';
+  document.getElementById('regForm').style.display=isLogin?'none':'block';
+  document.getElementById('subTitle').textContent=isLogin?'欢迎回来':'加入HeartChain，连接爱心';
+  document.getElementById('msg').style.display='none';
+}
+function showMsg(t,type){var m=document.getElementById('msg');m.textContent=t;m.className='msg '+type}
+function doLogin(e){
+  e.preventDefault();
+  var phone=document.getElementById('phone').value.replace(/[^0-9]/g,'');
+  var pwd=document.getElementById('pwd').value;
+  if(!phone){showMsg('请输入手机号','e');return false}
+  if(!pwd){showMsg('请输入密码','e');return false}
+  // 模拟登录成功
+  localStorage.setItem('hc_auth',JSON.stringify({
+    user:{name:'김영수',phone:'+821****8999',id:'admin'},
+    token:'mock-token-'+Date.now()
+  }));
+  showMsg('登录成功！正在跳转...','s');
+  setTimeout(function(){location.href='/';},800);
+  return false;
+}
+function doReg(e){
+  e.preventDefault();
+  var pwd=document.getElementById('rpwd').value;
+  var conf=document.getElementById('rconf').value;
+  if(pwd.length<8){showMsg('密码至少8位','e');return false}
+  if(pwd!==conf){showMsg('两次密码不一致','e');return false}
+  showMsg('注册成功！请登录','s');
+  setTimeout(function(){switchMode(true);},1000);
+  return false;
+}
+var cd=0;
+function sendCode(){
+  var p=document.getElementById('rphone').value;
+  if(!p){showMsg('请输入手机号','e');return}
+  cd=60;
+  var btn=document.querySelector('#regForm button[onclick="sendCode()"]');
+  btn.disabled=true;
+  var t=setInterval(function(){cd--;btn.textContent=cd+'s';if(cd<=0){clearInterval(t);btn.disabled=false;btn.textContent='获取验证码';}},1000);
+}
+</script>
+</body>
+</html>

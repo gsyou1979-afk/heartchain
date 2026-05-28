@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "mkdir -p dist/frontend && cp -r public/* dist/frontend/ 2>/dev/null; nest build",
+    "build": "cd ../web && npx nuxt generate && cp -r .output/public/* ../backend/dist/frontend/ 2>/dev/null; cd ../backend && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

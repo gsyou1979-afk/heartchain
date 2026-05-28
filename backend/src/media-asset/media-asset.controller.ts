@@ -115,9 +115,8 @@ export class MediaAssetController {
       }
     }
 
-    const asset = this.mediaRepo.create(saveData) as unknown as MediaAsset;
-    const rawSaved = await this.mediaRepo.save(asset);
-    const saved = (Array.isArray(rawSaved) ? rawSaved[0] : rawSaved) as unknown as MediaAsset;
+    const asset = this.mediaRepo-create(saveData);
+    const saved = await this.mediaRepo.save(asset);
 
     // Update URL to point to data endpoint
     if (hasDataUrl) {

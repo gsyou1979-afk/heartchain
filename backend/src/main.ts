@@ -25,7 +25,7 @@ async function bootstrap() {
 
   // CORS
   const allowedOrigins = nodeEnv === 'production'
-    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app,https://heartchain-backend.onrender.com').split(',')
+    ? (configService.get<string>('CORS_ORIGINS') || 'https://heartchain-five.vercel.app').split(',')
     : '*';
 
   app.enableCors({
@@ -86,7 +86,7 @@ async function bootstrap() {
     },
   });
 
-  // Serve frontend static files (SPA)
+  // Serve frontend static files (SPA) — MUST be after all API routes
   const frontendDir = join(__dirname, 'frontend');
   const frontendIndex = join(frontendDir, 'index.html');
 
