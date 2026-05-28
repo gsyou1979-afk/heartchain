@@ -1,6 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "echo 'Static site, no build'",
+  "buildCommand": "echo 'No build needed - static HTML'",
   "outputDirectory": "web/.output/public",
-  "framework": null
+  "installCommand": "echo 'No install needed'",
+  "framework": null,
+  "cleanUrls": false,
+  "trailingSlash": false
 }

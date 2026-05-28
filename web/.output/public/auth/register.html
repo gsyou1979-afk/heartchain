@@ -2,12 +2,13 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#7B1FA2">
 <title>登录 - HeartChain</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,'PingFang SC',sans-serif;background:#fff;color:#333;min-height:100vh;display:flex;flex-direction:column}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#fff;color:#333;min-height:100vh;display:flex;flex:1;flex-direction:column}
 .logo-area{text-align:center;padding:60px 0 30px}
 .logo-icon{font-size:56px;margin-bottom:12px}
 .logo-title{font-size:28px;font-weight:800;color:#1A1A2E}
@@ -19,8 +20,8 @@ label{font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px}
 .phone-row{display:flex;gap:8px}
 .phone-code{background:#F5F5F5;border-radius:12px;padding:14px 16px;font-size:14px;color:#888;white-space:nowrap}
 .btn{width:100%;padding:16px;border-radius:14px;font-size:16px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px}
-.btn-p{background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff}
-.btn-s{background:#F5F5F5;color:#666}
+.btn-primary{background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff}
+.btn-secondary{background:#F5F5F5;color:#666}
 .text-right{text-align:right;margin-bottom:24px}
 .text-right a{font-size:13px;color:#7B1FA2;font-weight:600;text-decoration:none}
 .switch-mode{text-align:center;font-size:13px;color:#888;margin-top:16px}
@@ -28,95 +29,125 @@ label{font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px}
 .terms{text-align:center;font-size:12px;color:#999;padding:24px}
 .terms a{color:#7B1FA2;font-weight:600;text-decoration:none}
 .msg{padding:12px;border-radius:12px;font-size:13px;margin-bottom:16px;display:none}
-.msg.e{background:#FFEBEE;color:#C62828;display:block}
-.msg.s{background:#E8F5E9;color:#2E7D32;display:block}
+.msg.error{background:#FFEBEE;color:#C62828;display:block}
+.msg.success{background:#E8F5E9;color:#2E7D32;display:block}
 </style>
 </head>
 <body>
 <div class="logo-area">
   <div class="logo-icon">❤️</div>
   <div class="logo-title">HeartChain</div>
-  <div class="logo-sub" id="subTitle">欢迎回来</div>
+  <div class="logo-sub" id="page-subtitle">欢迎回来</div>
 </div>
+
 <div class="form-area">
   <div id="msg" class="msg"></div>
 
-  <form id="loginForm" onsubmit="return doLogin(event)">
+  <!-- 登录表单 -->
+  <form id="login-form" onsubmit="return handleLogin(event)">
     <label>手机号</label>
     <div class="phone-row">
       <div class="phone-code">🇰🇷 +82</div>
-      <input class="input" id="phone" placeholder="010-XXXX-XXXX" required>
+      <input class="input" id="login-phone" placeholder="010-XXXX-XXXX" required>
     </div>
     <label>密码</label>
-    <input class="input" id="pwd" type="password" placeholder="请输入密码" required>
-    <div class="text-right"><a href="/auth/forgot-password.html">忘记密码？</a></div>
-    <button type="submit" class="btn btn-p">登录</button>
-    <button type="button" class="btn btn-s" onclick="switchMode(false)">注册新账号</button>
+    <input class="input" id="login-password" type="password" placeholder="请输入密码" required>
+    <div class="text-right"><a href="/auth/forgot-password">忘记密码？</a></div>
+    <button type="submit" class="btn btn-primary">登录</button>
+    <button type="button" class="btn btn-secondary" onclick="switchMode(false)">注册新账号</button>
   </form>
 
-  <form id="regForm" style="display:none" onsubmit="return doReg(event)">
+  <!-- 注册表单 -->
+  <form id="register-form" style="display:none" onsubmit="return handleRegister(event)">
     <label>手机号</label>
     <div class="phone-row">
       <div class="phone-code">🇰🇷 +82</div>
-      <input class="input" id="rphone" placeholder="010-XXXX-XXXX" required>
+      <input class="input" id="reg-phone" placeholder="010-XXXX-XXXX" required>
     </div>
     <label>验证码</label>
     <div class="phone-row">
-      <input class="input" id="rcode" placeholder="6位验证码" required>
-      <button type="button" class="btn btn-s" style="width:auto;padding:14px 16px;font-size:13px;white-space:nowrap" onclick="sendCode()">获取验证码</button>
+      <input class="input" id="reg-code" placeholder="6位验证码" required>
+      <button type="button" id="btn-code" class="btn btn-secondary" style="width:auto;padding:14px 16px;font-size:13px;white-space:nowrap" onclick="sendCode()">获取验证码</button>
     </div>
     <label>设置密码</label>
-    <input class="input" id="rpwd" type="password" placeholder="至少8位" required>
+    <input class="input" id="reg-password" type="password" placeholder="至少8位，包含字母和数字" required>
     <label>确认密码</label>
-    <input class="input" id="rconf" type="password" placeholder="再次输入密码" required>
-    <button type="submit" class="btn btn-p">注册</button>
-    <button type="button" class="btn btn-s" onclick="switchMode(true)">已有账号？去登录</button>
+    <input class="input" id="reg-confirm" type="password" placeholder="再次输入密码" required>
+    <button type="submit" class="btn btn-primary">注册</button>
+    <button type="button" class="btn btn-secondary" onclick="switchMode(true)">已有账号？去登录</button>
   </form>
 
   <div class="terms">注册即表示同意 <a href="#">《服务条款》</a> 和 <a href="#">《隐私政策》</a></div>
 </div>
 
 <script>
-function switchMode(isLogin){
-  document.getElementById('loginForm').style.display=isLogin?'block':'none';
-  document.getElementById('regForm').style.display=isLogin?'none':'block';
-  document.getElementById('subTitle').textContent=isLogin?'欢迎回来':'加入HeartChain，连接爱心';
-  document.getElementById('msg').style.display='none';
+const API = '/api/v1';
+
+function switchMode(isLogin) {
+  document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('register-form').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('page-subtitle').textContent = isLogin ? '欢迎回来' : '加入HeartChain，连接爱心';
+  document.getElementById('msg').style.display = 'none';
 }
-function showMsg(t,type){var m=document.getElementById('msg');m.textContent=t;m.className='msg '+type}
-function doLogin(e){
+
+function showMsg(text, type) {
+  const msg = document.getElementById('msg');
+  msg.textContent = text;
+  msg.className = 'msg ' + type;
+}
+
+async function handleLogin(e) {
   e.preventDefault();
-  var phone=document.getElementById('phone').value.replace(/[^0-9]/g,'');
-  var pwd=document.getElementById('pwd').value;
-  if(!phone){showMsg('请输入手机号','e');return false}
-  if(!pwd){showMsg('请输入密码','e');return false}
-  // 模拟登录成功
-  localStorage.setItem('hc_auth',JSON.stringify({
-    user:{name:'김영수',phone:'+821****8999',id:'admin'},
-    token:'mock-token-'+Date.now()
-  }));
-  showMsg('登录成功！正在跳转...','s');
-  setTimeout(function(){location.href='/';},800);
+  const phone = '+82' + document.getElementById('login-phone').value.replace(/[^0-9]/g, '');
+  const password = document.getElementById('login-password').value;
+  try {
+    const res = await fetch(API + '/auth/password-login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({phone, password})
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showMsg(err.message || '登录失败', 'error');
+      return false;
+    }
+    const data = await res.json();
+    const user = data.user || data;
+    const token = data.accessToken || data.token;
+    localStorage.setItem('heartchain_auth', JSON.stringify({user, token}));
+    showMsg('登录成功！正在跳转...', 'success');
+    setTimeout(() => location.href = '/', 500);
+  } catch(e) {
+    showMsg('网络错误，请重试', 'error');
+  }
   return false;
 }
-function doReg(e){
+
+function handleRegister(e) {
   e.preventDefault();
-  var pwd=document.getElementById('rpwd').value;
-  var conf=document.getElementById('rconf').value;
-  if(pwd.length<8){showMsg('密码至少8位','e');return false}
-  if(pwd!==conf){showMsg('两次密码不一致','e');return false}
-  showMsg('注册成功！请登录','s');
-  setTimeout(function(){switchMode(true);},1000);
+  const phone = document.getElementById('reg-phone').value;
+  const code = document.getElementById('reg-code').value;
+  const password = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  if (password.length < 8) { showMsg('密码至少8位', 'error'); return false; }
+  if (password !== confirm) { showMsg('两次密码不一致', 'error'); return false; }
+  showMsg('注册成功！请登录', 'success');
+  setTimeout(() => switchMode(true), 1000);
   return false;
 }
-var cd=0;
-function sendCode(){
-  var p=document.getElementById('rphone').value;
-  if(!p){showMsg('请输入手机号','e');return}
-  cd=60;
-  var btn=document.querySelector('#regForm button[onclick="sendCode()"]');
-  btn.disabled=true;
-  var t=setInterval(function(){cd--;btn.textContent=cd+'s';if(cd<=0){clearInterval(t);btn.disabled=false;btn.textContent='获取验证码';}},1000);
+
+let countdown = 0;
+function sendCode() {
+  const phone = document.getElementById('reg-phone').value;
+  if (!phone) { showMsg('请输入手机号', 'error'); return; }
+  countdown = 60;
+  const btn = document.getElementById('btn-code');
+  btn.disabled = true;
+  const timer = setInterval(() => {
+    countdown--;
+    btn.textContent = countdown + 's';
+    if (countdown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = '获取验证码'; }
+  }, 1000);
 }
 </script>
 </body>
