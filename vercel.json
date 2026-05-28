@@ -1,13 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "echo 'Static site, no build needed'",
+  "buildCommand": "echo 'Static site, no build'",
   "outputDirectory": "web/.output/public",
-  "installCommand": "echo 'No install needed'",
-  "framework": null,
-  "routes": [
-    { "src": "/pc/(.*)", "dest": "/pc/$1" },
-    { "src": "/auth/(.*)", "dest": "/auth/$1" },
-    { "src": "/tasks/(.*)", "dest": "/tasks/$1" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
+  "framework": null
 }
