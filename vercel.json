@@ -1,7 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "cd web && npm run generate",
+  "buildCommand": "echo 'Static site, no build needed'",
   "outputDirectory": "web/.output/public",
-  "installCommand": "cd web && npm install",
-  "framework": null
+  "installCommand": "echo 'No install needed'",
+  "framework": null,
+  "routes": [
+    { "src": "/pc/(.*)", "dest": "/pc/$1" },
+    { "src": "/auth/(.*)", "dest": "/auth/$1" },
+    { "src": "/tasks/(.*)", "dest": "/tasks/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }
