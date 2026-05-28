@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "echo 'No build needed - static HTML'",
+  "buildCommand": "bash build.sh",
   "outputDirectory": "web/.output/public",
-  "installCommand": "echo 'No install needed'",
+  "installCommand": "echo No install needed",
   "framework": null,
-  "cleanUrls": false,
-  "trailingSlash": false
+  "routes": [
+    { "src": "/pc", "dest": "/pc/index.html" },
+    { "src": "/pc/(.*)", "dest": "/pc/$1" }
+  ]
 }
