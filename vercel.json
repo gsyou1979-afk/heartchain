@@ -1,11 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "bash build.sh",
+  "buildCommand": "cd web && npm run generate",
   "outputDirectory": "web/.output/public",
-  "installCommand": "echo No install needed",
-  "framework": null,
-  "routes": [
-    { "src": "/pc", "dest": "/pc/index.html" },
-    { "src": "/pc/(.*)", "dest": "/pc/$1" }
-  ]
+  "installCommand": "cd web && npm install",
+  "framework": null
 }

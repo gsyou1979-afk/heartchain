@@ -1,125 +1,212 @@
 <template>
-  <div class="min-h-screen bg-white flex flex-col">
-    <!-- Logo区域 -->
-    <div class="text-center pt-16 pb-8">
-      <div class="text-5xl mb-3">❤️</div>
-      <div class="text-3xl font-bold text-[#1A1a2e]">HeartChain</div>
-      <div class="text-sm text-gray-400 mt-2">{{ isLogin ? '欢迎回来' : '加入HeartChain，连接爱心' }}</div>
-    </div>
+  <div class="min-h-[80vh] flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold">注册</h1>
+        <p class="text-sm text-gray-500 mt-1">哈特链 HeartChain</p>
+      </div>
 
-    <!-- 表单区域 -->
-    <div class="flex-1 px-6">
-      <!-- 登录 -->
-      <template v-if="isLogin">
-        <div class="mb-4">
-          <label class="text-sm font-semibold text-gray-700 mb-1.5 block">手机号</label>
-          <div class="flex gap-2">
-            <div class="bg-[#F5F5F5] rounded-xl px-4 py-3.5 text-sm text-gray-400">🇰🇷 +82</div>
-            <input v-model="loginForm.phone" class="input-field flex-1" placeholder="010-XXXX-XXXX">
+      <div class="card">
+        <form @submit.prevent="handleRegister" class="space-y-4">
+          <!-- Phone -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+            <input v-model="form.phone" type="tel" placeholder="请输入手机号（如 +821098765432）" class="input-field" />
           </div>
-        </div>
 
-        <div class="mb-4">
-          <label class="text-sm font-semibold text-gray-700 mb-1.5 block">密码</label>
-          <input v-model="loginForm.password" type="password" class="input-field" placeholder="请输入密码">
-        </div>
-
-        <div class="text-right mb-6">
-          <NuxtLink to="/auth/forgot-password" class="text-xs text-[#7B1FA2] font-semibold">忘记密码？</NuxtLink>
-        </div>
-
-        <button @click="handleLogin" class="w-full btn-primary py-3.5 mb-3">登录</button>
-        <button @click="isLogin = false" class="w-full btn-secondary py-3.5 mb-6">注册新账号</button>
-      </template>
-
-      <!-- 注册 -->
-      <template v-else>
-        <div class="mb-4">
-          <label class="text-sm font-semibold text-gray-700 mb-1.5 block">手机号</label>
-          <div class="flex gap-2">
-            <div class="bg-[#F5F5F5] rounded-xl px-4 py-3.5 text-sm text-gray-400 whitespace-nowrap">🇰🇷 +82</div>
-            <input v-model="regForm.phone" class="input-field flex-1" placeholder="010-XXXX-XXXX">
+          <!-- SMS Code -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+            <div class="flex gap-2">
+              <input v-model="form.code" type="text" placeholder="请输入验证码" class="input-field flex-1" maxlength="6" />
+              <button
+                type="button"
+                @click="sendCode"
+                :disabled="countdown > 0"
+                class="btn-secondary text-sm whitespace-nowrap"
+                :class="{ 'opacity-50 cursor-not-allowed': countdown > 0 }"
+              >
+                {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="mb-4">
-          <label class="text-sm font-semibold text-gray-700 mb-1.5 block">验证码</label>
-          <div class="flex gap-2">
-            <input v-model="regForm.code" class="input-field flex-1" placeholder="6位验证码">
-            <button @click="sendCode" class="px-4 py-3 rounded-xl text-sm font-semibold whitespace-nowrap transition-all"
-              :class="countdown > 0 ? 'bg-gray-200 text-gray-400' : 'bg-[#7B1FA2] text-white'">
-              {{ countdown > 0 ? countdown + 's' : '获取验证码' }}
-            </button>
+          <!-- Password -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+            <input v-model="form.password" type="password" placeholder="请设置密码（至少6位）" class="input-field" />
           </div>
-        </div>
 
-        <div class="mb-4">
-          <label class="text-sm font-semibold text-gray-700 mb-1.5 block">设置密码</label>
-          <input v-model="regForm.password" type="password" class="input-field" placeholder="至少8位，包含字母和数字">
-        </div>
-
-        <div class="mb-6">
-          <label class="text-sm font-semibold text-gray-700 mb-1.5 block">确认密码</label>
-          <input v-model="regForm.confirmPassword" type="password" class="input-field" placeholder="再次输入密码">
-          <div v-if="regForm.password && regForm.confirmPassword" class="mt-1">
-            <div v-if="regForm.password === regForm.confirmPassword" class="text-xs text-green-600">✅ 密码一致</div>
-            <div v-else class="text-xs text-red-500">❌ 密码不一致</div>
+          <!-- Confirm Password -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+            <input v-model="form.confirmPassword" type="password" placeholder="请再次输入密码" class="input-field" />
           </div>
-        </div>
 
-        <button @click="handleRegister" class="w-full btn-primary py-3.5 mb-3">注册</button>
-        <button @click="isLogin = true" class="w-full btn-secondary py-3.5 mb-6">已有账号？去登录</button>
-      </template>
+          <!-- Nickname -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">昵称</label>
+            <input v-model="form.nickname" type="text" placeholder="请输入昵称" class="input-field" />
+          </div>
 
-      <!-- 服务条款 -->
-      <div class="text-center text-xs text-gray-400 pb-6">
-        注册即表示同意 <span class="text-[#7B1FA2] font-semibold">《服务条款》</span> 和 <span class="text-[#7B1FA2] font-semibold">《隐私政策》</span>
+          <!-- Region -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">地区</label>
+            <select v-model="form.region" class="input-field">
+              <option value="cn">中国大陆</option>
+              <option value="kr">韩国</option>
+              <option value="global">其他地区</option>
+            </select>
+          </div>
+
+          <!-- Ad Preferences -->
+          <div class="border-t pt-4 mt-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">广告偏好设置</h3>
+            <p class="text-xs text-gray-500 mb-3">选择您希望看到的广告类型，帮助我们为您推荐相关内容</p>
+
+            <div class="space-y-3">
+              <label class="flex items-start gap-3">
+                <input v-model="form.adPreferences.projectAds" type="checkbox" class="mt-1 w-4 h-4 text-red-500 rounded" />
+                <div>
+                  <span class="text-sm font-medium">项目求助广告</span>
+                  <p class="text-xs text-gray-500">紧急求助、助学、扶贫等公益项目</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3">
+                <input v-model="form.adPreferences.charityAds" type="checkbox" class="mt-1 w-4 h-4 text-red-500 rounded" />
+                <div>
+                  <span class="text-sm font-medium">公益广告</span>
+                  <p class="text-xs text-gray-500">公益活动宣传、志愿服务招募等</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3">
+                <input v-model="form.adPreferences.commercialAds" type="checkbox" class="mt-1 w-4 h-4 text-red-500 rounded" />
+                <div>
+                  <span class="text-sm font-medium">商业广告</span>
+                  <p class="text-xs text-gray-500">企业品牌推广、产品促销等信息</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="mt-4">
+              <label class="flex items-center gap-2">
+                <input v-model="form.adEnabled" type="checkbox" class="w-4 h-4 text-red-500 rounded" />
+                <span class="text-sm">启用个性化广告推荐</span>
+              </label>
+              <p class="text-xs text-gray-500 mt-1 ml-6">关闭后您仍会看到广告，但不会基于您的兴趣推荐</p>
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div v-if="error" class="text-red-500 text-sm text-center">{{ error }}</div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-primary w-full" :disabled="loading">
+            {{ loading ? '注册中...' : '注册' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="mt-4 text-center text-sm">
+        <span class="text-gray-500">已有账号？</span>
+        <NuxtLink to="/auth/login" class="text-red-500 hover:text-red-600 font-medium">登录</NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '~/stores/auth'
+<script setup lang="ts">
+import { getApiUrl } from '~/utils/api';
+const auth = useAuthStore();
+const router = useRouter();
 
-const router = useRouter()
-const auth = useAuthStore()
-const isLogin = ref(true)
-const countdown = ref(0)
+const form = reactive({
+  phone: '',
+  code: '',
+  password: '',
+  confirmPassword: '',
+  nickname: '',
+  region: 'cn',
+  adEnabled: true,
+  adPreferences: {
+    projectAds: true,
+    charityAds: true,
+    commercialAds: false,
+  },
+});
+const loading = ref(false);
+const countdown = ref(0);
+const error = ref('');
+let timer: ReturnType<typeof setInterval>;
 
-const loginForm = reactive({ phone: '', password: '' })
-const regForm = reactive({ phone: '', code: '', password: '', confirmPassword: '' })
-
-function sendCode() {
-  if (!regForm.phone) return alert('请输入手机号')
-  countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) clearInterval(timer)
-  }, 1000)
-}
-
-async function handleLogin() {
-  if (!loginForm.phone) return alert('请输入手机号')
-  if (!loginForm.password) return alert('请输入密码')
+async function sendCode() {
+  if (!form.phone) return;
   try {
-    await auth.loginWithPhone(loginForm.phone, loginForm.password)
-    router.push('/')
-  } catch (e: any) {
-    alert(e.message || '登录失败')
+    const res = await fetch(`${getApiUrl()}/auth/sms/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: form.phone }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      error.value = data.message || '发送失败';
+      return;
+    }
+    countdown.value = 60;
+    timer = setInterval(() => {
+      countdown.value--;
+      if (countdown.value <= 0) clearInterval(timer);
+    }, 1000);
+  } catch (e) {
+    error.value = '网络错误';
   }
 }
 
-function handleRegister() {
-  if (!regForm.phone) return alert('请输入手机号')
-  if (!regForm.code) return alert('请输入验证码')
-  if (!regForm.password) return alert('请输入密码')
-  if (regForm.password.length < 8) return alert('密码至少8位')
-  if (regForm.password !== regForm.confirmPassword) return alert('两次密码不一致')
-  // TODO: 调用注册API
-  alert('注册成功！')
-  isLogin.value = true
+async function handleRegister() {
+  if (!form.phone || !form.code || !form.password) {
+    error.value = '请填写手机号、验证码和密码';
+    return;
+  }
+  if (form.password.length < 6) {
+    error.value = '密码至少6位';
+    return;
+  }
+  if (form.password !== form.confirmPassword) {
+    error.value = '两次密码不一致';
+    return;
+  }
+  loading.value = true;
+  error.value = '';
+  try {
+    const res = await fetch(`${getApiUrl()}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: form.phone,
+        code: form.code,
+        password: form.password,
+        nickname: form.nickname || undefined,
+        region: form.region,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      error.value = data.message || '注册失败';
+      return;
+    }
+    auth.setAuth(data.user, data.accessToken, data.refreshToken);
+    window.location.href = '/';
+  } catch (e) {
+    error.value = '网络错误';
+  } finally {
+    loading.value = false;
+  }
 }
 </script>

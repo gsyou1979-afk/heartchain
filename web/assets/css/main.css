@@ -4,84 +4,46 @@
 
 @layer base {
   :root {
-    /* 温暖紫主题 */
-    --color-primary: #7B1FA2;
-    --color-primary-dark: #6A1B9A;
-    --color-primary-light: #AB47BC;
-    --color-primary-bg: #FAF5FF;
-    --color-accent: #FFB300;
-    --color-accent-dark: #FF8F00;
-    --color-dark: #1A1A2E;
-    --color-dark-light: #16213E;
+    --color-primary: #ef4444;
+    --color-primary-dark: #dc2626;
+    --color-primary-light: #fca5a5;
+    --color-secondary: #f97316;
+    --color-accent: #ec4899;
   }
 
   body {
-    @apply bg-[#FAF5FF] text-gray-900 antialiased;
+    @apply bg-gray-50 text-gray-900 antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-[#7B1FA2] to-[#6A1B9A] hover:from-[#6A1B9A] hover:to-[#4A148C] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md shadow-purple-200;
+    @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-lg transition-colors duration-200;
   }
 
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-xl border border-gray-200 transition-all duration-200;
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-5 rounded-lg border border-gray-300 transition-colors duration-200;
   }
 
-  .btn-accent {
-    @apply bg-gradient-to-r from-[#FFB300] to-[#FF8F00] hover:from-[#FF8F00] hover:to-[#F57C00] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md shadow-yellow-200;
-  }
-
-  .btn-help {
-    @apply bg-gradient-to-r from-[#4CAF50] to-[#388E3C] hover:from-[#388E3C] hover:to-[#2E7D32] text-white font-semibold py-2.5 px-5 rounded-full transition-all duration-200 text-sm;
-  }
-
-  .btn-danger {
-    @apply bg-gradient-to-r from-[#F44336] to-[#D32F2F] text-white font-semibold py-2.5 px-5 rounded-full transition-all duration-200 text-sm;
+  .btn-outline {
+    @apply border-2 border-red-500 text-red-500 hover:bg-red-50 font-medium py-2.5 px-5 rounded-lg transition-colors duration-200;
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
-  }
-
-  .card-elevated {
-    @apply bg-white rounded-2xl shadow-lg border border-gray-100 p-5;
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
   }
 
   .input-field {
-    @apply w-full px-4 py-3.5 bg-[#F5F5F5] border border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-[#7B1FA2] focus:border-[#7B1FA2] outline-none transition-all text-base;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all;
   }
 
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
-  .badge-errand { @apply bg-purple-100 text-purple-700; }
-  .badge-transport { @apply bg-blue-100 text-blue-700; }
-  .badge-teach { @apply bg-green-100 text-green-700; }
-  .badge-pet { @apply bg-orange-100 text-orange-700; }
-  .badge-repair { @apply bg-red-100 text-red-700; }
-  .badge-delivery { @apply bg-cyan-100 text-cyan-700; }
-
-  .gradient-primary {
-    @apply bg-gradient-to-r from-[#7B1FA2] to-[#6A1B9A];
-  }
-
-  .gradient-dark {
-    @apply bg-gradient-to-r from-[#1A1A2E] to-[#16213E];
-  }
-
-  .gradient-accent {
-    @apply bg-gradient-to-r from-[#FFB300] to-[#FF8F00];
-  }
-
-  .gradient-green {
-    @apply bg-gradient-to-r from-[#4CAF50] to-[#388E3C];
-  }
-
-  .text-primary { @apply text-[#7B1FA2]; }
-  .text-accent { @apply text-[#FFB300]; }
-  .bg-primary { @apply bg-[#7B1FA2]; }
-  .bg-primary-bg { @apply bg-[#FAF5FF]; }
+  .badge-volunteer { @apply bg-green-100 text-green-800; }
+  .badge-skill { @apply bg-blue-100 text-blue-800; }
+  .badge-emergency { @apply bg-red-100 text-red-800; }
+  .badge-paid { @apply bg-yellow-100 text-yellow-800; }
+  .badge-donation { @apply bg-purple-100 text-purple-800; }
 }

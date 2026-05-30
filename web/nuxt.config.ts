@@ -3,12 +3,16 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-01',
   devtools: { enabled: true },
   
+  // 开发服务器配置
   devServer: {
     port: 3004,
     host: '0.0.0.0',
   },
   
+  // 禁用 SSR - SPA 模式
   ssr: false,
+  
+  // 启用 pages 路由（必须显式配置）
   pages: true,
   
   modules: [
@@ -23,33 +27,23 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'HeartChain - 连接每一份爱心',
+      title: '哈特链 HeartChain',
       htmlAttrs: { lang: 'zh' },
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' },
-        { name: 'description', content: 'HeartChain - 基于地理位置的互助服务平台' },
-        { name: 'theme-color', content: '#7B1FA2' },
-        { name: 'apple-mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-        { name: 'apple-mobile-web-app-title', content: 'HeartChain' },
-        { name: 'mobile-web-app-capable', content: 'yes' },
-        { name: 'format-detection', content: 'telephone=no' },
-        // Open Graph
-        { property: 'og:title', content: 'HeartChain - 连接每一份爱心' },
-        { property: 'og:description', content: '基于地理位置的互助服务平台，发布求助，帮助他人' },
-        { property: 'og:type', content: 'website' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'description', content: '哈特链 HeartChain - 以爱心链接世界 | Blockchain-based Volunteer Service Platform' },
+        { name: 'theme-color', content: '#ef4444' },
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
-        { rel: 'manifest', href: '/manifest.json' },
       ],
     },
   },
 
   runtimeConfig: {
     public: {
+      // API 地址：生产环境用 Render，开发环境用本地
       apiBase: process.env.NUXT_API_BASE || 'https://heartchain-backend.onrender.com/api/v1',
       appName: 'HeartChain',
     },
@@ -57,6 +51,7 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // 路由中间件
   routeRules: {
     '/admin/**': { ssr: false },
     '/profile/**': { ssr: false },
@@ -67,9 +62,4 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: '',
   },
-
-  // 强制 Vercel 重新构建（每次提交更新此值）
-  sourcemap: false,
-  nitro: {
-    preset: 'vercel',
-  },
+});
