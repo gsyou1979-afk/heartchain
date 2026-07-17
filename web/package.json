@@ -1,0 +1,24 @@
+{
+  "name": "heartchain-web",
+  "version": "1.0.0",
+  "description": "HeartChain frontend - Nuxt 3 + Vue 3 + Tailwind CSS",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^3.9.0",
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.10.0",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31"
+  }
+}

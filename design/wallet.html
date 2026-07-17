@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeartChain 钱包页面方案</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f0f0; color: #333; line-height: 1.6; }
+.page { max-width: 380px; margin: 20px auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 30px; }
+.header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header .back { font-size: 16px; }
+.content { padding: 24px; }
+.title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #888; margin-bottom: 20px; }
+.balance-card { background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 16px; padding: 24px; color: white; margin-bottom: 20px; }
+.balance-label { font-size: 13px; opacity: 0.7; margin-bottom: 4px; }
+.balance-amount { font-size: 38px; font-weight: 800; }
+.balance-unit { font-size: 16px; opacity: 0.7; margin-left: 4px; }
+.balance-row { display: flex; gap: 12px; margin-top: 16px; }
+.balance-item { flex: 1; text-align: center; }
+.balance-item .num { font-size: 20px; font-weight: 700; }
+.balance-item .label { font-size: 11px; opacity: 0.6; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.action-btn { text-align: center; cursor: pointer; }
+.action-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 6px; }
+.action-name { font-size: 11px; color: #555; }
+.section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.section-title .more { font-size: 12px; color: #888; font-weight: 400; }
+.tx-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+.tx-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.tx-info { flex: 1; }
+.tx-title { font-size: 14px; font-weight: 500; color: #333; }
+.tx-date { font-size: 12px; color: #888; margin-top: 2px; }
+.tx-amount { font-size: 15px; font-weight: 600; }
+.tx-amount.in { color: #4caf50; }
+.tx-amount.out { color: #f44336; }
+.tx-status { font-size: 11px; padding: 2px 8px; border-radius: 8px; }
+.tx-status.done { background: #e8f5e9; color: #4caf50; }
+.tx-status.pending { background: #fff3e0; color: #f57c00; }
+.tab-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab { flex: 1; text-align: center; padding: 8px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; background: #f5f5f5; color: #666; }
+.tab.active { background: #1a1a2e; color: white; }
+.heart-card { background: linear-gradient(135deg, #e91e63, #f06292); border-radius: 16px; padding: 20px; color: white; margin-bottom: 20px; }
+.heart-rate { font-size: 13px; opacity: 0.8; margin-bottom: 4px; }
+.heart-amount { font-size: 32px; font-weight: 800; }
+.heart-sub { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+.convert-row { display: flex; gap: 10px; margin-top: 16px; }
+.convert-box { flex: 1; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; text-align: center; }
+.convert-box .num { font-size: 18px; font-weight: 700; }
+.convert-box .label { font-size: 11px; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<h2 style="text-align:center; padding:20px 10px; color:#1a1a2e;">📱 钱包页面方案</h2>
+
+<!-- 方案A 综合钱包 -->
+<div class="page">
+  <div class="header">
+    <span class="back">← 返回</span>
+    <span style="font-size:13px; opacity:0.7;">钱包</span>
+  </div>
+  <div class="content">
+
+    <!-- 余额卡片 -->
+    <div class="balance-card">
+      <div class="balance-label">💰 账户余额</div>
+      <div><span class="balance-amount">125,000</span><span class="balance-unit">원</span></div>
+      <div class="balance-row">
+        <div class="balance-item"><div class="num">+85,000</div><div class="label">本月收入</div></div>
+        <div class="balance-item"><div class="num">-32,000</div><div class="label">本月支出</div></div>
+        <div class="balance-item"><div class="num">12</div><div class="label">交易笔数</div></div>
+      </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="action-grid">
+      <div class="action-btn"><div class="action-icon" style="background:#e3f2fd;">💳</div><div class="action-name">充值</div></div>
+      <div class="action-btn"><div class="action-icon" style="background:#e8f5e9;">🏧</div><div class="action-name">提现</div></div>
+      <div class="action-btn"><div class="action-icon" style="background:#fff3e0;">💸</div><div class="action-name">转账</div></div>
+      <div class="action-btn"><div class="action-icon" style="background:#fce4ec;">🎁</div><div class="action-name">红包</div></div>
+    </div>
+
+    <!-- 爱心积分卡片 -->
+    <div class="heart-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="heart-rate">❤️ 爱心积分</div>
+          <div><span class="heart-amount">12,400</span></div>
+          <div class="heart-sub">可抵扣 ₩12,400</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.2); padding:6px 12px; border-radius:12px; font-size:12px; cursor:pointer;">兑换 →</div>
+      </div>
+      <div class="convert-row">
+        <div class="convert-box"><div class="num">100❤️</div><div class="label">= ₩100</div></div>
+        <div class="convert-box"><div class="num">1,000❤️</div><div class="label">= ₩1,100</div></div>
+        <div class="convert-box"><div class="num">10,000❤️</div><div class="label">= ₩12,000</div></div>
+      </div>
+    </div>
+
+    <!-- 交易记录 -->
+    <div class="section-title">
+      <span>📋 最近交易</span>
+      <span class="more">全部 ›</span>
+    </div>
+
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#e8f5e9;">✋</div>
+      <div class="tx-info"><div class="tx-title">帮助买药</div><div class="tx-date">今天 14:30</div></div>
+      <div><div class="tx-amount in">+5,000</div><div class="tx-status done">已完成</div></div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#e3f2fd;">💳</div>
+      <div class="tx-info"><div class="tx-title">充值</div><div class="tx-date">今天 10:15</div></div>
+      <div><div class="tx-amount in">+50,000</div><div class="tx-status done">已完成</div></div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#fff3e0;">🏧</div>
+      <div class="tx-info"><div class="tx-title">提现</div><div class="tx-date">昨天 18:20</div></div>
+      <div><div class="tx-amount out">-20,000</div><div class="tx-status pending">处理中</div></div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#e8f5e9;">✋</div>
+      <div class="tx-info"><div class="tx-title">帮忙搬行李</div><div class="tx-date">昨天 09:45</div></div>
+      <div><div class="tx-amount in">+8,000</div><div class="tx-status done">已完成</div></div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#fce4ec;">❤️</div>
+      <div class="tx-info"><div class="tx-title">积分兑换</div><div class="tx-date">5月20日</div></div>
+      <div><div class="tx-amount out">-2,000❤️</div><div class="tx-status done">已完成</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 方案B 分Tab -->
+<div style="text-align:center; font-size:14px; color:#888; margin:10px 0;">方案B：分Tab切换（对比）</div>
+
+<div class="page">
+  <div class="header">
+    <span class="back">← 返回</span>
+    <span style="font-size:13px; opacity:0.7;">我的钱包</span>
+  </div>
+  <div class="content">
+
+    <div class="tab-row">
+      <div class="tab active">💰 余额</div>
+      <div class="tab">❤️ 积分</div>
+      <div class="tab">📋 记录</div>
+    </div>
+
+    <!-- 余额Tab内容 -->
+    <div class="balance-card">
+      <div class="balance-label">账户余额</div>
+      <div><span class="balance-amount">125,000</span><span class="balance-unit">원</span></div>
+    </div>
+
+    <div class="action-grid">
+      <div class="action-btn"><div class="action-icon" style="background:#e3f2fd;">💳</div><div class="action-name">充值</div></div>
+      <div class="action-btn"><div class="action-icon" style="background:#e8f5e9;">🏧</div><div class="action-name">提现</div></div>
+      <div class="action-btn"><div class="action-icon" style="background:#fff3e0;">💸</div><div class="action-name">转账</div></div>
+      <div class="action-btn"><div class="action-icon" style="background:#fce4ec;">📊</div><div class="action-name">明细</div></div>
+    </div>
+
+    <div class="section-title"><span>最近交易</span></div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#e8f5e9;">✋</div>
+      <div class="tx-info"><div class="tx-title">帮助买药</div><div class="tx-date">今天 14:30</div></div>
+      <div class="tx-amount in">+5,000</div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#e3f2fd;">💳</div>
+      <div class="tx-info"><div class="tx-title">充值</div><div class="tx-date">今天 10:15</div></div>
+      <div class="tx-amount in">+50,000</div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center; padding:20px; font-size:15px; color:#1a1a2e;">
+  <b>请选择：A（综合钱包）还是 B（分Tab）？</b>
+</div>
+
+</body>
+</html>

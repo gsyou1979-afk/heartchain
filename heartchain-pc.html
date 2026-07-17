@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#7B1FA2">
+<title>HeartChain PC版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:#FAF5FF;color:#333;min-height:100vh}
+.top{background:linear-gradient(135deg,#1A1A2E,#16213E);color:#fff;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.top a{color:#fff;text-decoration:none}
+.top .logo{font-size:20px;font-weight:700}
+.top nav{display:flex;gap:24px}
+.top nav a{font-size:14px;opacity:.8}
+.top nav a:hover{opacity:1}
+.main{display:flex;max-width:1200px;margin:24px auto;gap:24px;padding:0 24px}
+.content{flex:1}
+.sidebar{width:280px;flex-shrink:0}
+.card{background:#fff;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.ach{background:linear-gradient(135deg,#1A1A2E,#16213E);border-radius:16px;padding:28px;color:#fff;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center}
+.ach h2{font-size:13px;opacity:.7;margin-bottom:6px}
+.ach .num{font-size:42px;font-weight:800}
+.ach .sub{font-size:13px;opacity:.7}
+.map{border-radius:16px;height:240px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);margin-bottom:24px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#666}
+.task-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.task-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer}
+.task-card:hover{transform:translateY(-2px);transition:.2s}
+.task-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.task-meta{font-size:12px;color:#888;display:flex;gap:12px;margin-bottom:12px}
+.btn-h{padding:6px 16px;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#388E3C);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer}
+.btn-h:hover{opacity:.9}
+.side-btn{width:100%;padding:12px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.btn-p{background:linear-gradient(135deg,#FFB300,#FF8F00);color:#fff}
+.btn-s{background:#f5f5f5;color:#666}
+.stat-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.stat-row:last-child{border:none}
+.lb{background:#f0f0f0;border-radius:10px;height:8px;overflow:hidden;margin:8px 0}
+.lf{height:100%;border-radius:10px;background:linear-gradient(90deg,#7B1FA2,#AB47BC)}
+.badge-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.badge-t{text-align:center;padding:8px 4px;font-size:10px;color:#666}
+.b-i{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 4px}
+.footer{text-align:center;padding:32px;color:#999;font-size:12px}
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="/" class="logo">❤️ HeartChain</a>
+  <nav>
+    <a href="/">首页</a>
+    <a href="/tasks/index.html">任务</a>
+    <a href="/achievement.html">成就</a>
+    <a href="/wallet.html">钱包</a>
+  </nav>
+  <div>
+    <a href="/auth/register.html" style="padding:6px 16px;border-radius:16px;background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff;font-size:13px;text-decoration:none">登录</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="content">
+    <div class="ach">
+      <div>
+        <h2>🏆 本月成就</h2>
+        <div class="num">2,400</div>
+        <div class="sub">❤️ 爱心积分</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:24px;font-weight:700">12</div>
+        <div style="font-size:11px;opacity:.6">本月帮助</div>
+      </div>
+    </div>
+
+    <div class="map">🗺️ 地图区域（附近 4 个求助）</div>
+
+    <div class="task-grid">
+      <div class="task-card">
+        <div class="task-title">🛒 帮忙买药</div>
+        <div class="task-meta"><span>📍 0.8km</span><span>⏰ 20分钟后</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:#888">❤️ +200</span>
+          <button class="btn-h" onclick="alert('已接单')">我来帮助</button>
+        </div>
+      </div>
+      <div class="task-card">
+        <div class="task-title">🚗 帮忙搬行李</div>
+        <div class="task-meta"><span>📍 1.2km</span><span>⏰ 50分钟后</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:#888">❤️ +350</span>
+          <button class="btn-h" onclick="alert('已接单')">我来帮助</button>
+        </div>
+      </div>
+      <div class="task-card">
+        <div class="task-title">📱 教老人用手机</div>
+        <div class="task-meta"><span>📍 2.5km</span><span>⏰ 2小时后</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:#888">❤️ +150</span>
+          <button class="btn-h" onclick="alert('已接单')">我来帮助</button>
+        </div>
+      </div>
+      <div class="task-card">
+        <div class="task-title">🐕 帮忙遛狗</div>
+        <div class="task-meta"><span>📍 3.1km</span><span>⏰ 3小时后</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:#888">❤️ +100</span>
+          <button class="btn-h" onclick="alert('已接单')">我来帮助</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">⚡ 快捷操作</div>
+      <button class="side-btn btn-p" onclick="location.href='/tasks/publish.html'">📝 发布求助</button>
+      <button class="side-btn btn-s" onclick="location.href='/mytasks.html'">📋 我的任务</button>
+      <button class="side-btn btn-s" onclick="location.href='/admin/index.html'">⚙️ 管理后台</button>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">📊 本月统计</div>
+      <div class="stat-row"><span>帮助次数</span><strong>12</strong></div>
+      <div class="stat-row"><span>获得积分</span><strong>+2,400 ❤️</strong></div>
+      <div class="stat-row"><span>平均评分</span><strong>4.9 ⭐</strong></div>
+      <div class="stat-row"><span>月度排名</span><strong>#3</strong></div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">🏅 会员等级</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span style="color:#7B1FA2;font-weight:600">Lv.3 热心市民</span>
+        <span style="color:#999">Lv.4 爱心使者</span>
+      </div>
+      <div class="lb"><div class="lf" style="width:65%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#999"><span>12,400</span><span>20,000</span></div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">🏆 成就徽章</div>
+      <div class="badge-g">
+        <div class="badge-t"><div class="b-i" style="background:linear-gradient(135deg,#FFD700,#FFA000)">🌟</div>首次帮助</div>
+        <div class="badge-t"><div class="b-i" style="background:linear-gradient(135deg,#4CAF50,#8BC34A)">🌱</div>连续7天</div>
+        <div class="badge-t"><div class="b-i" style="background:linear-gradient(135deg,#2196F3,#03A9F4)">💎</div>帮助10次</div>
+        <div class="badge-t"><div class="b-i" style="background:linear-gradient(135deg,#E91E63,#F06292)">❤️</div>爱心大使</div>
+        <div class="badge-t"><div class="b-i" style="background:#e0e0e0;opacity:.4">🔒</div>???</div>
+        <div class="badge-t"><div class="b-i" style="background:#e0e0e0;opacity:.4">🔒</div>???</div>
+        <div class="badge-t"><div class="b-i" style="background:#e0e0e0;opacity:.4">🔒</div>???</div>
+        <div class="badge-t"><div class="b-i" style="background:#e0e0e0;opacity:.4">🔒</div>???</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">❤️ HeartChain — 连接每一份爱心 | Copyright © 2026</div>
+</body>
+</html>
