@@ -46,7 +46,7 @@ export class TasksService {
       requiredCreditScore: dto.requiredCreditScore ?? 1,
       requiredExperience: dto.requiredExperience ?? 0,
     };
-    const { baseReward } = this.evaluationService.evaluate(evalInput);
+    const { baseReward, publisherReward } = this.evaluationService.evaluate(evalInput);
 
     const bonusPoints = dto.bonusPoints ?? 0;
 
@@ -57,7 +57,7 @@ export class TasksService {
         `task_bonus_${dto.title}`,
       );
       if (!ok) {
-        throw new BadRequestException('ÀÜ°í°¡ ºÎÁ·ÇÏ¿© Ãß°¡ º¸»óÀ» µ¿°áÇÒ ¼ö ¾ø½À´Ï´Ù.');
+        throw new BadRequestException('ä½™é¢ä¸è¶³ï¼Œæ— æ³•å†»ç»“é¢å¤–å¥–åŠ±ã€‚');
       }
     }
 
@@ -75,6 +75,7 @@ export class TasksService {
       requiredCreditScore: dto.requiredCreditScore ?? 1,
       requiredExperience: dto.requiredExperience ?? 0,
       baseReward,
+      publisherReward,
       bonusReward: bonusPoints,
       bonusReserved: bonusPoints > 0,
       creator_id: dto.creator_id,
@@ -85,9 +86,9 @@ export class TasksService {
 
   async complete(taskId: number, helperId: number): Promise<Task> {
     const task = await this.taskRepo.findOne({ where: { id: taskId } });
-    if (!task) throw new NotFoundException('ÀÛ¾÷À» Ã£À» ¼ö ¾ø½À´Ï´Ù.');
+    if (!task) throw new NotFoundException('æ‰¾ä¸åˆ°ä»»åŠ¡ã€‚');
     if (task.status !== 'accepted') {
-      throw new BadRequestException('ÁøÇà ÁßÀÎ ÀÛ¾÷¸¸ ¿Ï·á Ã³¸®ÇÒ ¼ö ÀÖ½À´Ï´Ù.');
+      throw new BadRequestException('åªèƒ½å®Œæˆè¿›è¡Œä¸­çš„ä»»åŠ¡ã€‚');
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -95,14 +96,28 @@ export class TasksService {
     await queryRunner.startTransaction();
 
     try {
+      // 1. ä»»åŠ¡ç”Ÿæˆç§¯åˆ† â†’ å®Œæˆè€…è·å¾—åŸºç¡€å¥–åŠ±ï¼ˆå¹³å°é“¸é€ ï¼‰
       await this.transactionsService.mint(
         helperId,
         task.baseReward,
         `task_${task.id}_base`,
-        `ÀÛ¾÷ ¿Ï·á ±âº» º¸»ó: ${task.title}`,
+        `ä»»åŠ¡å®ŒæˆåŸºç¡€å¥–åŠ±: ${task.title}`,
         queryRunner,
       );
 
+      // 2. å‘å¸ƒäººå¥–åŠ±ç§¯åˆ† â†’ å‘å¸ƒäººè·å¾—å¥–åŠ±ï¼ˆå¹³å°é“¸é€ ï¼‰
+      if (task.publisherReward > 0) {
+        await this.transactionsService.mint(
+          task.creator_id,
+          task.publisherReward,
+          `task_${task.id}_publisher`,
+          `å‘å¸ƒäººå¥–åŠ±: ${task.title}`,
+          queryRunner,
+          'publisher_reward',
+        );
+      }
+
+      // 3. é¢å¤–å¥–åŠ± â†’ ä»å‘å¸ƒäººå†»ç»“ä½™é¢è½¬ç»™å®Œæˆè€…
       if (task.bonusReward > 0 && task.bonusReserved) {
         await this.walletService.releaseReserve(
           task.creator_id,
@@ -114,7 +129,7 @@ export class TasksService {
           helperId,
           task.bonusReward,
           `task_${task.id}_bonus`,
-          `ÀÛ¾÷ ¿Ï·á Ãß°¡ º¸»ó: ${task.title}`,
+          `é¢å¤–å¥–åŠ±: ${task.title}`,
           queryRunner,
         );
       }
@@ -135,9 +150,9 @@ export class TasksService {
 
   async cancel(taskId: number): Promise<Task> {
     const task = await this.taskRepo.findOne({ where: { id: taskId } });
-    if (!task) throw new NotFoundException('ÀÛ¾÷À» Ã£À» ¼ö ¾ø½À´Ï´Ù.');
+    if (!task) throw new NotFoundException('æ‰¾ä¸åˆ°ä»»åŠ¡ã€‚');
     if (task.status !== 'open' && task.status !== 'accepted') {
-      throw new BadRequestException('Ãë¼ÒÇÒ ¼ö ¾ø´Â »óÅÂÀÔ´Ï´Ù.');
+      throw new BadRequestException('æ— æ³•å–æ¶ˆçš„çŠ¶æ€ã€‚');
     }
 
     if (task.bonusReward > 0 && task.bonusReserved) {
@@ -150,7 +165,7 @@ export class TasksService {
         task.creator_id,
         task.bonusReward,
         `task_${task.id}_refund`,
-        `ÀÛ¾÷ Ãë¼Ò ? Ãß°¡ º¸»ó ¹İÈ¯: ${task.title}`,
+        `ä»»åŠ¡å–æ¶ˆ - é¢å¤–å¥–åŠ±é€€è¿˜: ${task.title}`,
       );
     }
 
@@ -161,7 +176,7 @@ export class TasksService {
 
   async findOne(id: number): Promise<Task> {
     const task = await this.taskRepo.findOne({ where: { id } });
-    if (!task) throw new NotFoundException('ÀÛ¾÷À» Ã£À» ¼ö ¾ø½À´Ï´Ù.');
+    if (!task) throw new NotFoundException('æ‰¾ä¸åˆ°ä»»åŠ¡ã€‚');
     return task;
   }
 

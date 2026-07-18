@@ -5,12 +5,13 @@ export type TransactionType =
   | 'expense'
   | 'recharge'
   | 'withdraw'
-  | 'mint'      // 신규 민팅 (기본 보상)
-  | 'bonus'     // 추가 보상 (transfer에 포함)
-  | 'transfer'  // 이체
-  | 'refund'    // 환불
-  | 'reserve'   // 동결
-  | 'release';  // 동결 해제
+  | 'mint'              // 任务生成积分（平台铸造 → 完成者）
+  | 'publisher_reward'  // 发布人奖励积分（平台铸造 → 发布人）
+  | 'bonus'             // 额外奖励（transfer 中包含）
+  | 'transfer'          // 转账
+  | 'refund'            // 退款
+  | 'reserve'           // 冻结
+  | 'release';          // 解冻
 
 @Entity('transactions')
 export class Transaction {

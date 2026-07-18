@@ -13,6 +13,7 @@ export interface EvaluationInput {
 
 export interface EvaluationResult {
   baseReward: number;
+  publisherReward: number; // 发布人奖励积分（任务完成后发放给发布人）
   breakdown: {
     categoryScore: number;
     educationScore: number;
@@ -45,6 +46,10 @@ export class EvaluationService {
 
   private readonly HOURLY_BASE = 30; // 시간당 기본 포인트
 
+  // ─── 발행인 보상 비율 (baseReward 의 N%) ──────────────────
+  private readonly PUBLISHER_REWARD_RATE = 0.15; // 15%
+  private readonly PUBLISHER_REWARD_MIN = 5;     // 최소 5 포인트
+
   // ─── 메인 평가 메서드 ─────────────────────────────────────
 
   evaluate(input: EvaluationInput): EvaluationResult {
@@ -73,8 +78,15 @@ export class EvaluationService {
     // 최소 보상 보장
     const finalReward = Math.max(10, baseReward);
 
+    // 발행인 보상 계산: baseReward 의 15%, 최소 5 포인트
+    const publisherReward = Math.max(
+      this.PUBLISHER_REWARD_MIN,
+      Math.round(finalReward * this.PUBLISHER_REWARD_RATE),
+    );
+
     return {
       baseReward: finalReward,
+      publisherReward,
       breakdown: {
         categoryScore,
         educationScore,

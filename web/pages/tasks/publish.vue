@@ -47,10 +47,22 @@
       <label>要求经验值</label>
       <input v-model.number="form.requiredExperience" type="number" min="0" class="input" />
 
-      <!-- 4. 플랫폼 산정 기본 보상 표시 -->
+      <!-- 4. 平台自动评估 -->
       <div class="eval-box" v-if="evaluation">
         <div class="eval-label">🤖 平台自动评估</div>
-        <div class="eval-amount">基础奖励：{{ evaluation.baseReward }} ❤️ Heart</div>
+        <div class="eval-row">
+          <div class="eval-item">
+            <div class="eval-item-label">任务生成积分</div>
+            <div class="eval-amount">{{ evaluation.baseReward }} ❤️</div>
+            <div class="eval-item-hint">完成者获得</div>
+          </div>
+          <div class="eval-divider">+</div>
+          <div class="eval-item highlight">
+            <div class="eval-item-label">发布人奖励积分</div>
+            <div class="eval-amount">{{ evaluation.publisherReward }} ❤️</div>
+            <div class="eval-item-hint">你将获得</div>
+          </div>
+        </div>
         <div class="eval-detail">
           <span>类型 {{ evaluation.breakdown.categoryScore }}</span>
           <span>学历 {{ evaluation.breakdown.educationScore }}</span>
@@ -86,11 +98,31 @@
         <span v-if="wallet.reservedBalance > 0">（冻结 {{ wallet.reservedBalance }} ❤️）</span>
       </div>
 
-      <!-- 7. 총 보상 표시 -->
-      <div class="total-box" v-if="evaluation">
-        <span>基础 {{ evaluation.baseReward }}</span>
-        <span>+ 额外 {{ form.bonusPoints || 0 }}</span>
-        <span class="total">= 合计 {{ evaluation.baseReward + (form.bonusPoints || 0) }} ❤️</span>
+      <!-- 7. 奖励总览 -->
+      <div class="reward-summary" v-if="evaluation">
+        <div class="summary-section">
+          <div class="summary-title">🎯 完成者获得</div>
+          <div class="summary-row">
+            <span>任务生成积分</span>
+            <span>{{ evaluation.baseReward }} ❤️</span>
+          </div>
+          <div class="summary-row">
+            <span>额外奖励</span>
+            <span>+ {{ form.bonusPoints || 0 }} ❤️</span>
+          </div>
+          <div class="summary-total">
+            合计 {{ evaluation.baseReward + (form.bonusPoints || 0) }} ❤️
+          </div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-section publisher">
+          <div class="summary-title">🎁 你（发布人）获得</div>
+          <div class="summary-row">
+            <span>发布人奖励积分</span>
+            <span class="publisher-reward">{{ evaluation.publisherReward }} ❤️</span>
+          </div>
+          <div class="summary-hint">任务被完成后自动发放</div>
+        </div>
       </div>
 
       <button class="btn btn-primary" @click="submit">📢 发布求助</button>
@@ -191,9 +223,15 @@ label { font-size:13px; font-weight:600; color:#333; display:block; margin:16px 
 .type-btn .icon { font-size:22px; }
 .type-btn .name { font-size:12px; }
 .eval-box { background:linear-gradient(135deg,#7B1FA2,#AB47BC); color:#fff; border-radius:14px; padding:16px; margin:16px 0; }
-.eval-label { font-size:12px; opacity:.8; margin-bottom:4px; }
+.eval-label { font-size:12px; opacity:.8; margin-bottom:8px; }
+.eval-row { display:flex; align-items:center; gap:12px; }
+.eval-item { flex:1; text-align:center; }
+.eval-item.highlight { background:rgba(255,255,255,.15); border-radius:10px; padding:8px 4px; }
+.eval-item-label { font-size:11px; opacity:.85; margin-bottom:2px; }
 .eval-amount { font-size:20px; font-weight:700; }
-.eval-detail { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; font-size:11px; opacity:.85; }
+.eval-item-hint { font-size:10px; opacity:.7; margin-top:2px; }
+.eval-divider { font-size:18px; opacity:.6; }
+.eval-detail { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; font-size:11px; opacity:.85; }
 .bonus-row { display:flex; gap:8px; align-items:center; }
 .reward-input { flex:1; background:#f5f5f5; border:none; border-radius:10px; padding:12px; font-size:16px; font-weight:700; outline:none; text-align:center; }
 .reward-input:disabled { opacity:.5; }
@@ -201,8 +239,15 @@ label { font-size:13px; font-weight:600; color:#333; display:block; margin:16px 
 .hint { font-size:12px; color:#888; margin:6px 0; }
 .hint.disabled { color:#F44336; }
 .wallet-info { font-size:13px; color:#333; margin:12px 0; padding:10px; background:#FAF5FF; border-radius:10px; }
-.total-box { display:flex; gap:12px; align-items:center; font-size:14px; font-weight:600; padding:12px; background:#F3E5F5; border-radius:10px; margin-bottom:16px; }
-.total-box .total { color:#7B1FA2; }
+.reward-summary { padding:16px; background:#F3E5F5; border-radius:14px; margin-bottom:16px; }
+.summary-section { padding:4px 0; }
+.summary-section.publisher { text-align:center; }
+.summary-title { font-size:13px; font-weight:700; color:#7B1FA2; margin-bottom:8px; }
+.summary-row { display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:4px 0; }
+.summary-total { font-size:16px; font-weight:700; color:#333; margin-top:4px; text-align:right; }
+.publisher-reward { font-size:18px; font-weight:700; color:#FF6F00; }
+.summary-hint { font-size:11px; color:#888; margin-top:4px; }
+.summary-divider { height:1px; background:rgba(123,31,162,.2); margin:12px 0; }
 .btn { width:100%; border:none; padding:14px; border-radius:14px; font-size:16px; font-weight:700; cursor:pointer; }
 .btn-primary { background:linear-gradient(135deg,#4CAF50,#43A047); color:#fff; }
 </style>

@@ -11,13 +11,15 @@ export class TransactionsService {
     private readonly txRepo: Repository<Transaction>,
   ) {}
 
-  // ─── 신규 민팅 (플랫폼 → 완수자) ──────────────────────────
+  // ─── 민팅 (플랫폼 → 사용자) ──────────────────────────────
+  // type 기본값 'mint' (任务生成积分), 'publisher_reward' (发布人奖励积分) 등 지정 가능
   async mint(
     userId: number,
     amount: number,
     reference: string,
     description: string,
     queryRunner?: QueryRunner,
+    type: TransactionType = 'mint',
   ): Promise<Transaction> {
     // 사용자 잔고 증가
     const manager = queryRunner?.manager ?? this.txRepo.manager;
@@ -26,7 +28,7 @@ export class TransactionsService {
 
     const tx = manager.create(Transaction, {
       user_id: userId,
-      type: 'mint' as TransactionType,
+      type,
       amount,
       points: amount,
       reference,
@@ -60,7 +62,7 @@ export class TransactionsService {
 
     const tx = manager.create(Transaction, {
       user_id: toUserId,
-      type: 'transfer' as TransactionType,
+      type: 'transfer',
       amount,
       points: amount,
       reference,
@@ -83,7 +85,7 @@ export class TransactionsService {
 
     const tx = this.txRepo.create({
       user_id: userId,
-      type: 'refund' as TransactionType,
+      type: 'refund',
       amount,
       points: amount,
       reference,

@@ -30,7 +30,10 @@ export class Task {
 
   // ─── 신규 보상 체계 ─────────────────────────────────────
   @Column({ type: 'integer', default: 0 })
-  baseReward: number; // 플랫폼 산정 기본 보상
+  baseReward: number; // 플랫폼 산정 기본 보상 (任务生成积分)
+
+  @Column({ type: 'integer', default: 0 })
+  publisherReward: number; // 발행인 보상 (发布人奖励积分, 완료 시 지급)
 
   @Column({ type: 'integer', default: 0 })
   bonusReward: number; // 발행인 추가 보상 (선택)
