@@ -44,10 +44,10 @@ export class EvaluationService {
     professional:  1.6,
   };
 
-  private readonly HOURLY_BASE = 30; // 시간당 기본 포인트
+  private readonly HOURLY_BASE = 10000; // 시간당 기본 포인트
 
   // ─── 발행인 보상 비율 (baseReward 의 N%) ──────────────────
-  private readonly PUBLISHER_REWARD_RATE = 0.15; // 15%
+  private readonly PUBLISHER_REWARD_RATE = 0.10; // 10%
   private readonly PUBLISHER_REWARD_MIN = 5;     // 최소 5 포인트
 
   // ─── 메인 평가 메서드 ─────────────────────────────────────
