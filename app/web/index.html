@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="哈特链 HeartChain - Blockchain-based Volunteer Service Platform">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="哈特链 HeartChain">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <title>哈特链 HeartChain</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body { margin: 0; background: #fff; }
+    .loading { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .loading-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #EF4444, #EC4899); border-radius: 20px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; animation: pulse 1.5s infinite; }
+    .loading-icon svg { fill: white; width: 40px; height: 40px; }
+    .loading h2 { color: #333; margin: 0 0 8px 0; font-size: 20px; }
+    .loading p { color: #888; margin: 0; font-size: 14px; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  </style>
+</head>
+<body>
+  <div class="loading">
+    <div class="loading-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    <h2>哈特链 HeartChain</h2>
+    <p>Loading...</p>
+  </div>
+  <script src="flutter.js" defer></script>
+</body>
+</html>
