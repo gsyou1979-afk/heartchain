@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 export type TaskStatus = 'open' | 'accepted' | 'completed' | 'cancelled';
 
-@Entity('tasks')
+@Entity('hc_tasks')
 export class Task {
   @PrimaryGeneratedColumn()
   id: number;

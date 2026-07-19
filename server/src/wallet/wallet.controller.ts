@@ -2,7 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { TransactionsService } from '../transactions/transactions.service';
 
-@Controller('api/users/:userId/wallet')
+@Controller('users/:userId/wallet')
 export class WalletController {
   constructor(
     private readonly walletService: WalletService,

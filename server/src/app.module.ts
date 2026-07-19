@@ -5,6 +5,8 @@ import { TasksModule } from './tasks/tasks.module';
 import { WalletModule } from './wallet/wallet.module';
 import { UsersModule } from './users/users.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -12,7 +14,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, // 마이그레이션으로 관리
+      synchronize: true,
       logging: process.env.NODE_ENV === 'development',
     }),
     EvaluationModule,
@@ -21,5 +23,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     UsersModule,
     TransactionsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

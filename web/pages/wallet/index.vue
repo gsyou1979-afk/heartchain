@@ -143,8 +143,8 @@ function formatDate(dateStr: string) {
 async function loadData() {
   try {
     const [wRes, tRes] = await Promise.all([
-      fetch(`${apiBase}/api/users/${currentUserId}/wallet`),
-      fetch(`${apiBase}/api/users/${currentUserId}/wallet/transactions`),
+      fetch(`${apiBase}/users/${currentUserId}/wallet`),
+      fetch(`${apiBase}/users/${currentUserId}/wallet/transactions`),
     ])
     if (wRes.ok) {
       const wData = await wRes.json()

@@ -13,7 +13,7 @@ export type TransactionType =
   | 'reserve'           // 冻结
   | 'release';          // 解冻
 
-@Entity('transactions')
+@Entity('hc_transactions')
 export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;

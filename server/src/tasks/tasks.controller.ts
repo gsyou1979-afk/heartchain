@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Param, Body, Patch } from '@nestjs/common';
 import { TasksService, CreateTaskDto } from './tasks.service';
 
-@Controller('api/tasks')
+@Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 

@@ -361,7 +361,7 @@ const canAddBonus = computed(() => wallet.availableBalance > 0)
 
 async function loadWallet() {
   try {
-    const res = await fetch(`${apiBase}/api/users/${currentUserId}/wallet`)
+    const res = await fetch(`${apiBase}/users/${currentUserId}/wallet`)
     if (res.ok) {
       const data = await res.json()
       Object.assign(wallet, data)
@@ -373,7 +373,7 @@ async function loadWallet() {
 
 async function evaluate() {
   try {
-    const res = await fetch(`${apiBase}/api/evaluation/calculate`, {
+    const res = await fetch(`${apiBase}/evaluation/calculate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -396,7 +396,7 @@ async function submit() {
   if (!form.title) return
   submitting.value = true
   try {
-    const res = await fetch(`${apiBase}/api/tasks`, {
+    const res = await fetch(`${apiBase}/tasks`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
