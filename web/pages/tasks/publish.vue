@@ -10,6 +10,7 @@
         <div class="nav-links">
           <a @click="goHome" class="nav-link">首页</a>
           <a @click="goWallet" class="nav-link">钱包</a>
+          <a @click="goHelp" class="nav-link">说明</a>
         </div>
       </div>
     </nav>
@@ -422,6 +423,7 @@ async function submit() {
 
 function goHome() { window.location.href = '/' }
 function goWallet() { window.location.href = '/wallet' }
+function goHelp() { window.location.href = '/help' }
 
 onMounted(() => {
   loadWallet()

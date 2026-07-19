@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <nav class="navbar">
       <div class="nav-container">
-        <div class="nav-brand" @click="navigateTo('/tasks/publish')">
+        <div class="nav-brand" @click="navigateTo('/')">
           <span class="brand-icon">❤️</span>
           <span class="brand-text">HeartChain</span>
           <span class="brand-sub">哈特链</span>
@@ -11,9 +11,41 @@
         <div class="nav-links">
           <a @click="navigateTo('/tasks/publish')" class="nav-link">发布求助</a>
           <a @click="navigateTo('/wallet')" class="nav-link">我的钱包</a>
+          <a @click="navigateTo('/help')" class="nav-link">说明</a>
         </div>
       </div>
     </nav>
+
+    <!-- 广告轮播横幅 -->
+    <div class="ad-banner">
+      <div class="ad-slides">
+        <div
+          v-for="(ad, i) in ads"
+          :key="i"
+          class="ad-slide"
+          :class="{ active: currentAd === i }"
+          :style="{ background: ad.bg }"
+        >
+          <div class="ad-content">
+            <div class="ad-icon">{{ ad.icon }}</div>
+            <div class="ad-text">
+              <div class="ad-title">{{ ad.title }}</div>
+              <div class="ad-desc">{{ ad.desc }}</div>
+            </div>
+            <div class="ad-tag">{{ ad.tag }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="ad-dots">
+        <span
+          v-for="(ad, i) in ads"
+          :key="i"
+          class="ad-dot"
+          :class="{ active: currentAd === i }"
+          @click="currentAd = i"
+        ></span>
+      </div>
+    </div>
 
     <!-- 主内容区 -->
     <div class="hero">
@@ -29,6 +61,9 @@
           </button>
           <button class="btn btn-secondary" @click="navigateTo('/wallet')">
             💎 我的钱包
+          </button>
+          <button class="btn btn-outline" @click="navigateTo('/help')">
+            📖 平台说明
           </button>
         </div>
       </div>
@@ -83,6 +118,14 @@
         </div>
         <div class="qa-arrow">→</div>
       </div>
+      <div class="qa-card" @click="navigateTo('/help')">
+        <div class="qa-icon">📖</div>
+        <div class="qa-text">
+          <div class="qa-title">平台说明</div>
+          <div class="qa-desc">了解积分规则、计算公式、FAQ</div>
+        </div>
+        <div class="qa-arrow">→</div>
+      </div>
     </div>
 
     <!-- 页脚 -->
@@ -93,6 +136,45 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const ads = [
+  {
+    icon: '🤝',
+    title: '互助让社区更温暖',
+    desc: '每一次帮助，都有积分回报',
+    tag: 'HeartChain',
+    bg: 'linear-gradient(135deg, #ef4444, #dc2626)',
+  },
+  {
+    icon: '🎯',
+    title: '时薪基数 10,000 ❤️/h',
+    desc: '平台自动评估，公平透明',
+    tag: '积分系统',
+    bg: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+  },
+  {
+    icon: '🎁',
+    title: '发布人也可获得奖励',
+    desc: '基础积分的 10% 额外发放',
+    tag: '双赢机制',
+    bg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+  },
+]
+
+const currentAd = ref(0)
+let adTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  adTimer = setInterval(() => {
+    currentAd.value = (currentAd.value + 1) % ads.length
+  }, 4000)
+})
+
+onUnmounted(() => {
+  if (adTimer) clearInterval(adTimer)
+})
+
 function navigateTo(path: string) {
   window.location.href = path
 }
@@ -142,6 +224,73 @@ function navigateTo(path: string) {
 }
 .nav-link:hover { color: #ef4444; }
 
+/* 广告轮播 */
+.ad-banner {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+}
+.ad-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.ad-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+  display: flex;
+  align-items: center;
+}
+.ad-slide.active { opacity: 1; }
+.ad-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+}
+.ad-icon { font-size: 40px; flex-shrink: 0; }
+.ad-text { flex: 1; }
+.ad-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.ad-desc { font-size: 14px; opacity: 0.85; }
+.ad-tag {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.ad-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.ad-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.ad-dot.active {
+  background: #fff;
+  width: 24px;
+  border-radius: 4px;
+}
+
 /* Hero 区域 */
 .hero {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
@@ -165,6 +314,7 @@ function navigateTo(path: string) {
   display: flex;
   gap: 16px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 .btn {
   padding: 14px 32px;
@@ -191,6 +341,14 @@ function navigateTo(path: string) {
 }
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+.btn-outline {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* 积分规则 */
@@ -235,7 +393,7 @@ function navigateTo(path: string) {
   margin: 0 auto;
   padding: 0 24px 64px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 .qa-card {
@@ -274,5 +432,7 @@ function navigateTo(path: string) {
   .rules-grid { grid-template-columns: 1fr; }
   .quick-access { grid-template-columns: 1fr; }
   .nav-links { gap: 16px; }
+  .ad-title { font-size: 16px; }
+  .ad-desc { font-size: 12px; }
 }
 </style>

@@ -10,6 +10,7 @@
         <div class="nav-links">
           <a @click="goPublish" class="nav-link">发布求助</a>
           <a @click="goHome" class="nav-link">首页</a>
+          <a @click="goHelp" class="nav-link">说明</a>
         </div>
       </div>
     </nav>
@@ -160,6 +161,7 @@ async function loadData() {
 
 function goHome() { window.location.href = '/' }
 function goPublish() { window.location.href = '/tasks/publish' }
+function goHelp() { window.location.href = '/help' }
 
 onMounted(loadData)
 </script>
