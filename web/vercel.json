@@ -1,5 +1,4 @@
 {
   "framework": "nuxtjs",
-  "installCommand": "npm install",
   "buildCommand": "nuxt build"
 }

@@ -1,149 +1,343 @@
 <template>
   <div class="publish-page">
-    <header class="header">
-      <span class="back" @click="goBack">←</span>
-      <span class="title">发布求助</span>
-    </header>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand" @click="goHome">
+          <span class="brand-icon">❤️</span>
+          <span class="brand-text">HeartChain</span>
+        </div>
+        <div class="nav-links">
+          <a @click="goHome" class="nav-link">首页</a>
+          <a @click="goWallet" class="nav-link">钱包</a>
+        </div>
+      </div>
+    </nav>
 
-    <div class="content">
-      <!-- 1. 작업 성격 (카테고리) -->
-      <label>任务类型</label>
-      <div class="type-grid">
-        <div
-          v-for="t in categories"
-          :key="t.value"
-          class="type-btn"
-          :class="{ selected: form.category === t.value }"
-          @click="form.category = t.value"
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <h1 class="page-title">发布求助任务</h1>
+      <p class="page-subtitle">填写任务信息，平台自动评估积分奖励</p>
+    </div>
+
+    <!-- 双栏布局 -->
+    <div class="main-layout">
+      <!-- 左栏：表单 -->
+      <div class="form-column">
+        <!-- 1. 任务类型 -->
+        <div class="form-card">
+          <div class="card-header">
+            <span class="card-step">1</span>
+            <span class="card-title">选择任务类型</span>
+          </div>
+          <div class="type-grid">
+            <div
+              v-for="t in categories"
+              :key="t.value"
+              class="type-btn"
+              :class="{ selected: form.category === t.value }"
+              @click="form.category = t.value"
+            >
+              <div class="type-icon">{{ t.icon }}</div>
+              <div class="type-name">{{ t.name }}</div>
+              <div class="type-weight">基础分 {{ t.weight }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 任务描述 -->
+        <div class="form-card">
+          <div class="card-header">
+            <span class="card-step">2</span>
+            <span class="card-title">任务描述</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">任务标题</label>
+            <input
+              v-model="form.title"
+              class="form-input"
+              placeholder="简短描述你的需求，如：帮忙买药送到家"
+              maxlength="200"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">详细描述</label>
+            <textarea
+              v-model="form.description"
+              class="form-textarea"
+              placeholder="详细说明任务内容、地点、注意事项等..."
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- 3. 评估参数 -->
+        <div class="form-card">
+          <div class="card-header">
+            <span class="card-step">3</span>
+            <span class="card-title">评估参数</span>
+            <span class="card-hint">影响积分计算结果</span>
+          </div>
+          <div class="params-grid">
+            <div class="form-group">
+              <label class="form-label">学历 / 资格要求</label>
+              <select v-model="form.educationLevel" class="form-input">
+                <option value="none">无要求 (×1.0)</option>
+                <option value="highschool">高中 (×1.0)</option>
+                <option value="college">大专 (×1.2)</option>
+                <option value="university">本科 (×1.4)</option>
+                <option value="professional">专业资格 (×1.6)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">预计完成时间（小时）</label>
+              <div class="input-with-suffix">
+                <input
+                  v-model.number="form.estimatedHours"
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  class="form-input"
+                />
+                <span class="input-suffix">h</span>
+              </div>
+              <div class="param-hint">时薪基数：10,000 ❤️/h</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">要求信用等级（1~5）</label>
+              <div class="credit-stars">
+                <button
+                  v-for="n in 5"
+                  :key="n"
+                  class="star-btn"
+                  :class="{ active: form.requiredCreditScore >= n }"
+                  @click="form.requiredCreditScore = n"
+                >★</button>
+                <span class="credit-value">等级 {{ form.requiredCreditScore }}</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">要求经验值</label>
+              <input
+                v-model.number="form.requiredExperience"
+                type="number"
+                min="0"
+                class="form-input"
+              />
+              <div class="param-hint">每点经验值 +0.5 分</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 额外奖励 -->
+        <div class="form-card">
+          <div class="card-header">
+            <span class="card-step">4</span>
+            <span class="card-title">额外奖励（可选）</span>
+          </div>
+          <div class="bonus-section">
+            <div class="bonus-input-row">
+              <input
+                v-model.number="form.bonusPoints"
+                type="number"
+                min="0"
+                class="form-input bonus-input"
+                :disabled="!canAddBonus"
+                placeholder="0"
+              />
+              <span class="bonus-unit">❤️</span>
+            </div>
+            <p class="bonus-hint" v-if="canAddBonus">
+              💡 追加额外奖励可让任务优先被处理（发布时从钱包冻结，完成时转给完成者）
+            </p>
+            <p class="bonus-hint warning" v-else>
+              ⚠️ 钱包余额不足，无法追加额外奖励
+            </p>
+          </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <button
+          class="submit-btn"
+          :class="{ loading: submitting }"
+          :disabled="submitting || !form.title"
+          @click="submit"
         >
-          <div class="icon">{{ t.icon }}</div>
-          <div class="name">{{ t.name }}</div>
-        </div>
+          <span v-if="!submitting">📢 发布求助任务</span>
+          <span v-else>发布中...</span>
+        </button>
       </div>
 
-      <!-- 2. 제목 / 설명 -->
-      <label>任务标题</label>
-      <input v-model="form.title" class="input" placeholder="简短描述你的需求，如：帮忙买药" />
-
-      <label>详细描述</label>
-      <textarea v-model="form.description" class="input" placeholder="详细说明任务内容、注意事项等..."></textarea>
-
-      <!-- 3. 평가용 필드 -->
-      <label>需要学历 / 资格水平</label>
-      <select v-model="form.educationLevel" class="input">
-        <option value="none">无要求</option>
-        <option value="highschool">高中</option>
-        <option value="college">大专</option>
-        <option value="university">本科</option>
-        <option value="professional">专业资格</option>
-      </select>
-
-      <label>预计完成时间（小时）</label>
-      <input v-model.number="form.estimatedHours" type="number" min="0.5" step="0.5" class="input" />
-
-      <label>要求信用等级（1~5）</label>
-      <input v-model.number="form.requiredCreditScore" type="number" min="1" max="5" class="input" />
-
-      <label>要求经验值</label>
-      <input v-model.number="form.requiredExperience" type="number" min="0" class="input" />
-
-      <!-- 4. 平台自动评估 -->
-      <div class="eval-box" v-if="evaluation">
-        <div class="eval-label">🤖 平台自动评估</div>
-        <div class="eval-row">
-          <div class="eval-item">
-            <div class="eval-item-label">任务生成积分</div>
-            <div class="eval-amount">{{ evaluation.baseReward }} ❤️</div>
-            <div class="eval-item-hint">完成者获得</div>
+      <!-- 右栏：实时积分面板 -->
+      <div class="preview-column">
+        <div class="preview-sticky">
+          <!-- 钱包信息 -->
+          <div class="wallet-card">
+            <div class="wallet-header">
+              <span class="wallet-icon">💎</span>
+              <span class="wallet-title">我的钱包</span>
+            </div>
+            <div class="wallet-balance">
+              <div class="balance-main">
+                <span class="balance-num">{{ wallet.availableBalance }}</span>
+                <span class="balance-unit">❤️</span>
+              </div>
+              <div class="balance-sub">可用余额</div>
+            </div>
+            <div class="wallet-detail" v-if="wallet.reservedBalance > 0">
+              冻结中：{{ wallet.reservedBalance }} ❤️
+            </div>
           </div>
-          <div class="eval-divider">+</div>
-          <div class="eval-item highlight">
-            <div class="eval-item-label">发布人奖励积分</div>
-            <div class="eval-amount">{{ evaluation.publisherReward }} ❤️</div>
-            <div class="eval-item-hint">你将获得</div>
+
+          <!-- 积分评估面板 -->
+          <div class="eval-card" v-if="evaluation">
+            <div class="eval-header">
+              <span class="eval-icon">🤖</span>
+              <span class="eval-title">平台积分评估</span>
+              <span class="eval-live-badge">实时</span>
+            </div>
+
+            <!-- 积分分解 -->
+            <div class="eval-breakdown">
+              <div class="breakdown-row">
+                <span class="breakdown-label">📋 类型基础分</span>
+                <span class="breakdown-value">{{ evaluation.breakdown.categoryScore }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="breakdown-label">🎓 学历加分</span>
+                <span class="breakdown-value">+ {{ evaluation.breakdown.educationScore }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="breakdown-label">⏱️ 时间积分</span>
+                <span class="breakdown-value">+ {{ evaluation.breakdown.timeScore.toLocaleString() }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="breakdown-label">⭐ 信用要求</span>
+                <span class="breakdown-value">+ {{ evaluation.breakdown.creditScore }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="breakdown-label">💪 经验要求</span>
+                <span class="breakdown-value">+ {{ evaluation.breakdown.experienceScore }}</span>
+              </div>
+              <div class="breakdown-divider"></div>
+              <div class="breakdown-row total">
+                <span class="breakdown-label">基础积分合计</span>
+                <span class="breakdown-value">{{ evaluation.baseReward.toLocaleString() }} ❤️</span>
+              </div>
+            </div>
+
+            <!-- 奖励总览 -->
+            <div class="reward-summary">
+              <!-- 完成者获得 -->
+              <div class="reward-block completer">
+                <div class="reward-block-header">
+                  <span class="reward-block-icon">🎯</span>
+                  <span class="reward-block-title">完成者获得</span>
+                </div>
+                <div class="reward-rows">
+                  <div class="reward-row">
+                    <span>任务生成积分</span>
+                    <span class="reward-amount">{{ evaluation.baseReward.toLocaleString() }} ❤️</span>
+                  </div>
+                  <div class="reward-row" v-if="form.bonusPoints > 0">
+                    <span>额外奖励</span>
+                    <span class="reward-amount">+ {{ form.bonusPoints.toLocaleString() }} ❤️</span>
+                  </div>
+                  <div class="reward-total">
+                    <span>合计</span>
+                    <span class="reward-total-amount">
+                      {{ (evaluation.baseReward + (form.bonusPoints || 0)).toLocaleString() }} ❤️
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 发布人获得 -->
+              <div class="reward-block publisher">
+                <div class="reward-block-header">
+                  <span class="reward-block-icon">🎁</span>
+                  <span class="reward-block-title">你（发布人）获得</span>
+                </div>
+                <div class="reward-rows">
+                  <div class="reward-row">
+                    <span>发布人奖励（10%）</span>
+                    <span class="reward-amount publisher-reward">
+                      {{ evaluation.publisherReward.toLocaleString() }} ❤️
+                    </span>
+                  </div>
+                  <div class="reward-hint-text">
+                    任务完成后自动发放
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 积分流向图 -->
+            <div class="flow-diagram">
+              <div class="flow-node platform">
+                <div class="flow-node-icon">🏛️</div>
+                <div class="flow-node-label">平台铸造</div>
+              </div>
+              <div class="flow-arrow down">↓</div>
+              <div class="flow-split">
+                <div class="flow-path">
+                  <div class="flow-arrow">→</div>
+                  <div class="flow-node completer-node">
+                    <div class="flow-node-icon">🎯</div>
+                    <div class="flow-node-label">完成者</div>
+                    <div class="flow-node-value">{{ evaluation.baseReward.toLocaleString() }}</div>
+                  </div>
+                </div>
+                <div class="flow-path">
+                  <div class="flow-arrow">→</div>
+                  <div class="flow-node publisher-node">
+                    <div class="flow-node-icon">🎁</div>
+                    <div class="flow-node-label">发布人</div>
+                    <div class="flow-node-value">{{ evaluation.publisherReward.toLocaleString() }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 加载中状态 -->
+          <div class="eval-card loading-state" v-else>
+            <div class="loading-spinner"></div>
+            <p>正在计算积分...</p>
           </div>
         </div>
-        <div class="eval-detail">
-          <span>类型 {{ evaluation.breakdown.categoryScore }}</span>
-          <span>学历 {{ evaluation.breakdown.educationScore }}</span>
-          <span>时间 {{ evaluation.breakdown.timeScore }}</span>
-          <span>信用 {{ evaluation.breakdown.creditScore }}</span>
-          <span>经验 {{ evaluation.breakdown.experienceScore }}</span>
-        </div>
       </div>
+    </div>
 
-      <!-- 5. 추가 보상 (선택) -->
-      <label>额外奖励（可选）</label>
-      <div class="bonus-row">
-        <input
-          v-model.number="form.bonusPoints"
-          type="number"
-          min="0"
-          class="reward-input"
-          :disabled="!canAddBonus"
-          placeholder="0"
-        />
-        <span class="reward-unit">❤️</span>
+    <!-- 成功弹窗 -->
+    <div class="modal-overlay" v-if="showSuccess" @click="showSuccess = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-icon">✅</div>
+        <h2 class="modal-title">任务发布成功！</h2>
+        <p class="modal-desc" v-if="lastTask">
+          任务 #{{ lastTask.id }} 已创建<br/>
+          基础积分：{{ lastTask.baseReward }} ❤️ | 发布人奖励：{{ lastTask.publisherReward }} ❤️
+        </p>
+        <button class="modal-btn" @click="goWallet">查看钱包</button>
       </div>
-      <p class="hint" v-if="canAddBonus">
-        想让任务优先被处理？可追加额外奖励（将从你的钱包冻结）
-      </p>
-      <p class="hint disabled" v-else>
-        ⚠️ 余额不足，无法追加额外奖励
-      </p>
-
-      <!-- 6. 발행인 잔고 표시 -->
-      <div class="wallet-info">
-        <span>我的余额：{{ wallet.availableBalance }} ❤️</span>
-        <span v-if="wallet.reservedBalance > 0">（冻结 {{ wallet.reservedBalance }} ❤️）</span>
-      </div>
-
-      <!-- 7. 奖励总览 -->
-      <div class="reward-summary" v-if="evaluation">
-        <div class="summary-section">
-          <div class="summary-title">🎯 完成者获得</div>
-          <div class="summary-row">
-            <span>任务生成积分</span>
-            <span>{{ evaluation.baseReward }} ❤️</span>
-          </div>
-          <div class="summary-row">
-            <span>额外奖励</span>
-            <span>+ {{ form.bonusPoints || 0 }} ❤️</span>
-          </div>
-          <div class="summary-total">
-            合计 {{ evaluation.baseReward + (form.bonusPoints || 0) }} ❤️
-          </div>
-        </div>
-        <div class="summary-divider"></div>
-        <div class="summary-section publisher">
-          <div class="summary-title">🎁 你（发布人）获得</div>
-          <div class="summary-row">
-            <span>发布人奖励积分</span>
-            <span class="publisher-reward">{{ evaluation.publisherReward }} ❤️</span>
-          </div>
-          <div class="summary-hint">任务被完成后自动发放</div>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" @click="submit">📢 发布求助</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
-const currentUserId = 1 // 실제로는 auth store에서 가져옴
+const config = useRuntimeConfig()
+const apiBase = config.public.apiBase as string
+const currentUserId = 1
 
 const categories = [
-  { value: 'errand', icon: '🛒', name: '跑腿' },
-  { value: 'transport', icon: '🚗', name: '搬运' },
-  { value: 'teach', icon: '📱', name: '教学' },
-  { value: 'pet', icon: '🐕', name: '宠物' },
-  { value: 'repair', icon: '🔧', name: '维修' },
-  { value: 'delivery', icon: '📦', name: '快递' },
+  { value: 'errand',    icon: '🛒', name: '跑腿',  weight: 50 },
+  { value: 'delivery',  icon: '📦', name: '快递',  weight: 50 },
+  { value: 'pet',       icon: '🐕', name: '宠物',  weight: 60 },
+  { value: 'transport', icon: '🚗', name: '搬运',  weight: 70 },
+  { value: 'teach',     icon: '📱', name: '教学',  weight: 80 },
+  { value: 'repair',    icon: '🔧', name: '维修',  weight: 90 },
 ]
 
 const form = reactive({
@@ -158,96 +352,496 @@ const form = reactive({
 })
 
 const evaluation = ref<any>(null)
-const wallet = reactive({ balance: 0, reservedBalance: 0, availableBalance: 0 })
+const wallet = reactive({ balance: 0, reservedBalance: 0, availableBalance: 0, totalPoints: 0 })
+const submitting = ref(false)
+const showSuccess = ref(false)
+const lastTask = ref<any>(null)
 
 const canAddBonus = computed(() => wallet.availableBalance > 0)
 
 async function loadWallet() {
-  const res = await fetch(`/api/users/${currentUserId}/wallet`)
-  const data = await res.json()
-  Object.assign(wallet, data)
+  try {
+    const res = await fetch(`${apiBase}/api/users/${currentUserId}/wallet`)
+    if (res.ok) {
+      const data = await res.json()
+      Object.assign(wallet, data)
+    }
+  } catch (e) {
+    console.error('Failed to load wallet:', e)
+  }
 }
 
 async function evaluate() {
-  const res = await fetch('/api/evaluation/calculate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      category: form.category,
-      educationLevel: form.educationLevel,
-      estimatedHours: form.estimatedHours,
-      requiredCreditScore: form.requiredCreditScore,
-      requiredExperience: form.requiredExperience,
-    }),
-  })
-  evaluation.value = await res.json()
+  try {
+    const res = await fetch(`${apiBase}/api/evaluation/calculate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: form.category,
+        educationLevel: form.educationLevel,
+        estimatedHours: form.estimatedHours,
+        requiredCreditScore: form.requiredCreditScore,
+        requiredExperience: form.requiredExperience,
+      }),
+    })
+    if (res.ok) {
+      evaluation.value = await res.json()
+    }
+  } catch (e) {
+    console.error('Evaluation failed:', e)
+  }
 }
 
 async function submit() {
-  await evaluate() // 최종 평가
-  const res = await fetch('/api/tasks', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...form,
-      creator_id: currentUserId,
-      bonusPoints: form.bonusPoints || 0,
-    }),
-  })
-  if (res.ok) router.push('/tasks')
+  if (!form.title) return
+  submitting.value = true
+  try {
+    const res = await fetch(`${apiBase}/api/tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        creator_id: currentUserId,
+        bonusPoints: form.bonusPoints || 0,
+      }),
+    })
+    if (res.ok) {
+      lastTask.value = await res.json()
+      showSuccess.value = true
+      await loadWallet()
+    } else {
+      const err = await res.text()
+      alert('发布失败: ' + err)
+    }
+  } catch (e) {
+    alert('网络错误: ' + e)
+  } finally {
+    submitting.value = false
+  }
 }
 
-function goBack() { router.back() }
+function goHome() { window.location.href = '/' }
+function goWallet() { window.location.href = '/wallet' }
 
 onMounted(() => {
   loadWallet()
   evaluate()
 })
 
-// 평가 필드 변경 시 자동 재평가
-watch(() => [form.category, form.educationLevel, form.estimatedHours, form.requiredCreditScore, form.requiredExperience],
-  () => evaluate(), { deep: true })
+watch(
+  () => [form.category, form.educationLevel, form.estimatedHours, form.requiredCreditScore, form.requiredExperience],
+  () => evaluate(),
+  { deep: true }
+)
 </script>
 
 <style scoped>
-.publish-page { max-width: 420px; margin: 0 auto; background: #fff; min-height: 100vh; }
-.header { background: linear-gradient(135deg,#1A1A2E,#16213E); color:#fff; padding:16px 20px; display:flex; align-items:center; gap:16px; }
-.header .back { font-size:18px; cursor:pointer; }
-.header .title { font-size:16px; font-weight:600; }
-.content { padding: 20px; }
-label { font-size:13px; font-weight:600; color:#333; display:block; margin:16px 0 6px; }
-.input { width:100%; background:#f5f5f5; border:none; border-radius:10px; padding:12px 14px; font-size:14px; outline:none; box-sizing:border-box; }
-.type-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.type-btn { background:#f5f5f5; border:2px solid transparent; border-radius:12px; padding:12px 6px; text-align:center; cursor:pointer; }
-.type-btn.selected { border-color:#7B1FA2; background:#F3E5F5; }
-.type-btn .icon { font-size:22px; }
-.type-btn .name { font-size:12px; }
-.eval-box { background:linear-gradient(135deg,#7B1FA2,#AB47BC); color:#fff; border-radius:14px; padding:16px; margin:16px 0; }
-.eval-label { font-size:12px; opacity:.8; margin-bottom:8px; }
-.eval-row { display:flex; align-items:center; gap:12px; }
-.eval-item { flex:1; text-align:center; }
-.eval-item.highlight { background:rgba(255,255,255,.15); border-radius:10px; padding:8px 4px; }
-.eval-item-label { font-size:11px; opacity:.85; margin-bottom:2px; }
-.eval-amount { font-size:20px; font-weight:700; }
-.eval-item-hint { font-size:10px; opacity:.7; margin-top:2px; }
-.eval-divider { font-size:18px; opacity:.6; }
-.eval-detail { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; font-size:11px; opacity:.85; }
-.bonus-row { display:flex; gap:8px; align-items:center; }
-.reward-input { flex:1; background:#f5f5f5; border:none; border-radius:10px; padding:12px; font-size:16px; font-weight:700; outline:none; text-align:center; }
-.reward-input:disabled { opacity:.5; }
-.reward-unit { font-size:16px; color:#666; }
-.hint { font-size:12px; color:#888; margin:6px 0; }
-.hint.disabled { color:#F44336; }
-.wallet-info { font-size:13px; color:#333; margin:12px 0; padding:10px; background:#FAF5FF; border-radius:10px; }
-.reward-summary { padding:16px; background:#F3E5F5; border-radius:14px; margin-bottom:16px; }
-.summary-section { padding:4px 0; }
-.summary-section.publisher { text-align:center; }
-.summary-title { font-size:13px; font-weight:700; color:#7B1FA2; margin-bottom:8px; }
-.summary-row { display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:4px 0; }
-.summary-total { font-size:16px; font-weight:700; color:#333; margin-top:4px; text-align:right; }
-.publisher-reward { font-size:18px; font-weight:700; color:#FF6F00; }
-.summary-hint { font-size:11px; color:#888; margin-top:4px; }
-.summary-divider { height:1px; background:rgba(123,31,162,.2); margin:12px 0; }
-.btn { width:100%; border:none; padding:14px; border-radius:14px; font-size:16px; font-weight:700; cursor:pointer; }
-.btn-primary { background:linear-gradient(135deg,#4CAF50,#43A047); color:#fff; }
+.publish-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* 导航栏 */
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.brand-icon { font-size: 28px; }
+.brand-text { font-size: 20px; font-weight: 800; color: #ef4444; }
+.nav-links { display: flex; gap: 24px; }
+.nav-link { font-size: 15px; color: #374151; cursor: pointer; font-weight: 500; }
+.nav-link:hover { color: #ef4444; }
+
+/* 页面标题 */
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 16px;
+}
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+.page-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* 双栏布局 */
+.main-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* 左栏：表单卡片 */
+.form-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.card-step {
+  width: 28px;
+  height: 28px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.card-title { font-size: 17px; font-weight: 700; color: #111827; }
+.card-hint { font-size: 13px; color: #9ca3af; margin-left: auto; }
+
+/* 任务类型选择 */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.type-btn {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.type-btn:hover { border-color: #fca5a5; background: #fef2f2; }
+.type-btn.selected {
+  border-color: #ef4444;
+  background: #fef2f2;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+.type-icon { font-size: 28px; }
+.type-name { font-size: 14px; font-weight: 600; color: #374151; margin-top: 6px; }
+.type-weight { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+/* 表单元素 */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: #ef4444; background: #fff; }
+.form-textarea {
+  width: 100%;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.form-textarea:focus { border-color: #ef4444; background: #fff; }
+
+.params-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.input-with-suffix {
+  position: relative;
+}
+.input-suffix {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 14px;
+}
+.param-hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+/* 信用星级 */
+.credit-stars { display: flex; align-items: center; gap: 4px; }
+.star-btn {
+  font-size: 24px;
+  color: #d1d5db;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.star-btn.active { color: #fbbf24; }
+.star-btn:hover { color: #f59e0b; }
+.credit-value { margin-left: 8px; font-size: 13px; color: #6b7280; }
+
+/* 额外奖励 */
+.bonus-input-row { display: flex; align-items: center; gap: 8px; }
+.bonus-input { font-size: 20px; font-weight: 700; text-align: center; }
+.bonus-input:disabled { opacity: 0.5; }
+.bonus-unit { font-size: 20px; }
+.bonus-hint { font-size: 13px; color: #6b7280; margin-top: 8px; }
+.bonus-hint.warning { color: #f59e0b; }
+
+/* 提交按钮 */
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+}
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-btn.loading { opacity: 0.8; }
+
+/* 右栏：预览面板 */
+.preview-column {
+  position: sticky;
+  top: 80px;
+}
+.preview-sticky {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 钱包卡片 */
+.wallet-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+}
+.wallet-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.wallet-icon { font-size: 20px; }
+.wallet-title { font-size: 14px; opacity: 0.8; }
+.wallet-balance { text-align: center; }
+.balance-main { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+.balance-num { font-size: 32px; font-weight: 800; }
+.balance-unit { font-size: 16px; opacity: 0.7; }
+.balance-sub { font-size: 12px; opacity: 0.6; margin-top: 4px; }
+.wallet-detail { font-size: 12px; opacity: 0.7; text-align: center; margin-top: 8px; }
+
+/* 积分评估卡片 */
+.eval-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+}
+.eval-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.eval-icon { font-size: 20px; }
+.eval-title { font-size: 16px; font-weight: 700; color: #111827; }
+.eval-live-badge {
+  margin-left: auto;
+  background: #fef2f2;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+/* 积分分解 */
+.eval-breakdown { margin-bottom: 16px; }
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.breakdown-label { color: #6b7280; }
+.breakdown-value { font-weight: 600; color: #374151; }
+.breakdown-divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
+.breakdown-row.total .breakdown-label { font-weight: 700; color: #111827; }
+.breakdown-row.total .breakdown-value { font-size: 16px; color: #ef4444; }
+
+/* 奖励总览 */
+.reward-summary { display: flex; flex-direction: column; gap: 12px; }
+.reward-block {
+  border-radius: 12px;
+  padding: 16px;
+}
+.reward-block.completer {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.reward-block.publisher {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+.reward-block-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.reward-block-icon { font-size: 18px; }
+.reward-block-title { font-size: 14px; font-weight: 700; }
+.completer .reward-block-title { color: #15803d; }
+.publisher .reward-block-title { color: #b45309; }
+
+.reward-rows { display: flex; flex-direction: column; gap: 4px; }
+.reward-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #374151;
+}
+.reward-amount { font-weight: 600; }
+.reward-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  margin-top: 4px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  font-weight: 700;
+}
+.reward-total-amount { color: #15803d; font-size: 16px; }
+.publisher-reward { color: #b45309; font-size: 16px; }
+.reward-hint-text { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+/* 积分流向图 */
+.flow-diagram {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+.flow-node {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+.flow-node.platform { background: #eff6ff; border-color: #bfdbfe; }
+.flow-node-icon { font-size: 20px; }
+.flow-node-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.flow-node-value { font-size: 14px; font-weight: 700; color: #ef4444; }
+.flow-arrow { font-size: 18px; color: #9ca3af; }
+.flow-arrow.down { margin: 4px 0; }
+.flow-split { display: flex; justify-content: center; gap: 24px; }
+.flow-path { display: flex; align-items: center; gap: 4px; }
+.flow-node.completer-node { background: #f0fdf4; border-color: #bbf7d0; }
+.flow-node.publisher-node { background: #fffbeb; border-color: #fde68a; }
+
+/* 加载状态 */
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-state p { color: #9ca3af; font-size: 14px; }
+
+/* 成功弹窗 */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+}
+.modal-icon { font-size: 48px; margin-bottom: 16px; }
+.modal-title { font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+.modal-desc { font-size: 15px; color: #6b7280; line-height: 1.6; margin-bottom: 24px; }
+.modal-btn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.modal-btn:hover { background: #dc2626; }
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .main-layout { grid-template-columns: 1fr; }
+  .preview-column { position: static; }
+  .params-grid { grid-template-columns: 1fr; }
+  .type-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
