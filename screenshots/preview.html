@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeartChain 部署效果预览</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', sans-serif; background: #FAF5FF; color: #333; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+h1 { text-align: center; font-size: 28px; margin-bottom: 10px; color: #1A1a2e; }
+.subtitle { text-align: center; color: #888; margin-bottom: 40px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 30px; }
+.card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.card-header { padding: 16px 20px; font-weight: 600; font-size: 15px; }
+.card-body { padding: 0; }
+.card-body img { width: 100%; height: auto; display: block; }
+.card-footer { padding: 12px 20px; font-size: 13px; color: #888; background: #f8f9fa; }
+/* 手机框架 */
+.phone-frame { width: 375px; margin: 0 auto; border: 8px solid #1A1a2e; border-radius: 36px; overflow: hidden; position: relative; }
+.phone-frame::before { content: ''; display: block; width: 150px; height: 24px; background: #1A1a2e; margin: 0 auto; border-radius: 0 0 16px 16px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+.phone-frame img { width: 100%; padding-top: 24px; }
+.status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status.ok { background: #e8f5e9; color: #4caf50; }
+.status.pending { background: #fff3e0; color: #f57c00; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>❤️ HeartChain 部署效果预览</h1>
+  <p class="subtitle">2026年5月25日 · 温暖紫主题 · 版本 de761c4</p>
+
+  <div style="text-align: center; margin-bottom: 30px;">
+    <span class="status ok">✅ Vercel 已部署</span>
+    <span class="status pending" style="margin-left: 10px;">⏳ Render 后端启动中</span>
+  </div>
+
+  <div class="grid">
+    <!-- 首页 -->
+    <div class="card">
+      <div class="card-header" style="background: linear-gradient(135deg, #7B1FA2, #6A1B9A); color: white;">
+        📱 首页 — 地图+列表混合
+      </div>
+      <div class="card-body">
+        <div class="phone-frame">
+          <img src="https://heartchain-five.vercel.app/" alt="首页截图" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22375%22 height=%22667%22><rect fill=%22%23FAF5FF%22 width=%22375%22 height=%22667%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23888%22>加载中...</text></svg>'">
+        </div>
+      </div>
+      <div class="card-footer">
+        紫色顶部栏 · 成就横幅 · 地图区域 · 任务列表 · 筛选条
+      </div>
+    </div>
+
+    <!-- 说明 -->
+    <div class="card">
+      <div class="card-header" style="background: linear-gradient(135deg, #1A1a2e, #16213E); color: white;">
+        📋 已完成功能清单
+      </div>
+      <div class="card-body" style="padding: 20px; font-size: 14px; line-height: 2;">
+        <div style="margin-bottom: 15px;">
+          <b style="color: #7B1FA2;">🎨 主题配色</b><br>
+          温暖紫 #7B1FA2 + 金黄 #FFB300<br>
+          背景 #FAF5FF · 深色 #1A1A2E
+        </div>
+        <div style="margin-bottom: 15px;">
+          <b style="color: #7B1FA2;">📱 前端页面</b><br>
+          ✅ 首页（地图+成就+任务+筛选）<br>
+          ✅ 任务详情（底部弹出式）<br>
+          ✅ 设置菜单（侧边滑出）<br>
+          ✅ 成就页面（仪表盘）<br>
+          ✅ 注册登录（单页）<br>
+          ✅ 发布求助（分步4步）<br>
+          ✅ 钱包（分Tab）
+        </div>
+        <div style="margin-bottom: 15px;">
+          <b style="color: #7B1FA2;">⚙️ 后端API</b><br>
+          ✅ GET /help/nearby（GPS搜索）<br>
+          ✅ GET /help/:id（详情）<br>
+          ✅ POST /help（发布）<br>
+          ✅ POST /help/:id/accept（接单）<br>
+          ✅ 数据库迁移SQL
+        </div>
+        <div>
+          <b style="color: #7B1FA2;">🚀 部署状态</b><br>
+          ✅ Vercel 前端：已上线<br>
+          ⏳ Render 后端：启动中<br>
+          🔗 <a href="https://heartchain-five.vercel.app/" style="color: #7B1FA2;" target="_blank">访问网站</a>
+        </div>
+      </div>
+      <div class="card-footer">
+        HeartChain · 连接每一份爱心
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 40px; color: #888; font-size: 13px;">
+    <p>📂 设计文档：E:\HeartChain\docs\design.md</p>
+    <p>📂 方案原型：E:\HeartChain\design\</p>
+    <p style="margin-top: 10px;">访问 <a href="https://heartchain-five.vercel.app/" style="color: #7B1FA2; font-weight: 600;" target="_blank">heartchain-five.vercel.app</a> 查看实际效果</p>
+  </div>
+</div>
+</body>
+</html>

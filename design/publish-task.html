@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeartChain 发布求助方案</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f0f0; color: #333; line-height: 1.6; }
+.page { max-width: 380px; margin: 20px auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 30px; }
+.header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+.header .back { font-size: 16px; }
+.step-badge { font-size: 12px; font-weight: 600; color: #4caf50; margin-bottom: 6px; }
+.title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #888; margin-bottom: 20px; }
+.content { padding: 24px; }
+label { font-size: 13px; font-weight: 600; color: #333; display: block; margin-bottom: 6px; }
+.input { width: 100%; background: #f5f5f5; border: none; border-radius: 10px; padding: 14px 16px; font-size: 15px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+textarea.input { min-height: 100px; resize: none; }
+.btn { width: 100%; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; }
+.btn-primary { background: linear-gradient(135deg, #4caf50, #43a047); color: white; }
+.btn-secondary { background: #f5f5f5; color: #666; }
+.type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.type-btn { background: #f5f5f5; border: 2px solid transparent; border-radius: 12px; padding: 14px 8px; text-align: center; cursor: pointer; }
+.type-btn.selected { border-color: #4caf50; background: #e8f5e9; }
+.type-btn .icon { font-size: 24px; margin-bottom: 4px; }
+.type-btn .name { font-size: 12px; color: #333; font-weight: 500; }
+.time-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.time-btn { flex: 1; background: #f5f5f5; border: 2px solid transparent; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; font-size: 13px; }
+.time-btn.selected { border-color: #2196f3; background: #e3f2fd; color: #1976d2; font-weight: 600; }
+.reward-row { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+.reward-input { flex: 1; background: #f5f5f5; border: none; border-radius: 10px; padding: 14px 16px; font-size: 18px; font-weight: 700; outline: none; text-align: center; }
+.reward-unit { font-size: 16px; color: #666; }
+.switch-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 8px; }
+.switch-label { font-size: 14px; color: #333; }
+.switch { width: 48px; height: 28px; background: #4caf50; border-radius: 14px; position: relative; cursor: pointer; }
+.switch::after { content: ''; width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.switch.off { background: #ccc; }
+.switch.off::after { left: 2px; right: auto; }
+.upload-area { background: #f5f5f5; border: 2px dashed #ccc; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 16px; cursor: pointer; }
+.upload-area .icon { font-size: 32px; margin-bottom: 8px; }
+.upload-area .text { font-size: 13px; color: #888; }
+.preview-img { width: 80px; height: 80px; border-radius: 10px; background: #e0e0e0; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-right: 8px; position: relative; }
+.preview-img .del { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: #f44336; color: white; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.check-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: 13px; color: #555; }
+.check-item input { width: 20px; height: 20px; accent-color: #4caf50; }
+.section-title { font-size: 15px; font-weight: 700; color: #888; text-align: center; margin: 30px 0 20px; }
+</style>
+</head>
+<body>
+
+<h2 style="text-align:center; padding:20px 10px; color:#1a1a2e;">📱 发布求助页面方案</h2>
+
+<!-- 方案A -->
+<div class="page">
+  <div class="header">
+    <span class="back">← 返回</span>
+    <span style="font-size:13px; opacity:0.7;">发布求助</span>
+  </div>
+  <div class="content">
+    <div class="title">发布求助 ✋</div>
+    <div class="subtitle">填写需求，附近的人会看到</div>
+
+    <label>任务类型</label>
+    <div class="type-grid">
+      <div class="type-btn selected"><div class="icon">🛒</div><div class="name">跑腿</div></div>
+      <div class="type-btn"><div class="icon">🚗</div><div class="name">搬运</div></div>
+      <div class="type-btn"><div class="icon">📱</div><div class="name">教学</div></div>
+      <div class="type-btn"><div class="icon">🐕</div><div class="name">宠物</div></div>
+      <div class="type-btn"><div class="icon">🔧</div><div class="name">维修</div></div>
+      <div class="type-btn"><div class="icon">📦</div><div class="name">快递</div></div>
+    </div>
+
+    <label>任务标题</label>
+    <input class="input" placeholder="简短描述你的需求，如：帮忙买药">
+
+    <label>详细描述</label>
+    <textarea class="input" placeholder="详细说明任务内容、注意事项等..."></textarea>
+
+    <label>位置</label>
+    <div style="background:#e8f5e9; border-radius:10px; padding:12px; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+      <span style="font-size:18px">📍</span>
+      <div style="flex:1">
+        <div style="font-size:13px; font-weight:500;">서울시 강남구 역삼동</div>
+        <div style="font-size:11px; color:#4caf50;">GPS 已定位</div>
+      </div>
+      <span style="font-size:13px; color:#4caf50; cursor:pointer;">更改</span>
+    </div>
+
+    <label>需要在多长时间内完成？</label>
+    <div class="time-row">
+      <div class="time-btn">⚡ 30分钟</div>
+      <div class="time-btn selected">🕐 1小时</div>
+      <div class="time-btn">📅 今天</div>
+      <div class="time-btn">♾️ 不限</div>
+    </div>
+
+    <label>报酬（可选）</label>
+    <div class="reward-row">
+      <input class="reward-input" placeholder="0" value="5000">
+      <span class="reward-unit">원</span>
+      <span style="font-size:12px; color:#888;">或 ❤️ 积分</span>
+    </div>
+
+    <label>添加图片（可选）</label>
+    <div class="upload-area">
+      <div class="icon">📷</div>
+      <div class="text">点击上传图片<br>最多3张</div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div class="preview-img">📷<div class="del">×</div></div>
+      <div class="preview-img" style="background:#e8f5e9;">+</div>
+    </div>
+
+    <div class="switch-row">
+      <div>
+        <div class="switch-label">匿名发布</div>
+        <div style="font-size:11px; color:#888;">不显示你的姓名和头像</div>
+      </div>
+      <div class="switch off"></div>
+    </div>
+
+    <div class="switch-row">
+      <div>
+        <div class="switch-label">接受积分代替报酬</div>
+        <div style="font-size:11px; color:#888;">对方可以用❤️积分代替金钱</div>
+      </div>
+      <div class="switch"></div>
+    </div>
+
+    <div style="flex:1"></div>
+    <button class="btn btn-secondary" style="margin-bottom:10px;">保存草稿</button>
+    <button class="btn btn-primary">📢 发布求助</button>
+
+    <div style="margin-top:16px">
+      <div class="check-item"><input type="checkbox" checked> 我已阅读并同意 <span style="color:#4caf50;">《服务条款》</span></div>
+      <div class="check-item"><input type="checkbox"> 发布后通知我附近的志愿者</div>
+    </div>
+  </div>
+</div>
+
+<!-- 方案B 分步 -->
+<div class="section-title">方案B：分步发布（对比）</div>
+
+<div class="page">
+  <div class="header">
+    <span class="back">← 取消</span>
+    <span style="font-size:13px; opacity:0.7;">步骤 1/4</span>
+  </div>
+  <div class="content">
+    <div class="step-badge">Step 1 — 基本信息</div>
+    <div class="title">你需要什么帮助？</div>
+    <div class="subtitle">选择任务类型 + 填写标题</div>
+
+    <label>任务类型</label>
+    <div class="type-grid">
+      <div class="type-btn selected"><div class="icon">🛒</div><div class="name">跑腿</div></div>
+      <div class="type-btn"><div class="icon">🚗</div><div class="name">搬运</div></div>
+      <div class="type-btn"><div class="icon">📱</div><div class="name">教学</div></div>
+      <div class="type-btn"><div class="icon">🐕</div><div class="name">宠物</div></div>
+      <div class="type-btn"><div class="icon">🔧</div><div class="name">维修</div></div>
+      <div class="type-btn"><div class="icon">📦</div><div class="name">快递</div></div>
+    </div>
+
+    <label>任务标题</label>
+    <input class="input" placeholder="简短描述你的需求">
+    <label>详细描述</label>
+    <textarea class="input" placeholder="详细说明..."></textarea>
+
+    <div style="flex:1; min-height:20px"></div>
+    <button class="btn btn-primary">下一步 →</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="header">
+    <span class="back">← 上一步</span>
+    <span style="font-size:13px; opacity:0.7;">步骤 2/4</span>
+  </div>
+  <div class="content">
+    <div class="step-badge">Step 2 — 时间 & 地点</div>
+    <div class="title">时间和地点</div>
+    <div="subtitle">什么时候需要？在哪里？</div>
+
+    <label>需要在多长时间内完成？</label>
+    <div class="time-row">
+      <div class="time-btn">⚡ 30分钟</div>
+      <div class="time-btn selected">🕐 1小时</div>
+      <div class="time-btn">📅 今天</div>
+      <div class="time-btn">♾️ 不限</div>
+    </div>
+
+    <label>任务地点</label>
+    <div style="background:#e8f5e9; border-radius:10px; padding:12px; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+      <span style="font-size:18px">📍</span>
+      <div style="flex:1"><div style="font-size:13px; font-weight:500;">서울시 강남구 역삼동</div></div>
+      <span style="font-size:13px; color:#4caf50;">重新定位</span>
+    </div>
+
+    <label>详细地址（可选）</label>
+    <input class="input" placeholder="如：역삼동 123-45，3楼">
+
+    <div style="flex:1; min-height:20px"></div>
+    <button class="btn btn-primary">下一步 →</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="header">
+    <span class="back">← 上一步</span>
+    <span style="font-size:13px; opacity:0.7;">步骤 3/4</span>
+  </div>
+  <div class="content">
+    <div class="step-badge">Step 3 — 报酬 & 图片</div>
+    <div class="title">报酬和图片</div>
+
+    <label>报酬金额</label>
+    <div class="reward-row">
+      <input class="reward-input" placeholder="0" value="5000">
+      <span class="reward-unit">원</span>
+    </div>
+
+    <div class="switch-row" style="margin-bottom:16px">
+      <div><div class="switch-label">接受❤️积分代替</div></div>
+      <div class="switch"></div>
+    </div>
+
+    <label>添加图片（可选）</label>
+    <div class="upload-area">
+      <div class="icon">📷</div>
+      <div class="text">点击上传 · 最多3张</div>
+    </div>
+
+    <div style="flex:1; min-height:20px"></div>
+    <button class="btn btn-primary">下一步 →</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="header">
+    <span class="back">← 上一步</span>
+    <span style="font-size:13px; opacity:0.7;">步骤 4/4</span>
+  </div>
+  <div class="content">
+    <div class="step-badge">Step 4 — 确认发布</div>
+    <div class="title">确认信息</div>
+
+    <!-- 预览卡片 -->
+    <div style="background:#f8f9fa; border-radius:12px; padding:16px; margin-bottom:16px;">
+      <div style="font-size:16px; font-weight:600; margin-bottom:8px;">🛒 帮忙买药</div>
+      <div style="font-size:13px; color:#555; margin-bottom:8px;">할머니 댁에 약을 사다 드려야 하는데...</div>
+      <div style="display:flex; gap:12px; font-size:12px; color:#888;">
+        <span>📍 역삼동</span>
+        <span>⏰ 1小时内</span>
+        <span>💰 ₩5,000</span>
+      </div>
+    </div>
+
+    <div class="switch-row">
+      <div><div class="switch-label">匿名发布</div></div>
+      <div class="switch off"></div>
+    </div>
+
+    <div class="check-item"><input type="checkbox" checked> 我同意 <span style="color:#4caf50;">《服务条款》</span></div>
+
+    <div style="flex:1; min-height:20px"></div>
+    <button class="btn btn-secondary" style="margin-bottom:10px;">保存草稿</button>
+    <button class="btn btn-primary">📢 发布求助</button>
+  </div>
+</div>
+
+<div style="text-align:center; padding:20px; font-size:15px; color:#1a1a2e;">
+  <b>请选择：A（单页）还是 B（分步）？</b>
+</div>
+
+</body>
+</html>
