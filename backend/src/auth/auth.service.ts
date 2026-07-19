@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { SmsService } from './sms.service';
 
 function md5(str: string): string {
   return crypto.createHash('md5').update(str).digest('hex');
@@ -18,7 +19,7 @@ function verifyPassword(password: string, hash: string): boolean {
   return hashPassword(password) === hash;
 }
 import { User, UserRole, UserStatus } from '../users/entities/user.entity';
-import { SendSmsDto, PhoneLoginDto, RegisterDto, AuthResponseDto, PasswordLoginDto } from './dto/auth.dto';
+import { SendSmsDto, SmsVerifyDto, PhoneLoginDto, RegisterDto, AuthResponseDto, PasswordLoginDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,19 +28,26 @@ export class AuthService {
     private userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private smsService: SmsService,
   ) {}
 
   async sendSmsCode(dto: SendSmsDto): Promise<{ message: string; expiresIn: number }> {
-    // 开发模式：固定验证码 123456
-    const expiresIn = 300;
-    console.log(`[DEV SMS] Phone: ${dto.phone}, Code: 123456 (固定验证码), Expires: ${expiresIn}s`);
-    return { message: '验证码已发送（开发模式：123456）', expiresIn };
+    return this.smsService.sendCode(dto.phone);
+  }
+
+  async verifySmsCode(dto: SmsVerifyDto): Promise<{ success: boolean; verified: boolean }> {
+    const verified = this.smsService.verifyCode(dto.phone, dto.code);
+    if (!verified) {
+      throw new UnauthorizedException('验证码错误或已过期');
+    }
+    return { success: true, verified: true };
   }
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    // 开发模式：验证固定验证码 123456
-    if (dto.code !== '123456') {
-      throw new UnauthorizedException('验证码错误（开发模式请输入：123456）');
+    // SmsService로 인증번호 검증
+    const isCodeValid = this.smsService.verifyCode(dto.phone, dto.code);
+    if (!isCodeValid) {
+      throw new UnauthorizedException('验证码错误或已过期');
     }
 
     const existingUser = await this.userRepository.findOne({

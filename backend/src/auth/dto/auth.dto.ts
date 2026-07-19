@@ -8,6 +8,18 @@ export class SendSmsDto {
   phone: string;
 }
 
+export class SmsVerifyDto {
+  @ApiProperty({ example: '+8613800138000', description: 'Phone number (E.164)' })
+  @IsString()
+  @Matches(/^\+[1-9]\d{1,14}$/, { message: 'Invalid phone number format (E.164)' })
+  phone: string;
+
+  @ApiProperty({ example: '123456', description: 'SMS verification code' })
+  @IsString()
+  @Length(4, 6)
+  code: string;
+}
+
 export class PhoneLoginDto {
   @ApiProperty({ example: '+8613800138000', description: 'Phone number (E.164)' })
   @IsString()

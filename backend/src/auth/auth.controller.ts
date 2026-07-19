@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { SendSmsDto, PhoneLoginDto, RegisterDto, RefreshTokenDto, PasswordLoginDto, AuthResponseDto } from './dto/auth.dto';
+import { SendSmsDto, SmsVerifyDto, PhoneLoginDto, RegisterDto, RefreshTokenDto, PasswordLoginDto, AuthResponseDto } from './dto/auth.dto';
 import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Auth')
@@ -15,6 +15,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Send SMS verification code' })
   async sendSms(@Body() dto: SendSmsDto) {
     return this.authService.sendSmsCode(dto);
+  }
+
+  @Public()
+  @Post('sms/verify')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Verify SMS code' })
+  async verifySms(@Body() dto: SmsVerifyDto) {
+    return this.authService.verifySmsCode(dto);
   }
 
   @Public()
