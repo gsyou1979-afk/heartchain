@@ -22,14 +22,14 @@
           <ul class="space-y-2 text-sm text-gray-500">
             <li><NuxtLink to="/tasks" class="hover:text-red-500">{{ $t('nav.tasks') }}</NuxtLink></li>
             <li><NuxtLink to="/teams" class="hover:text-red-500">{{ $t('nav.teams') }}</NuxtLink></li>
-            <li><a href="#" class="hover:text-red-500">About</a></li>
+            <li><NuxtLink to="/help" class="hover:text-red-500">About</NuxtLink></li>
           </ul>
         </div>
 
         <div>
           <h4 class="text-sm font-medium text-gray-900 mb-3">Support</h4>
           <ul class="space-y-2 text-sm text-gray-500">
-            <li><a href="#" class="hover:text-red-500">Help Center</a></li>
+            <li><NuxtLink to="/help" class="hover:text-red-500">Help Center</NuxtLink></li>
             <li><a href="#" class="hover:text-red-500">Privacy Policy</a></li>
             <li><a href="#" class="hover:text-red-500">Terms of Service</a></li>
           </ul>
