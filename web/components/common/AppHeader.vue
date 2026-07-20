@@ -108,6 +108,8 @@ const navItems = computed(() => {
   } else {
     items.push({ to: '/heart-board', label: '爱心榜' });
   }
+  // PC 版右上角「说明」入口（与手机版一致）
+  items.push({ to: '/help', label: '说明' });
   return items;
 });
 </script>
