@@ -1,7 +1,6 @@
 {
-  "version": 2,
-  "buildCommand": "cd web && npm run generate",
-  "outputDirectory": "web/.output/public",
+  "buildCommand": "cd web && npm run build",
   "installCommand": "cd web && npm install",
-  "framework": null
+  "outputDirectory": "web/.vercel/output",
+  "framework": "nuxtjs"
 }
