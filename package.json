@@ -1,5 +1,8 @@
 {
-  "dependencies": {
-    "pptxgenjs": "^4.0.1"
+  "name": "heartchain-root",
+  "private": true,
+  "scripts": {
+    "install": "cd web && npm install",
+    "build": "cd web && npm install && npm run build"
   }
 }
