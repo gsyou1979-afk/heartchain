@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.11.3",
-    "@rollup/rollup-linux-x64-gnu": "^4.60.4",
     "@vueuse/nuxt": "^13.0.0",
     "axios": "^1.9.0",
     "html2canvas": "^1.4.1",

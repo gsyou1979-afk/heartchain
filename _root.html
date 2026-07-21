@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#7B1FA2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>HeartChain - 连接每一份爱心</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#FAF5FF;color:#333;line-height:1.6;min-height:100vh}
+.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.8);backdrop-filter:blur(12px);border-bottom:1px solid #eee}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:56px}
+.logo{display:flex;align-items:center;gap:6px;font-size:18px;font-weight:700;color:#1A1A2E}
+.logo span:first-child{font-size:24px}
+.btn-login{padding:6px 16px;border-radius:20px;background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff;font-size:13px;font-weight:600;text-decoration:none}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7B1FA2,#6A1B9A);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;cursor:pointer;border:none}
+.filter-bar{display:flex;gap:8px;padding:8px 16px;overflow-x:auto}
+.filter-btn{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap}
+.filter-btn.active{background:#7B1FA2;color:#fff}
+.filter-btn:not(.active){background:#f0f0f0;color:#666}
+.achievement-card{margin:16px;border-radius:16px;padding:20px;background:linear-gradient(135deg,#1A1A2E,#16213E);color:#fff;position:relative;overflow:hidden}
+.achievement-card .bg-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,.1)}
+.achievement-card .bg-circle:nth-child(1){width:96px;height:96px;top:-32px;right:-32px}
+.achievement-card .bg-circle:nth-child(2){width:64px;height:64px;bottom:-24px;left:-24px}
+.achievement-label{font-size:12px;opacity:.7;margin-bottom:4px}
+.achievement-title{font-size:14px;font-weight:500;margin-bottom:8px}
+.achievement-stats{display:flex;gap:24px;margin-top:12px}
+.achievement-stat{text-align:center}
+.achievement-stat .num{font-size:20px;font-weight:700}
+.achievement-stat .label{font-size:10px;opacity:.6}
+.map-area{margin:16px;border-radius:16px;height:160px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.map-area .map-inner{position:relative;width:100%;height:100%}
+.map-area .map-circle{position:absolute;border-radius:50%;border:2px solid rgba(76,175,80,.3);top:50%;left:50%;transform:translate(-50%,-50%)}
+.map-area .map-circle:nth-child(1){width:128px;height:128px}
+.map-area .map-circle:nth-child(2){width:256px;height:256px}
+.map-marker{position:absolute;font-size:20px;transform:translate(-50%,-50%)}
+.map-marker:nth-child(3){top:35%;left:40%}
+.map-marker:nth-child(4){top:55%;left:60%}
+.map-marker:nth-child(5){top:25%;left:70%}
+.task-section{padding:0 16px 16px}
+.task-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.task-header h3{font-size:14px;font-weight:600;color:#333}
+.task-header span{font-size:12px;color:#999}
+.task-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer}
+.task-card:active{transform:scale(.98)}
+.task-card-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.task-info{flex:1;min-width:0}
+.task-title{font-size:15px;font-weight:600;color:#1A1A2E;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.task-meta{font-size:12px;color:#888;display:flex;gap:12px}
+.task-meta .urgent{color:#F44336;font-weight:600}
+.btn-help{padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#4CAF50,#388E3C);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;white-space:nowrap}
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#FFB300,#FF8F00);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(255,179,0,.4);display:flex;align-items:center;justify-content:center;z-index:40}
+.fab:active{transform:scale(.95)}
+
+/* 侧边菜单 */
+.side-menu-overlay{position:fixed;inset:0;z-index:100;display:none}
+.side-menu-overlay.show{display:block}
+.side-menu-overlay .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.side-menu{position:absolute;top:0;left:0;bottom:0;width:280px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.15);display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .3s ease}
+.side-menu-overlay.show .side-menu{transform:translateX(0)}
+.side-menu-header{background:linear-gradient(135deg,#1A1A2E,#16213E);padding:20px;color:#fff}
+.side-menu-header .user-info{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.side-menu-header .user-avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700}
+.side-menu-header .user-name{font-weight:600;font-size:16px}
+.side-menu-header .user-phone{font-size:12px;opacity:.6}
+.side-menu-header .user-level{font-size:12px;color:#FFB300;margin-top:2px}
+.side-menu-header .user-stats{display:flex;gap:16px}
+.side-menu-header .stat{text-align:center}
+.side-menu-header .stat .num{font-size:18px;font-weight:700}
+.side-menu-header .stat .label{font-size:10px;opacity:.6}
+.side-menu-list{flex:1;overflow-y:auto;padding:8px 0}
+.menu-item{display:flex;align-items:center;gap:12px;padding:12px 20px;text-decoration:none;color:#333;font-size:14px}
+.menu-item:hover{background:#f5f5f5}
+.menu-item .icon{font-size:18px}
+.menu-item .arrow{margin-left:auto;color:#ccc}
+.menu-divider{height:1px;background:#eee;margin:8px 16px}
+.side-menu-footer{padding:16px;border-top:1px solid #eee}
+.btn-logout{display:flex;align-items:center;gap:12px;color:#F44336;font-size:14px;font-weight:500;background:none;border:none;cursor:pointer;width:100%;padding:4px 0}
+
+/* 筛选弹窗 */
+.filter-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end}
+.filter-overlay.show{display:flex}
+.filter-overlay .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+.filter-sheet{position:relative;width:100%;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 32px;transform:translateY(100%);transition:transform .3s ease}
+.filter-overlay.show .filter-sheet{transform:translateY(0)}
+.filter-drag{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+.filter-title{font-size:18px;font-weight:700;color:#1A1A2E;margin-bottom:20px}
+.filter-label{font-size:13px;font-weight:600;color:#333;margin-bottom:8px}
+.filter-range{width:100%;accent-color:#7B1FA2;margin-bottom:4px}
+.filter-range-labels{display:flex;justify-between;font-size:11px;color:#999;margin-bottom:16px}
+.filter-range-labels .current{color:#7B1FA2;font-weight:700;font-size:16px}
+.filter-options{display:flex;gap:8px;margin-bottom:20px}
+.filter-option{flex:1;padding:10px;border-radius:12px;font-size:12px;font-weight:600;border:2px solid transparent;background:#f5f5f5;color:#666;cursor:pointer;text-align:center}
+.filter-option.active{border-color:#7B1FA2;background:#7B1FA2;color:#fff}
+.filter-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.filter-type-btn{padding:12px 8px;border-radius:12px;font-size:11px;font-weight:600;border:2px solid transparent;background:#f5f5f5;color:#666;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.filter-type-btn.active{border-color:#7B1FA2;background:#7B1FA2;color:#fff}
+.filter-type-btn .emoji{font-size:20px}
+.btn-apply{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#7B1FA2,#6A1B9A);color:#fff;font-size:16px;font-weight:700;border:none;cursor:pointer}
+
+/* 任务详情弹窗 */
+.task-detail-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end}
+.task-detail-overlay.show{display:flex}
+.task-detail-overlay .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
+.task-detail-sheet{position:relative;width:100%;background:#fff;border-radius:24px 24px 0 0;max-height:85vh;overflow-y:auto;padding:0 0 24px;transform:translateY(100%);transition:transform .3s ease}
+.task-detail-overlay.show .task-detail-sheet{transform:translateY(0)}
+.task-detail-drag{width:40px;height:4px;background:#ddd;border-radius:2px;margin:12px auto}
+.task-detail-header{display:flex;justify-content:space-between;align-items:flex-start;padding:0 20px;margin-bottom:16px}
+.task-detail-title{font-size:20px;font-weight:700;color:#1A1A2E}
+.task-detail-time{font-size:12px;color:#999;margin-top:4px}
+.task-detail-urgent{background:#F44336;color:#fff;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:600}
+.task-creator{display:flex;align-items:center;gap:12px;padding:12px;background:#FAF5FF;border-radius:12px;margin:0 20px 16px}
+.task-creator-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#7B1FA2,#6A1B9A);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.task-creator-info{flex:1}
+.task-creator-name{font-size:14px;font-weight:600}
+.task-creator-rating{font-size:12px;color:#888}
+.btn-chat{background:#E3F2FD;color:#1976D2;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:600;border:none;cursor:pointer}
+.task-section-title{font-size:13px;font-weight:600;color:#333;margin:0 20px 8px}
+.task-desc{font-size:13px;color:#555;line-height:1.6;background:#FAF5FF;padding:12px;border-radius:12px;margin:0 20px 16px}
+.task-location{background:#E8F5E9;border-radius:12px;padding:12px;margin:0 20px 16px;display:flex;align-items:center;gap:8px}
+.task-location-icon{font-size:20px}
+.task-location-info{flex:1}
+.task-location-addr{font-size:13px;font-weight:500}
+.task-location-dist{font-size:11px;color:#4CAF50}
+.btn-nav{background:#4CAF50;color:#fff;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;border:none;cursor:pointer}
+.task-reward{display:flex;gap:12px;margin:0 20px 20px}
+.task-reward-item{flex:1;background:#FAF5FF;border-radius:12px;padding:12px;text-align:center}
+.task-reward-item .num{font-size:18px;font-weight:700;color:#7B1FA2}
+.task-reward-item .label{font-size:11px;color:#888}
+.task-actions{display:flex;gap:12px;padding:0 20px}
+.btn-later{flex:1;padding:14px;border-radius:14px;background:#f5f5f5;color:#666;font-size:15px;font-weight:600;border:none;cursor:pointer}
+.btn-accept{flex:2;padding:14px;border-radius:14px;background:linear-gradient(135deg,#4CAF50,#388E3C);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+  <div class="header-inner">
+    <div id="auth-area">
+      <a href="/auth/register" class="btn-login" id="btn-login">登录</a>
+    </div>
+    <a href="/" class="logo"><span>❤️</span> HeartChain</a>
+    <button onclick="showFilter=true" style="width:36px;height:36px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:18px">⚙️</button>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="setFilter(5)">📍 5km</button>
+    <button class="filter-btn active" onclick="setFilterTime(2)">⏰ 2h内</button>
+    <button class="filter-btn" onclick="toggleType(this)">🛒 跑腿</button>
+    <button class="filter-btn" onclick="toggleType(this)">🚗 搬运</button>
+    <button class="filter-btn" onclick="toggleType(this)">📱 教学</button>
+  </div>
+</header>
+
+<!-- 成就卡片 -->
+<div class="achievement-card">
+  <div class="bg-circle"></div>
+  <div class="bg-circle"></div>
+  <div style="position:relative;z-index:1">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div class="achievement-label">🏆 本月成就</div>
+        <div class="achievement-title" id="achievement-text">登录后查看你的成就</div>
+      </div>
+      <a href="/achievement" style="font-size:12px;font-weight:600;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:12px;color:#fff;text-decoration:none">详情 →</a>
+    </div>
+    <div class="achievement-stats" id="achievement-stats" style="display:none">
+      <div class="achievement-stat"><div class="num" id="stat-monthly">0</div><div class="label">本月帮助</div></div>
+      <div class="achievement-stat"><div class="num" id="stat-points">0</div><div class="label">爱心积分</div></div>
+      <div class="achievement-stat"><div class="num" id="stat-rank">#0</div><div class="label">排名</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 地图 -->
+<div class="map-area">
+  <div class="map-inner">
+    <div class="map-circle"></div>
+    <div class="map-circle"></div>
+    <div class="map-marker">📍</div>
+    <div class="map-marker">📌</div>
+    <div class="map-marker">📌</div>
+  </div>
+</div>
+
+<!-- 任务列表 -->
+<div class="task-section">
+  <div class="task-header">
+    <h3>附近 <span id="task-count">3</span> 个求助</h3>
+    <span>实时更新</span>
+  </div>
+  <div id="task-list"></div>
+</div>
+
+<!-- 浮动发布按钮 -->
+<button class="fab" onclick="location.href='/tasks/publish'">＋</button>
+
+<!-- 侧边菜单 -->
+<div class="side-menu-overlay" id="sideMenuOverlay" onclick="if(event.target===this)closeSideMenu()">
+  <div class="backdrop"></div>
+  <div class="side-menu">
+    <div class="side-menu-header">
+      <div class="user-info">
+        <div class="user-avatar" id="sideAvatar">김</div>
+        <div>
+          <div class="user-name" id="sideName">김영수</div>
+          <div class="user-phone" id="sidePhone">+82 10-****-8999</div>
+          <div class="user-level">⭐ 4.8 · Lv.3 热心市民</div>
+        </div>
+      </div>
+      <div class="user-stats">
+        <div class="stat"><div class="num" id="sideHelps">36</div><div class="label">帮助次数</div></div>
+        <div class="stat"><div class="num" id="sidePoints">12,400</div><div class="label">爱心积分</div></div>
+        <div class="stat"><div class="num">#3</div><div class="label">排名</div></div>
+      </div>
+    </div>
+    <div class="side-menu-list">
+      <a class="menu-item" href="/mytasks"><span class="icon">📋</span>我的任务<span class="arrow">›</span></a>
+      <a class="menu-item" href="/tasks/publish"><span class="icon">📝</span>发布求助<span class="arrow">›</span></a>
+      <a class="menu-item" href="/wallet"><span class="icon">💳</span>钱包<span class="arrow">›</span></a>
+      <a class="menu-item" href="/achievement"><span class="icon">🏆</span>成就<span class="arrow">›</span></a>
+      <div class="menu-divider"></div>
+      <a class="menu-item" href="/settings/location"><span class="icon">📍</span>定位设置<span class="arrow">›</span></a>
+      <a class="menu-item" href="/settings/notifications"><span class="icon">🔔</span>通知设置<span class="arrow">›</span></a>
+      <div class="menu-divider"></div>
+      <a class="menu-item" href="/help"><span class="icon">❓</span>帮助中心<span class="arrow">›</span></a>
+    </div>
+    <div class="side-menu-footer">
+      <button class="btn-logout" onclick="handleLogout()"><span>🚪</span> 退出登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- 筛选弹窗 -->
+<div class="filter-overlay" id="filterOverlay" onclick="if(event.target===this)closeFilter()">
+  <div class="backdrop"></div>
+  <div class="filter-sheet">
+    <div class="filter-drag"></div>
+    <div class="filter-title">筛选条件</div>
+    <div class="filter-label">📍 搜索半径</div>
+    <input type="range" class="filter-range" id="filterRange" min="1" max="50" value="5" oninput="updateRangeLabel()">
+    <div class="filter-range-labels"><span>1km</span><span class="current" id="rangeLabel">5km</span><span>50km</span></div>
+    <div class="filter-options">
+      <button class="filter-option active" onclick="setRange(1)">1km</button>
+      <button class="filter-option active" onclick="setRange(5)">5km</button>
+      <button class="filter-option" onclick="setRange(10)">10km</button>
+      <button class="filter-option" onclick="setRange(50)">全城</button>
+    </div>
+    <div class="filter-label">⏰ 时间要求</div>
+    <div class="filter-options">
+      <button class="filter-option" onclick="setTime(0.5)">30分钟</button>
+      <button class="filter-option active" onclick="setTime(2)">2小时</button>
+      <button class="filter-option" onclick="setTime(24)">今天</button>
+      <button class="filter-option" onclick="setTime(999)">不限</button>
+    </div>
+    <div class="filter-label">任务类型</div>
+    <div class="filter-type-grid">
+      <button class="filter-type-btn" onclick="toggleType(this)"><span class="emoji">🛒</span>跑腿</button>
+      <button class="filter-type-btn" onclick="toggleType(this)"><span class="emoji">🚗</span>搬运</button>
+      <button class="filter-type-btn" onclick="toggleType(this)"><span class="emoji">📱</span>教学</button>
+      <button class="filter-type-btn" onclick="toggleType(this)"><span class="emoji">🐕</span>宠物</button>
+      <button class="filter-type-btn" onclick="toggleType(this)"><span class="emoji">🔧</span>维修</button>
+      <button class="filter-type-btn" onclick="toggleType(this)"><span class="emoji">📦</span>快递</button>
+    </div>
+    <button class="btn-apply" onclick="closeFilter()">应用筛选</button>
+  </div>
+</div>
+
+<!-- 任务详情弹窗 -->
+<div class="task-detail-overlay" id="taskDetailOverlay" onclick="if(event.target===this)closeTaskDetail()">
+  <div class="backdrop"></div>
+  <div class="task-detail-sheet" id="taskDetailSheet"></div>
+</div>
+
+<script>
+const API = '/api/v1';
+
+// 任务数据
+const tasks = [
+  {id:1,type:'errand',title:'帮忙买药',desc:'할머니 댁에 약을 사다 드려야 하는데, 제가 출장중이라 부탁드립니다.',distance:0.8,address:'서울시 강남구 역삼동',deadline:20,points:200,reward:5000,creator:{name:'김영수',rating:4.8,tasks:23}},
+  {id:2,type:'transport',title:'帮忙搬行李',desc:'이사 짐을 옮겨야 하는데 혼자서 너무 무거워서 도움을 요청합니다.',distance:1.2,address:'서울시 강남구 삼성동',deadline:50,points:350,reward:10000,creator:{name:'이민지',rating:4.9,tasks:15}},
+  {id:3,type:'teach',title:'教老人用手机',desc:'어머니가 스마트폰을 못 쓰셔서, 카카오톡 보내는 법 좀 가르쳐 주세요.',distance:2.5,address:'서울시 서초구 반포동',deadline:120,points:150,reward:0,creator:{name:'박지훈',rating:4.5,tasks:8}},
+];
+
+const typeEmoji = {errand:'🛒',transport:'🚗',teach:'📱',pet:'🐕',repair:'🔧',delivery:'📦'};
+
+// 渲染任务列表
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = tasks.map(t => `
+    <div class="task-card" onclick="openTaskDetail(${t.id})">
+      <div class="task-card-inner">
+        <div class="task-info">
+          <div class="task-title">${typeEmoji[t.type]||'📌'} ${t.title}</div>
+          <div class="task-meta">
+            <span>📍 ${t.distance}km</span>
+            <span class="${t.deadline<=30?'urgent':''}">⏰ ${t.deadline}分钟后</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px">${t.address}</div>
+        </div>
+        <button class="btn-help" onclick="event.stopPropagation();alert('已接单！')">我来帮助</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('task-count').textContent = tasks.length;
+}
+
+// 任务详情
+function openTaskDetail(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('taskDetailSheet').innerHTML = `
+    <div class="task-detail-drag"></div>
+    <div class="task-detail-header">
+      <div>
+        <div class="task-detail-title">${typeEmoji[t.type]||'📌'} ${t.title}</div>
+        <div class="task-detail-time">发布于 10分钟前</div>
+      </div>
+      <div class="task-detail-urgent">⏰ 剩余${t.deadline}分钟</div>
+    </div>
+    <div class="task-creator">
+      <div class="task-creator-avatar">${t.creator.name.charAt(0)}</div>
+      <div class="task-creator-info">
+        <div class="task-creator-name">${t.creator.name}</div>
+        <div class="task-creator-rating">⭐ ${t.creator.rating} · 已完成 ${t.creator.tasks} 次求助</div>
+      </div>
+      <button class="btn-chat">💬 聊天</button>
+    </div>
+    <div class="task-section-title">📋 任务详情</div>
+    <div class="task-desc">${t.desc}</div>
+    <div class="task-section-title">📍 位置</div>
+    <div class="task-location">
+      <span class="task-location-icon">🗺️</span>
+      <div class="task-location-info">
+        <div class="task-location-addr">${t.address}</div>
+        <div class="task-location-dist">距你 ${t.distance}km · 步行约 ${Math.ceil(t.distance*12)} 分钟</div>
+      </div>
+      <button class="btn-nav">导航</button>
+    </div>
+    <div class="task-reward">
+      <div class="task-reward-item"><div class="num">+${t.points} ❤️</div><div class="label">爱心积分</div></div>
+      ${t.reward>0?`<div class="task-reward-item"><div class="num">₩${t.reward.toLocaleString()}</div><div class="label">报酬</div></div>`:''}
+    </div>
+    <div class="task-actions">
+      <button class="btn-later" onclick="closeTaskDetail()">稍后再看</button>
+      <button class="btn-accept" onclick="alert('已接单！求助者将收到通知')">✋ 我来帮助</button>
+    </div>
+  `;
+  document.getElementById('taskDetailOverlay').classList.add('show');
+}
+function closeTaskDetail() { document.getElementById('taskDetailOverlay').classList.remove('show'); }
+
+// 筛选
+let filterDistance = 5, filterTime = 2;
+function setRange(d) { filterDistance = d; document.getElementById('filterRange').value = d; updateRangeLabel(); }
+function setTime(t) { filterTime = t; }
+function updateRangeLabel() { filterDistance = document.getElementById('filterRange').value; document.getElementById('rangeLabel').textContent = filterDistance >= 50 ? '全城' : filterDistance + 'km'; }
+function showFilter() { document.getElementById('filterOverlay').classList.add('show'); }
+function closeFilter() { document.getElementById('filterOverlay').classList.remove('show'); }
+function setFilter(d) {}
+function setFilterTime(t) {}
+function toggleType(btn) { btn.classList.toggle('active'); }
+
+// 侧边菜单
+function openSideMenu() { document.getElementById('sideMenuOverlay').classList.add('show'); }
+function closeSideMenu() { document.getElementById('sideMenuOverlay').classList.remove('show'); }
+
+// 登录状态
+function checkAuth() {
+  const auth = localStorage.getItem('heartchain_auth');
+  const authArea = document.getElementById('auth-area');
+  if (auth) {
+    try {
+      const {user} = JSON.parse(auth);
+      authArea.innerHTML = `<button class="avatar" onclick="openSideMenu()">${(user.nickname||'U').charAt(0)}</button>`;
+      document.getElementById('achievement-text').textContent = '12 次帮助';
+      document.getElementById('achievement-stats').style.display = 'flex';
+      document.getElementById('stat-monthly').textContent = '12';
+      document.getElementById('stat-points').textContent = '2,400';
+      document.getElementById('stat-rank').textContent = '#3';
+      document.getElementById('sideAvatar').textContent = (user.nickname||'U').charAt(0);
+      document.getElementById('sideName').textContent = user.nickname || '用户';
+      document.getElementById('sidePhone').textContent = user.phone || '';
+    } catch(e) { localStorage.removeItem('heartchain_auth'); }
+  } else {
+    authArea.innerHTML = `<a href="/auth/register" class="btn-login">登录</a>`;
+  }
+}
+
+// 退出登录
+function handleLogout() {
+  localStorage.removeItem('heartchain_auth');
+  closeSideMenu();
+  checkAuth();
+}
+
+// 初始化
+renderTasks();
+checkAuth();
+</script>
+</body>
+</html>

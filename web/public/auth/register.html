@@ -123,31 +123,59 @@ async function handleLogin(e) {
   return false;
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
   e.preventDefault();
-  const phone = document.getElementById('reg-phone').value;
-  const code = document.getElementById('reg-code').value;
+  const phone = '+82' + document.getElementById('reg-phone').value.replace(/[^0-9]/g, '');
+  const code = document.getElementById('reg-code').value.trim();
   const password = document.getElementById('reg-password').value;
   const confirm = document.getElementById('reg-confirm').value;
   if (password.length < 8) { showMsg('密码至少8位', 'error'); return false; }
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) { showMsg('密码需包含字母和数字', 'error'); return false; }
   if (password !== confirm) { showMsg('两次密码不一致', 'error'); return false; }
-  showMsg('注册成功！请登录', 'success');
-  setTimeout(() => switchMode(true), 1000);
+  try {
+    const res = await fetch(API + '/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({phone, code, password})
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { showMsg(data.message || '注册失败', 'error'); return false; }
+    const user = data.user || data;
+    const token = data.accessToken || data.token;
+    localStorage.setItem('heartchain_auth', JSON.stringify({user, token}));
+    showMsg('注册成功！正在跳转...', 'success');
+    setTimeout(() => location.href = '/', 500);
+  } catch (err) {
+    showMsg('网络错误，请重试', 'error');
+  }
   return false;
 }
 
 let countdown = 0;
-function sendCode() {
-  const phone = document.getElementById('reg-phone').value;
-  if (!phone) { showMsg('请输入手机号', 'error'); return; }
-  countdown = 60;
-  const btn = document.getElementById('btn-code');
-  btn.disabled = true;
-  const timer = setInterval(() => {
-    countdown--;
-    btn.textContent = countdown + 's';
-    if (countdown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = '获取验证码'; }
-  }, 1000);
+async function sendCode() {
+  const raw = document.getElementById('reg-phone').value.replace(/[^0-9]/g, '');
+  if (!raw) { showMsg('请输入手机号', 'error'); return; }
+  try {
+    const res = await fetch(API + '/auth/send-code', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({phone: '+82' + raw})
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { showMsg(data.message || '发送失败', 'error'); return; }
+    // 演示环境：直接显示验证码
+    showMsg('验证码已发送：' + (data.code || '（请查收短信）'), 'success');
+    countdown = 60;
+    const btn = document.getElementById('btn-code');
+    btn.disabled = true;
+    const timer = setInterval(() => {
+      countdown--;
+      btn.textContent = countdown + 's';
+      if (countdown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = '获取验证码'; }
+    }, 1000);
+  } catch (e) {
+    showMsg('网络错误，请重试', 'error');
+  }
 }
 </script>
 </body>
